@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0e10">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site.css">
+<title>Katalog — IXVII.CO</title>
+<meta name="description" content="Semua aplikasi premium di IXVII.CO: streaming, AI, editing, edukasi, dan musik, lengkap dengan harga dan stok.">
+<script type="module" src="/js/katalog.js"></script>
+</head>
+<body>
+<header id="kepala" class="kepala"><div class="wadah"><a class="merek" href="/"><span>IXVII.CO</span></a></div></header>
+<main class="wadah">
+  <section class="seksi">
+    <h1 style="margin:0;font-size:clamp(26px,6vw,36px)">Katalog</h1>
+    <p class="redup" style="margin:6px 0 0">Pilih kategori atau ketik nama aplikasi.</p>
+    <div class="cari">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="tersembunyi" for="kotak-cari">Cari aplikasi</label>
+      <input id="kotak-cari" type="search" placeholder="Cari Netflix, ChatGPT, Canva…" autocomplete="off">
+    </div>
+    <div class="chips" id="filter-kategori" role="group" aria-label="Filter kategori"></div>
+  </section>
+  <p class="info-hasil" id="info-hasil" aria-live="polite"></p>
+  <div id="hasil"></div>
+</main>
+<footer id="kaki" class="kaki"></footer>
+<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog.</p></noscript>
+</body>
+</html>

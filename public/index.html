@@ -3,8 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IXVII.CO — Your App Solver</title>
-<meta name="description" content="IXVII.CO: langganan aplikasi premium dengan harga hemat. Segera hadir.">
 <meta name="theme-color" content="#0e0e10">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
@@ -12,30 +10,40 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/css/brand.css">
-<style>
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    display: grid; place-items: center; padding: 16px;
-    background:
-      radial-gradient(600px 400px at 20% 20%, rgba(128, 2, 3, .55), transparent 70%),
-      radial-gradient(500px 380px at 85% 80%, rgba(192, 38, 45, .30), transparent 70%),
-      var(--hitam);
-  }
-  .kartu { width: 100%; max-width: 440px; padding: 40px 28px; text-align: center; }
-  .logo { display: block; width: 168px; height: auto; margin: 0 auto; }
-  .judul { margin: 28px 0 10px; font-size: 22px; color: var(--putih); }
-  p { margin: 0; color: rgba(245, 245, 247, .72); line-height: 1.6; }
-  .garis { width: 56px; height: 4px; border-radius: 2px; background: var(--maroon-terang); margin: 22px auto 0; }
-  h1 { margin: 0; }
-</style>
+<link rel="stylesheet" href="/css/site.css">
+<title>IXVII.CO — Your App Solver</title>
+<meta name="description" content="Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat. Lihat paket, harga, dan stok terbaru.">
+<script type="module" src="/js/beranda.js"></script>
 </head>
 <body>
-  <main class="kartu kaca">
-    <h1><img class="logo" src="/assets/brand/logo-putih.png" width="274" height="282" alt="IXVII.CO — Your App Solver"></h1>
-    <p class="judul">Segera hadir</p>
-    <p>Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat.</p>
-    <div class="garis" aria-hidden="true"></div>
-  </main>
+<header id="kepala" class="kepala"><div class="wadah"><a class="merek" href="/"><span>IXVII.CO</span></a></div></header>
+<main>
+  <section class="wadah hero">
+    <div>
+      <h1>Langganan aplikasi premium, <em>lebih hemat.</em></h1>
+      <p class="redup">Netflix, ChatGPT, Canva, Spotify, dan <span id="jumlah-app">puluhan</span> aplikasi lain. Pilih paket sharing atau private, lalu cek harga dan stoknya langsung.</p>
+      <div class="aksi">
+        <a class="tombol" href="/katalog/">Lihat katalog</a>
+        <a class="tombol garis" href="#kategori">Pilih kategori</a>
+      </div>
+    </div>
+    <img class="hero-logo" src="/assets/brand/logo-putih.png" width="274" height="282" alt="IXVII.CO — Your App Solver">
+  </section>
+  <section class="wadah poin" aria-label="Keunggulan">
+    <div class="kaca"><h3>Harga jelas per paket</h3><p class="redup">Setiap durasi dan tipe paket tampil dengan harganya masing-masing.</p></div>
+    <div class="kaca"><h3>Stok selalu terbaru</h3><p class="redup">Label Tersedia dan Habis diambil langsung dari katalog kami.</p></div>
+    <div class="kaca"><h3>Sharing atau private</h3><p class="redup">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
+  </section>
+  <section class="wadah seksi" id="kategori">
+    <div class="seksi-kepala"><h2>Kategori</h2><a href="/katalog/">Semua aplikasi →</a></div>
+    <div class="chips" id="daftar-kategori"></div>
+  </section>
+  <section class="wadah seksi">
+    <div class="seksi-kepala"><h2>Pilihan untukmu</h2><a href="/katalog/">Lihat katalog →</a></div>
+    <div class="grid" id="unggulan" aria-live="polite"></div>
+  </section>
+</main>
+<footer id="kaki" class="kaki"></footer>
+<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog.</p></noscript>
 </body>
 </html>
