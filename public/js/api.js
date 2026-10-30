@@ -1,9 +1,9 @@
 // Mengambil data publik dari Supabase lewat REST (tanpa supabase-js, supaya halaman ringan).
-// Hanya memakai publishable key di header `apikey`; HPP tidak pernah ikut terkirim.
+// Hanya memakai publishable key di header `apikey`; HPP dan data pembeli tidak pernah ikut terkirim.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+import { inggris } from './i18n.js';
 
 const HEADER = { apikey: SUPABASE_ANON_KEY };
-const CACHE_KEY = 'ixvii-katalog-v2';
 const CACHE_MS = 5 * 60 * 1000;
 
 export const slugify = (t) => String(t ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -14,34 +14,75 @@ async function ambil(path) {
   return res.json();
 }
 
-/** Katalog lengkap dari rpc katalog_json, disimpan sebentar di sessionStorage. */
-export async function ambilKatalog() {
+/** Ambil dengan cache singkat di sessionStorage. */
+async function ambilSimpan(kunci, path) {
   try {
-    const simpan = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
-    if (simpan && Date.now() - simpan.t < CACHE_MS) return olah(simpan.data);
-  } catch { /* sessionStorage tidak tersedia: lanjut ambil dari server */ }
-  const data = await ambil('rpc/katalog_json');
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), data })); } catch { /* abaikan */ }
-  return olah(data);
+    const s = JSON.parse(sessionStorage.getItem(kunci) || 'null');
+    if (s && Date.now() - s.t < CACHE_MS) return s.data;
+  } catch { /* sessionStorage tidak tersedia */ }
+  const data = await ambil(path);
+  try { sessionStorage.setItem(kunci, JSON.stringify({ t: Date.now(), data })); } catch { /* abaikan */ }
+  return data;
 }
 
-/** FAQ dan harga resmi satu aplikasi. Kalau tabelnya belum ada, kembalikan daftar kosong. */
+/** Katalog lengkap dari rpc katalog_json. */
+export async function ambilKatalog() {
+  return olah(await ambilSimpan('ixvii-katalog-v3', 'rpc/katalog_json'));
+}
+
+/** Pengaturan toko yang boleh publik: nomor WhatsApp, cara bayar, kurs USD, buka/tutup pesanan. */
+export async function ambilToko() {
+  try {
+    const rows = await ambilSimpan('ixvii-toko-v1', 'store_settings?select=whatsapp_number,payment_info,payment_info_en,usd_rate,usd_rate_at,orders_open&id=eq.1');
+    return rows[0] ?? null;
+  } catch { return null; }   // tabel belum dibuat: website tetap jalan, pesanan ditutup
+}
+
+/** Penjelasan tipe paket (Sharing, Private, ...). */
+export async function ambilInfoTipe() {
+  try { return await ambilSimpan('ixvii-tipe-v1', 'plan_type_info?select=keywords,title,title_en,body,body_en,pros,pros_en,cons,cons_en&order=sort.asc,id.asc'); }
+  catch { return []; }
+}
+
+/** FAQ umum di beranda (hanya yang sudah diterbitkan). */
+export async function ambilFaqUmum() {
+  try { return await ambil('site_faqs?select=question,answer,question_en,answer_en&order=sort.asc,id.asc'); }
+  catch { return []; }
+}
+
+/** FAQ dan harga resmi satu aplikasi. */
 export async function ambilDetail(appId) {
   if (appId == null) return { faqs: [], resmi: [] };
   const aman = (p) => ambil(p).catch(() => []);
+  const id = encodeURIComponent(appId);
   const [faqs, resmi] = await Promise.all([
-    aman(`app_faqs?select=question,answer&app_id=eq.${encodeURIComponent(appId)}&order=sort.asc,id.asc`),
-    aman(`official_prices?select=label,price,duration_days,note,checked_at&app_id=eq.${encodeURIComponent(appId)}&order=sort.asc,id.asc`),
+    aman(`app_faqs?select=question,answer,question_en,answer_en&app_id=eq.${id}&order=sort.asc,id.asc`)
+      .then((r) => (r.length ? r : aman(`app_faqs?select=question,answer&app_id=eq.${id}&order=sort.asc,id.asc`))),
+    aman(`official_prices?select=label,price,duration_days,note,checked_at&app_id=eq.${id}&order=sort.asc,id.asc`),
   ]);
   return { faqs, resmi };
 }
 
+/** Buat pesanan lewat RPC. Harga dihitung ulang di database. */
+export async function buatPesanan({ kode, nama, wa }) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/buat_pesanan`, {
+    method: 'POST',
+    headers: { ...HEADER, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_items: kode.map((c) => ({ code: c })), p_nama: nama, p_wa: wa, p_bahasa: inggris() ? 'en' : 'id' }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.message || `Gagal membuat pesanan (${res.status})`);
+  return data;
+}
+
 // Ubah bentuk katalog_json menjadi daftar aplikasi yang mudah dipakai halaman.
 function olah(data) {
+  const en = inggris();
   const kategori = [];
   const apps = [];
   for (const c of data?.cats ?? []) {
-    kategori.push({ label: c.label, desc: c.desc, jumlah: c.apps.length });
+    const namaKat = (en && c.label_en) || c.label;
+    kategori.push({ kunci: c.label, label: namaKat, desc: (en && c.desc_en) || c.desc, jumlah: c.apps.length });
     for (const a of c.apps) {
       const varian = a.groups.flatMap((g) => g.items.map((i) => ({ ...i, tipe: g.label })));
       const tersedia = varian.filter((v) => v.s !== 0);
@@ -49,10 +90,11 @@ function olah(data) {
         id: a.id ?? null,
         slug: a.slug || slugify(a.name),
         nama: a.name,
-        desc: a.desc,
+        desc: (en && a.desc_en) || a.desc,
         logo: a.logo || null,
         unggulan: !!a.featured,
-        kategori: c.label,
+        kategori: namaKat,
+        kunciKategori: c.label,
         grup: a.groups,
         varian,
         hargaMulai: tersedia.length ? Math.min(...tersedia.map((v) => v.p)) : null,

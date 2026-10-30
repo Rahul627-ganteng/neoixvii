@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0e0e10">
+<script>
+/* Pasang bahasa & tema sebelum halaman tampil supaya tidak berkedip. */
+(function () {
+  var d = document.documentElement, b = null, t = null, q = null;
+  try { q = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  try {
+    if (q === 'en' || q === 'id') localStorage.setItem('ixvii-bahasa', q);
+    b = localStorage.getItem('ixvii-bahasa'); t = localStorage.getItem('ixvii-tema');
+  } catch (e) {}
+  if (q === 'en' || q === 'id') b = q;
+  if (b === 'en') { d.lang = 'en'; d.classList.add('terjemah'); setTimeout(function () { d.classList.remove('terjemah'); }, 2000); }
+  if (t === 'terang') { d.setAttribute('data-tema', 'terang'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f6f4f4'); }
+})();
+</script>
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,8 +25,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/css/brand.css">
 <link rel="stylesheet" href="/css/site.css">
-<title>IXVII.CO — Your App Solver</title>
-<meta name="description" content="Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat. Lihat paket, harga, dan stok terbaru.">
+<title data-t="judul.beranda">IXVII.CO — Your App Solver</title>
+<meta name="description" data-t-content="meta.beranda" content="Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat. Lihat paket, harga, dan stok terbaru.">
 <script type="module" src="/js/beranda.js"></script>
 </head>
 <body>
@@ -20,30 +34,36 @@
 <main>
   <section class="wadah hero">
     <div>
-      <h1>Langganan aplikasi premium, <em>lebih hemat.</em></h1>
-      <p class="redup">Netflix, ChatGPT, Canva, Spotify, dan <span id="jumlah-app">puluhan</span> aplikasi lain. Pilih paket sharing atau private, lalu cek harga dan stoknya langsung.</p>
+      <h1><span data-t="hero.judul1">Langganan aplikasi premium,</span> <em data-t="hero.judul2">lebih hemat.</em></h1>
+      <p class="redup" id="hero-teks" data-t="hero.teks">Netflix, ChatGPT, Canva, Spotify, dan puluhan aplikasi lain. Pilih paket sharing atau private, lalu cek harga dan stoknya langsung.</p>
       <div class="aksi">
-        <a class="tombol" href="/katalog/">Lihat katalog</a>
-        <a class="tombol garis" href="#kategori">Pilih kategori</a>
+        <a class="tombol" href="/katalog/" data-t="hero.katalog">Lihat katalog</a>
+        <a class="tombol garis" href="#kategori" data-t="hero.kategori">Pilih kategori</a>
       </div>
     </div>
-    <img class="hero-logo" src="/assets/brand/logo-putih.png" width="274" height="282" alt="IXVII.CO — Your App Solver">
+    <img class="hero-logo hanya-gelap" src="/assets/brand/logo-putih.png" width="274" height="282" alt="IXVII.CO — Your App Solver">
+    <img class="hero-logo hanya-terang" src="/assets/brand/logo-maroon.png" width="273" height="282" alt="IXVII.CO — Your App Solver">
   </section>
-  <section class="wadah poin" aria-label="Keunggulan">
-    <div class="kaca"><h3>Harga jelas per paket</h3><p class="redup">Setiap durasi dan tipe paket tampil dengan harganya masing-masing.</p></div>
-    <div class="kaca"><h3>Stok selalu terbaru</h3><p class="redup">Label Tersedia dan Habis diambil langsung dari katalog kami.</p></div>
-    <div class="kaca"><h3>Sharing atau private</h3><p class="redup">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
+  <section class="wadah poin" aria-label="Keunggulan" data-t-aria="poin.label">
+    <div class="kaca"><h3 data-t="poin1.j">Harga jelas per paket</h3><p class="redup" data-t="poin1.t">Setiap durasi dan tipe paket tampil dengan harganya masing-masing.</p></div>
+    <div class="kaca"><h3 data-t="poin2.j">Stok selalu terbaru</h3><p class="redup" data-t="poin2.t">Label Tersedia dan Habis diambil langsung dari katalog kami.</p></div>
+    <div class="kaca"><h3 data-t="poin3.j">Sharing atau private</h3><p class="redup" data-t="poin3.t">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
   </section>
   <section class="wadah seksi" id="kategori">
-    <div class="seksi-kepala"><h2>Kategori</h2><a href="/katalog/">Semua aplikasi →</a></div>
+    <div class="seksi-kepala"><h2 data-t="seksi.kategori">Kategori</h2><a href="/katalog/" data-t="seksi.semuaApp">Semua aplikasi →</a></div>
     <div class="chips" id="daftar-kategori"></div>
   </section>
   <section class="wadah seksi">
-    <div class="seksi-kepala"><h2>Pilihan untukmu</h2><a href="/katalog/">Lihat katalog →</a></div>
+    <div class="seksi-kepala"><h2 data-t="seksi.pilihan">Pilihan untukmu</h2><a href="/katalog/" data-t="seksi.lihatKatalog">Lihat katalog →</a></div>
     <div class="grid" id="unggulan" aria-live="polite"></div>
+  </section>
+  <section class="wadah seksi" id="faq" hidden>
+    <div class="seksi-kepala"><h2 data-t="seksi.faq">Pertanyaan umum</h2></div>
+    <div class="kaca faq faq-beranda" id="faq-umum"></div>
+    <p class="redup faq-wa" id="faq-wa" hidden></p>
   </section>
 </main>
 <footer id="kaki" class="kaki"></footer>
-<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog.</p></noscript>
+<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog. / Please enable JavaScript to see the catalog.</p></noscript>
 </body>
 </html>

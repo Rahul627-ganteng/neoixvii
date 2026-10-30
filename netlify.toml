@@ -3,6 +3,10 @@
 [build]
   publish = "public"
 
+# Fungsi server (kurs dolar harian). Kodenya tidak ikut terbit sebagai file publik.
+[functions]
+  directory = "netlify/functions"
+
 # Halaman admin jangan muncul di mesin pencari
 [[headers]]
   for = "/admin-impor/*"
