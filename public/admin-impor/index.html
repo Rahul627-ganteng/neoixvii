@@ -113,10 +113,8 @@
 </main>
 
 <script type="module">
-// ====== UBAH DUA BARIS INI (Supabase → Project Settings → API) ======
-const SUPABASE_URL = 'https://ISI-PROJECT-ID.supabase.co';
-const SUPABASE_ANON_KEY = 'ISI-ANON-PUBLIC-KEY';
-// ====================================================================
+// Alamat & kunci Supabase diambil dari /js/config.js (satu tempat untuk semua halaman)
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/config.js';
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 import { siapkanPratinjau, terapkan, batalkan } from './src/alur-impor.js';
@@ -263,7 +261,7 @@ $('tombolBatalkan').addEventListener('click', async () => {
 $('tombolLagi').addEventListener('click', () => { $('inputFile').value = ''; tampil('kartuHasil', false); $('inputFile').click(); });
 
 if (SUPABASE_URL.includes('ISI-PROJECT-ID')) {
-  pesan('pesanLogin', 'Isi dulu SUPABASE_URL dan SUPABASE_ANON_KEY di bagian atas kode halaman ini (Langkah 5 panduan).');
+  pesan('pesanLogin', 'Isi dulu SUPABASE_URL dan SUPABASE_ANON_KEY di public/js/config.js.');
 } else {
   // jangan memanggil fungsi Supabase lain langsung di dalam callback ini (saran resmi supabase-js)
   supabase.auth.onAuthStateChange((_event, session) => setTimeout(() => cekSesi(session), 0));
