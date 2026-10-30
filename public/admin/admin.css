@@ -78,3 +78,9 @@ details.batch summary { cursor: pointer; }
 .atur input { flex: 1 1 220px; width: auto; }
 label.row { display: flex; gap: 8px; align-items: center; }
 label.row input[type=number] { width: 90px; }
+/* promo & bundle */
+.aturan { margin-top: 8px; }
+.aturan input[type=number] { width: 80px; }
+.banner-pratinjau { border: 1px dashed var(--line); border-radius: 10px; min-height: 60px; display: grid; place-items: center; overflow: hidden; background: #fafafa; }
+.banner-pratinjau img { width: 100%; max-height: 180px; object-fit: cover; }
+.item-form h3 { font-size: 15px; }

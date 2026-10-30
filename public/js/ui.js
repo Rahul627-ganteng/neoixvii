@@ -44,8 +44,10 @@ const SIMBOL = {
 };
 
 const HALAMAN = [
-  { href: '/', kunci: 'nav.beranda' },
+  { href: '/', kunci: 'nav.beranda', kelas: 'nav-beranda' },   // di HP disembunyikan; logo juga menuju beranda
   { href: '/katalog/', kunci: 'nav.katalog' },
+  { href: '/promo/', kunci: 'nav.promo' },
+  { href: '/rakit/', kunci: 'nav.rakit' },
 ];
 
 /** Ganti teks statis di HTML sesuai bahasa: data-t (isi), data-t-placeholder, data-t-aria, data-t-content. */
@@ -79,7 +81,7 @@ export function pasangKerangka(aktif, vars) {
         el('span', {}, 'IXVII.CO')),
       el('div', { class: 'kanan' },
         el('nav', { class: 'nav', 'aria-label': 'Menu' },
-          HALAMAN.map((h) => el('a', { href: h.href, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
+          HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
         tombolBahasa, tombolTema)));
   }
   const kaki = document.getElementById('kaki');

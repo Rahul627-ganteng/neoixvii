@@ -1,10 +1,7 @@
-import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilToko, buatPesanan } from './api.js';
-import {
-  catatanKurs, formatUsd, harga, inggris, labelTipe, labelVarian, pakaiUsd, pasangKurs, rupiah, t, tanggal, teksDurasi, teksGalat,
-} from './i18n.js';
-import {
-  daftarFaq, el, gabung, ikonApp, kartuApp, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori,
-} from './ui.js';
+import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko } from './api.js';
+import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal, teksDurasi } from './i18n.js';
+import { panelPesan } from './pesan.js';
+import { daftarFaq, el, gabung, ikonApp, kartuApp, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
 
 pasangKerangka('/katalog/');
 pasangTilt();
@@ -16,7 +13,6 @@ const pilihBahasa = (id, en) => (inggris() && en ? en : id);
 const baris = (s) => String(s ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
 const kata = (s) => String(s ?? '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
 const mengandung = (label, kunci) => ` ${kata(label).join(' ')} `.includes(` ${kata(kunci).join(' ')} `);
-const SIMPAN_KONTAK = 'ixvii-kontak';
 
 function tidakDitemukan() {
   document.title = `${t('app.tidakAda')} — IXVII.CO`;
@@ -152,116 +148,25 @@ function bagianFaq(app, infoTipe, faqs) {
 }
 
 // ---------------------------------------------------------------- ringkasan & pemesanan
-function bagianPesan(app, toko) {
-  let pilihan = null;
-  const bisaPesan = !!(toko?.whatsapp_number && toko.orders_open);
-
-  const judul = el('h2', {}, t('app.pilihanmu'));
-  const namaPilihan = el('div', { class: 'redup' }, t('app.belumPilih'));
-  const total = el('div', { class: 'total' }, '–');
-  const totalIdr = el('div', { class: 'total-idr' });
-  const tombol = el('button', { class: 'tombol', type: 'button', disabled: true, onclick: () => tampil('form') }, t('app.pesan'));
-
-  // formulir
-  const kontak = (() => { try { return JSON.parse(localStorage.getItem(SIMPAN_KONTAK) || '{}'); } catch { return {}; } })();
-  const inputNama = el('input', { type: 'text', name: 'name', autocomplete: 'name', required: true, minlength: 2, maxlength: 60, value: kontak.nama || '' });
-  const inputWa = el('input', { type: 'tel', name: 'tel', autocomplete: 'tel', inputmode: 'tel', required: true, maxlength: 20, placeholder: t('pesan.waContoh'), value: kontak.wa || '' });
-  const galat = el('div', { class: 'galat', role: 'alert', hidden: true });
-  const kirim = el('button', { class: 'tombol', type: 'submit' }, t('pesan.kirim'));
-  const form = el('form', { class: 'form-pesan', hidden: true, novalidate: true, onsubmit: kirimPesanan },
-    el('label', {}, t('pesan.nama'), inputNama),
-    el('label', {}, t('pesan.wa'), inputWa),
-    galat, kirim,
-    el('button', { class: 'tombol garis', type: 'button', onclick: () => tampil('pilih') }, t('pesan.batal')));
-  const sukses = el('div', { class: 'sukses', hidden: true, tabindex: '-1' });
-
-  const catatan = el('p', { class: 'catatan' });
-  if (bisaPesan) catatan.append(t('app.pesanCatatan'));
-  else {
-    catatan.append(t('app.tutup'));
-    if (toko?.whatsapp_number) {
-      catatan.append(' ', el('a', { href: tautanWa(toko.whatsapp_number, t('wa.tanya', { app: app.nama })), target: '_blank', rel: 'noopener' }, t('app.tanyaWa')));
-    }
-  }
-  const kurs = catatanKurs();
-  const catatanUsd = kurs ? el('p', { class: 'catatan' }, kurs) : null;
-
-  const wadahPilihan = el('div', { class: 'pilihan' }, namaPilihan);
-  const bagianPilih = [wadahPilihan, total, totalIdr];
-  function tampil(mode) {
-    for (const e of bagianPilih) e.hidden = mode === 'sukses';
-    judul.hidden = mode === 'sukses';
-    tombol.hidden = mode !== 'pilih';
-    form.hidden = mode !== 'form';
-    sukses.hidden = mode !== 'sukses';
-    catatan.hidden = mode === 'sukses';
-    if (mode === 'form') { galat.hidden = true; (inputNama.value ? inputWa : inputNama).focus(); }
-    if (mode === 'sukses') sukses.focus();
-  }
-
-  function tunjukGalat(teks) { galat.textContent = teks; galat.hidden = false; }
-
-  async function kirimPesanan(e) {
-    e.preventDefault();
-    const nama = inputNama.value.trim();
-    const wa = inputWa.value.trim();
-    if (!pilihan) return tunjukGalat(teksGalat('Pilih 1 sampai 10 paket'));
-    if (nama.length < 2 || wa.replace(/\D/g, '').length < 8) return tunjukGalat(t('pesan.wajib'));
-    kirim.disabled = true; kirim.textContent = t('pesan.proses'); galat.hidden = true;
-    try {
-      const hasil = await buatPesanan({ kode: [pilihan.id], nama, wa });
-      try { localStorage.setItem(SIMPAN_KONTAK, JSON.stringify({ nama, wa })); } catch { /* abaikan */ }
-      tulisSukses(hasil, nama);
-      tampil('sukses');
-    } catch (err) {
-      tunjukGalat(err instanceof TypeError ? t('pesan.gagal') : teksGalat(err.message));
-    } finally {
-      kirim.disabled = false; kirim.textContent = t('pesan.kirim');
-    }
-  }
-
-  function tulisSukses(hasil, nama) {
-    const usdTotal = inggris() && hasil.total_usd != null;
-    const teksTotal = usdTotal ? `${formatUsd(Number(hasil.total_usd))} (${rupiah(hasil.total)})` : rupiah(hasil.total);
-    const pesanWa = [
-      t('wa.halo'),
-      ...(hasil.items || []).map((i) => `- ${i.aplikasi} · ${labelTipe(i.tipe)} · ${labelVarian(i.varian)}: ${rupiah(i.harga)}`),
-      '',
-      `${t('wa.kode')}: ${hasil.kode}`,
-      `${t('wa.total')}: ${teksTotal}`,
-      `${t('wa.nama')}: ${nama}`,
-    ].join('\n');
-    sukses.replaceChildren(
-      el('h2', {}, t('pesan.berhasil')),
-      el('div', {}, el('div', { class: 'redup', style: 'font-size:12px' }, t('pesan.kodeLabel')), el('div', { class: 'kode' }, hasil.kode)),
-      el('pre', {}, pesanWa),
-      el('a', { class: 'tombol wa', href: tautanWa(hasil.whatsapp || toko.whatsapp_number, pesanWa), target: '_blank', rel: 'noopener' }, t('pesan.lanjutWa')),
-      el('p', { class: 'catatan', style: 'margin:0' }, t('pesan.catatanWa')),
-      ...(hasil.pembayaran ? [el('p', { class: 'sub' }, t('pesan.bayar')), el('pre', {}, hasil.pembayaran)] : []),
-      el('button', { class: 'tombol garis', type: 'button', onclick: () => tampil('pilih') }, t('pesan.lagi')));
-  }
-
-  const aside = el('aside', { class: 'ringkasan kaca', 'aria-label': t('app.ringkasan') },
-    judul, wadahPilihan, total, totalIdr, tombol, form, sukses, catatan, catatanUsd);
-
-  function pilih(v) {
-    pilihan = v;
-    namaPilihan.textContent = `${labelTipe(v.tipe)} · ${labelVarian(v.d)}`;
-    total.textContent = harga(v.p);
-    totalIdr.textContent = pakaiUsd() ? t('app.rupiah', { rp: rupiah(v.p) }) : '';
-    tombol.disabled = !bisaPesan;
-    if (!sukses.hidden) tampil('pilih');
-  }
-
+function bagianPesan(app, toko, promo) {
+  // ajakan rakit bundle (kalau aturan diskon rakitan sudah ada)
+  const aturan = promo?.rules ?? [];
+  const tertinggi = aturan.at(-1);
+  const ajak = tertinggi ? el('a', { class: 'ajak-rakit', href: '/rakit/' }, t('rakit.ajak', { pct: persen(tertinggi.pct) })) : null;
+  const { aside, atur } = panelPesan({ toko, tanya: t('wa.tanya', { app: app.nama }), sisipan: ajak ? [ajak] : [] });
+  const pilih = (v) => {
+    atur({ baris: [`${labelTipe(v.tipe)} · ${labelVarian(v.d)}`], total: v.p, kirim: { kode: [v.id] } });
+    if (ajak) ajak.href = `/rakit/?pilih=${encodeURIComponent(v.id)}`;
+  };
   return { aside, pilih };
 }
 
 // ---------------------------------------------------------------- susun halaman
-function tampilkan(app, semua, detail, toko, infoTipe) {
+function tampilkan(app, semua, detail, toko, infoTipe, promo) {
   document.title = `${app.nama} — IXVII.CO`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', t('meta.app', { app: app.nama, desc: app.desc }));
 
-  const { aside, pilih } = bagianPesan(app, toko);
+  const { aside, pilih } = bagianPesan(app, toko, promo);
   const lain = semua.filter((a) => a.kunciKategori === app.kunciKategori && a.slug !== app.slug && !a.habisSemua).slice(0, 4);
 
   isi.replaceChildren(...[
@@ -293,13 +198,13 @@ function tampilkan(app, semua, detail, toko, infoTipe) {
 async function muat() {
   isi.replaceChildren(el('div', { class: 'memuat', style: 'margin-top:32px;height:280px' }));
   try {
-    const [{ apps }, toko, infoTipe] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe()]);
+    const [{ apps }, toko, infoTipe, promo] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe(), ambilPromo()]);
     pasangKurs(toko);
     tulisCatatanKurs();
     const app = apps.find((a) => a.slug === slug);
     if (!app) return tidakDitemukan();
     const detail = await ambilDetail(app.id);
-    tampilkan(app, apps, detail, toko, infoTipe);
+    tampilkan(app, apps, detail, toko, infoTipe, promo);
   } catch (err) {
     console.error(err);
     isi.replaceChildren(pesanGagal(t('gagal.app'), muat));
