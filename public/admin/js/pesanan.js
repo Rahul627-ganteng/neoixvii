@@ -26,7 +26,7 @@ const usd = (n) => (n == null ? '' : ' · ' + new Intl.NumberFormat('en-US', { s
 
 export async function halamanPesanan(supabase, halaman) {
   const pesanan = await q(supabase.from('orders')
-    .select('id,code,customer_name,customer_wa,lang,total,total_usd,status,starts_on,ends_on,admin_note,created_at,order_items(app_name,plan_label,variant_label,price,duration_days)')
+    .select('*,order_items(app_name,plan_label,variant_label,price,duration_days)')
     .order('created_at', { ascending: false }).limit(300));
 
   const cari = el('input', { type: 'search', placeholder: 'Cari kode, nama, atau nomor WhatsApp…', 'aria-label': 'Cari pesanan' });
@@ -72,7 +72,9 @@ export async function halamanPesanan(supabase, halaman) {
     return el('article', { class: 'pesanan item-form' },
       el('div', { class: 'row', style: 'justify-content:space-between' },
         el('div', {}, el('b', { class: 'kode' }, o.code), ' ', el('span', { class: 'tag ' + st.kelas }, st.label),
-          en ? el('span', { class: 'tag' }, 'EN') : null),
+          en ? el('span', { class: 'tag' }, 'EN') : null,
+          o.kind === 'bundle' ? el('span', { class: 'tag biru' }, 'Bundle: ' + (o.bundle_name || '–')) : null,
+          o.kind === 'rakit' ? el('span', { class: 'tag biru' }, 'Rakitan') : null),
         el('span', { class: 'muted' }, waktu(o.created_at))),
       el('div', { class: 'row', style: 'margin-top:6px' },
         el('span', {}, o.customer_name), el('span', { class: 'muted' }, '+' + o.customer_wa),
@@ -80,7 +82,8 @@ export async function halamanPesanan(supabase, halaman) {
       el('ul', { class: 'isi-pesanan' }, (o.order_items || []).map((i) =>
         el('li', {}, `${i.app_name} · ${i.plan_label} · ${i.variant_label}`, el('span', { class: 'num' }, rp(i.price))))),
       el('div', { class: 'row', style: 'justify-content:space-between' },
-        el('b', {}, 'Total ', rp(o.total), el('span', { class: 'muted' }, usd(o.total_usd))), masa),
+        el('b', {}, 'Total ', rp(o.total), el('span', { class: 'muted' }, usd(o.total_usd)),
+          o.discount ? el('span', { class: 'muted' }, ` · diskon ${rp(o.discount)}`) : null), masa),
       el('div', { class: 'row atur', style: 'margin-top:8px' }, pilihStatus, catatan, simpan));
   };
 

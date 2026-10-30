@@ -7,6 +7,7 @@ import { unduhExcel } from './ekspor.js';
 import { el, hariIni, memuat, persen, q, rp, tabel, td, toast, waktu } from './alat.js';
 import { halamanPesanan } from './pesanan.js';
 import { halamanToko } from './toko.js';
+import { halamanPromo } from './promo.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -56,6 +57,7 @@ const RUTE = {
   ringkasan, stok, aplikasi, margin, riwayat,
   pesanan: () => halamanPesanan(supabase, halaman),
   toko: () => halamanToko(supabase, halaman),
+  promo: () => halamanPromo(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;

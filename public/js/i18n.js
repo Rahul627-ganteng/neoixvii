@@ -80,6 +80,27 @@ const KAMUS = {
     'app.rupiah': '', 'app.lihatFaqUmum': 'Lihat FAQ umum →',
     'pesan.wajib': 'Isi nama dan nomor WhatsApp dulu.', 'pesan.gagal': 'Pesanan belum bisa dibuat. Coba lagi sebentar lagi.',
     'wa.tanya': 'Halo IXVII.CO, saya mau tanya soal {app}.', 'wa.umum': 'Halo IXVII.CO, saya mau tanya.',
+    'nav.promo': 'Promo', 'nav.rakit': 'Rakit',
+    'judul.promo': 'Promo & bundle — IXVII.CO', 'judul.rakit': 'Rakit bundle — IXVII.CO',
+    'meta.promo': 'Promo dan bundle hemat langganan aplikasi premium di IXVII.CO.',
+    'meta.rakit': 'Rakit bundle langganan aplikasi premium sendiri. Makin banyak aplikasinya, makin besar diskonnya.',
+    'seksi.promo': 'Promo & bundle', 'beranda.promoT': '{n} promo dan bundle sedang berjalan.', 'beranda.promoTombol': 'Lihat promo',
+    'promo.judul': 'Promo & bundle', 'promo.sub': 'Paket hemat pilihan kami. Bundle otomatis hilang kalau salah satu paketnya habis.',
+    'promo.promo': 'Promo berjalan', 'promo.bundle': 'Bundle hemat', 'promo.sampai': 'Berlaku sampai {tgl}', 'promo.lihat': 'Lihat →',
+    'promo.pilih': 'Pilih bundle', 'promo.dipilih': 'Dipilih ✓', 'promo.hemat': 'Hemat {n}', 'promo.kosong': 'Belum ada promo atau bundle saat ini.',
+    'promo.rakitJ': 'Mau pilih sendiri?', 'promo.rakitT': 'Rakit bundle dari aplikasi mana pun. Hemat hingga {pct} untuk {n} aplikasi atau lebih.',
+    'promo.rakitTombol': 'Rakit bundle', 'promo.bundlemu': 'Bundle pilihanmu', 'promo.belumPilih': 'Belum ada bundle dipilih.',
+    'rakit.judul': 'Rakit bundle sendiri', 'rakit.sub': 'Pilih satu paket dari beberapa aplikasi. Makin banyak aplikasinya, makin besar diskonnya.',
+    'rakit.tingkat': '{n} aplikasi', 'rakit.tingkatPlus': '{n}+ aplikasi', 'rakit.hingga': 'hemat hingga {pct}',
+    'rakit.cari': 'Cari aplikasi…', 'rakit.cariLabel': 'Cari aplikasi untuk dirakit', 'rakit.hapusPilihan': 'Hapus dari rakitan',
+    'rakit.rakitanmu': 'Rakitanmu', 'rakit.kosong': 'Belum ada paket. Pilih paket dari daftar aplikasi.',
+    'rakit.lagi': 'Tambah {n} aplikasi lagi untuk hemat hingga {pct}.', 'rakit.maks': 'Kamu sudah dapat diskon tertinggi.',
+    'rakit.belumAturan': 'Diskon rakitan belum diatur, jadi harganya dijumlahkan biasa.', 'rakit.hapus': 'Hapus {app}',
+    'rakit.maks10': 'Maksimal 10 aplikasi dalam satu rakitan.', 'rakit.ajak': 'Rakit dengan aplikasi lain, hemat hingga {pct} →',
+    'rakit.bar': '{n} aplikasi · {total}', 'rakit.lihat': 'Lihat rakitan',
+    'rakit.catatanDiskon': 'Diskon dihitung otomatis per paket dan dibulatkan ke bawah.', 'rakit.tidakAda': 'Tidak ada aplikasi yang cocok.',
+    'pesan.hemat': 'Hemat {n}',
+    'wa.rakit': 'Rakit bundle sendiri', 'wa.bundle': 'Bundle', 'wa.subtotal': 'Subtotal', 'wa.diskon': 'Diskon bundle',
     'usd.catatan': '',
   },
   en: {
@@ -136,6 +157,27 @@ const KAMUS = {
     'app.rupiah': '{rp} in Indonesian rupiah', 'app.lihatFaqUmum': 'See general FAQ →',
     'pesan.wajib': 'Please enter your name and WhatsApp number.', 'pesan.gagal': 'Your order could not be placed. Please try again shortly.',
     'wa.tanya': 'Hello IXVII.CO, I have a question about {app}.', 'wa.umum': 'Hello IXVII.CO, I have a question.',
+    'nav.promo': 'Deals', 'nav.rakit': 'Build',
+    'judul.promo': 'Deals & bundles — IXVII.CO', 'judul.rakit': 'Bundle builder — IXVII.CO',
+    'meta.promo': 'Deals and money-saving bundles for premium app subscriptions at IXVII.CO.',
+    'meta.rakit': 'Build your own bundle of premium app subscriptions. The more apps, the bigger the discount.',
+    'seksi.promo': 'Deals & bundles', 'beranda.promoT': '{n} deals and bundles running now.', 'beranda.promoTombol': 'See deals',
+    'promo.judul': 'Deals & bundles', 'promo.sub': 'Our money-saving picks. A bundle disappears automatically when one of its plans sells out.',
+    'promo.promo': 'Current deals', 'promo.bundle': 'Bundles', 'promo.sampai': 'Ends {tgl}', 'promo.lihat': 'View →',
+    'promo.pilih': 'Choose bundle', 'promo.dipilih': 'Selected ✓', 'promo.hemat': 'Save {n}', 'promo.kosong': 'No deals or bundles right now.',
+    'promo.rakitJ': 'Want to pick your own?', 'promo.rakitT': 'Build a bundle from any apps. Save up to {pct} on {n} or more apps.',
+    'promo.rakitTombol': 'Build a bundle', 'promo.bundlemu': 'Your bundle', 'promo.belumPilih': 'No bundle selected yet.',
+    'rakit.judul': 'Build your own bundle', 'rakit.sub': 'Pick one plan from each of several apps. The more apps, the bigger the discount.',
+    'rakit.tingkat': '{n} apps', 'rakit.tingkatPlus': '{n}+ apps', 'rakit.hingga': 'save up to {pct}',
+    'rakit.cari': 'Search apps…', 'rakit.cariLabel': 'Search apps to add', 'rakit.hapusPilihan': 'Remove from bundle',
+    'rakit.rakitanmu': 'Your bundle', 'rakit.kosong': 'No plans yet. Pick plans from the app list.',
+    'rakit.lagi': 'Add {n} more app{s} to save up to {pct}.', 'rakit.maks': "You've unlocked the top discount.",
+    'rakit.belumAturan': 'Bundle discounts are not set up yet, so prices are simply added up.', 'rakit.hapus': 'Remove {app}',
+    'rakit.maks10': 'Up to 10 apps per bundle.', 'rakit.ajak': 'Bundle it with other apps and save up to {pct} →',
+    'rakit.bar': '{n} app{s} · {total}', 'rakit.lihat': 'View bundle',
+    'rakit.catatanDiskon': 'The discount is worked out per plan and rounded down.', 'rakit.tidakAda': 'No matching apps.',
+    'pesan.hemat': 'You save {n}',
+    'wa.rakit': 'Custom bundle', 'wa.bundle': 'Bundle', 'wa.subtotal': 'Subtotal', 'wa.diskon': 'Bundle discount',
     'usd.catatan': 'Prices in US dollars are estimates at 1 USD = {kurs} ({tgl}).',
   },
 };
@@ -163,6 +205,8 @@ export function catatanKurs() {
   const tgl = kursTanggal ? new Date(kursTanggal).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
   return t('usd.catatan', { kurs: rupiah(Math.round(kurs)), tgl });
 }
+/** 0.05 → "5%" */
+export const persen = (p) => `${(Math.round(Number(p) * 1000) / 10).toLocaleString(inggris() ? 'en-US' : 'id-ID')}%`;
 export const tanggal = (d) => new Date(d).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // ---------------------------------------------------------------- teks data
@@ -204,8 +248,13 @@ export function teksGalat(pesan) {
     [/Terlalu banyak pesanan/, 'Too many orders from this number. Please try again in 10 minutes or contact us on WhatsApp.'],
     [/Sedang banyak pesanan/, 'We are receiving a lot of orders right now. Please try again in a few minutes or contact us on WhatsApp.'],
     [/sedang habis/, 'This plan has just sold out. Please pick another one.'],
-    [/tidak tersedia/, 'This plan is no longer available.'],
     [/Pilih 1 sampai 10/, 'Please pick a plan first.'],
+    [/satu paket untuk setiap aplikasi/, 'Pick one plan per app.'],
+    [/Bundle ini sedang tidak tersedia/, 'This bundle is not available right now.'],
+    [/Maksimal 10 paket/, 'Up to 10 plans per bundle.'],
+    [/sudah tidak tersedia/, 'One of the plans is no longer available. Please reload the page.'],
+    [/Pilih paket dulu/, 'Please pick a plan first.'],
+    [/tidak tersedia/, 'This plan is no longer available.'],
   ];
   return peta.find(([re]) => re.test(pesan))?.[1] ?? t('pesan.gagal');
 }

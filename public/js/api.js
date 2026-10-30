@@ -63,17 +63,36 @@ export async function ambilDetail(appId) {
   return { faqs, resmi };
 }
 
-/** Buat pesanan lewat RPC. Harga dihitung ulang di database. */
-export async function buatPesanan({ kode, nama, wa }) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/buat_pesanan`, {
+async function rpc(nama, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${nama}`, {
     method: 'POST',
     headers: { ...HEADER, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ p_items: kode.map((c) => ({ code: c })), p_nama: nama, p_wa: wa, p_bahasa: inggris() ? 'en' : 'id' }),
+    body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(data?.message || `Gagal membuat pesanan (${res.status})`);
+  if (!res.ok) throw new Error(data?.message || `Gagal (${res.status})`);
   return data;
 }
+
+/**
+ * Buat pesanan lewat RPC. Harga, diskon rakitan, dan harga bundle dihitung ulang di database.
+ * kode = daftar kode varian; bundle = id bundle harga tetap; rakit = true untuk diskon rakitan.
+ */
+export function buatPesanan({ kode = [], bundle = null, rakit = false, nama, wa }) {
+  const p_items = bundle != null ? [{ bundle }] : kode.map((c) => ({ code: c }));
+  const body = { p_items, p_nama: nama, p_wa: wa, p_bahasa: inggris() ? 'en' : 'id' };
+  if (rakit) body.p_rakit = true;   // dikirim hanya kalau perlu, supaya tetap jalan di database lama
+  return rpc('buat_pesanan', body);
+}
+
+/** Promo, bundle yang berlaku, dan aturan diskon rakitan. Null kalau migration Tahap 7 belum dijalankan. */
+export async function ambilPromo() {
+  try { return await ambilSimpan('ixvii-promo-v1', 'rpc/promo_json'); }
+  catch { return null; }
+}
+
+/** Hitung total rakitan (diskon dibatasi batas aman di server). */
+export const hitungRakit = (kode) => rpc('bundle_quote', { p_codes: kode });
 
 // Ubah bentuk katalog_json menjadi daftar aplikasi yang mudah dipakai halaman.
 function olah(data) {
