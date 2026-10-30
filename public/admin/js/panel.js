@@ -1,51 +1,17 @@
-// Panel admin IXVII.CO: ringkasan, stok cepat, data aplikasi (logo, unggulan, deskripsi, FAQ, harga resmi),
-// pengaturan margin, dan riwayat impor. Semua akses dijaga RLS: hanya akun dengan role admin yang bisa mengubah data.
+// Panel admin IXVII.CO: ringkasan, pesanan, stok cepat, data aplikasi (logo, unggulan, deskripsi, FAQ, harga resmi),
+// pengaturan toko & konten (WhatsApp, pembayaran, kurs, FAQ beranda, penjelasan tipe paket), margin, dan riwayat impor.
+// Semua akses dijaga RLS: hanya akun dengan role admin yang bisa mengubah data.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '/js/config.js';
 import { unduhExcel } from './ekspor.js';
+import { el, hariIni, memuat, persen, q, rp, tabel, td, toast, waktu } from './alat.js';
+import { halamanPesanan } from './pesanan.js';
+import { halamanToko } from './toko.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
 const halaman = $('halaman');
 
-// ---------------------------------------------------------------- utilitas
-const rp = (n) => (n == null || n === '' ? '–' : 'Rp' + Number(n).toLocaleString('id-ID'));
-const persen = (x) => (x == null ? '–' : (x * 100).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + '%');
-const waktu = (t) => (t ? new Date(t).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–');
-const hariIni = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
-
-function el(tag, attrs = {}, ...anak) {
-  const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v == null || v === false) continue;
-    if (k === 'class') e.className = v;
-    else if (k === 'value') e.value = v;
-    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
-    else e.setAttribute(k, v === true ? '' : v);
-  }
-  for (const a of anak.flat()) if (a != null && a !== false) e.append(a instanceof Node ? a : document.createTextNode(String(a)));
-  return e;
-}
-function tabel(kepala, baris) {
-  return el('div', { class: 'tablewrap' }, el('table', {},
-    el('thead', {}, el('tr', {}, kepala.map((h) => (h.startsWith('>') ? el('th', { class: 'num' }, h.slice(1)) : el('th', {}, h))))),
-    el('tbody', {}, baris)));
-}
-const td = (isi, num) => el('td', num ? { class: 'num' } : {}, isi);
-let toastJeda;
-function toast(teks, err = false) {
-  document.querySelector('.toast')?.remove();
-  const t = el('div', { class: 'toast' + (err ? ' err' : ''), role: 'status' }, teks);
-  document.body.append(t);
-  clearTimeout(toastJeda);
-  toastJeda = setTimeout(() => t.remove(), 3200);
-}
-async function q(janji) {
-  const { data, error } = await janji;
-  if (error) throw new Error(error.message);
-  return data;
-}
-const memuat = () => el('div', { class: 'card muted' }, 'Memuat…');
 const urutKatalog = (x) => x.order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian').order('code');
 
 function ikon(app, besar = false) {
@@ -86,7 +52,11 @@ function mulai(session) {
 supabase.auth.onAuthStateChange((_e, session) => setTimeout(() => mulai(session), 0));
 
 // ---------------------------------------------------------------- router
-const RUTE = { ringkasan, stok, aplikasi, margin, riwayat };
+const RUTE = {
+  ringkasan, stok, aplikasi, margin, riwayat,
+  pesanan: () => halamanPesanan(supabase, halaman),
+  toko: () => halamanToko(supabase, halaman),
+};
 async function rute() {
   if (!siap) return;
   const nama = RUTE[location.hash.slice(1)] ? location.hash.slice(1) : 'ringkasan';
@@ -191,7 +161,7 @@ async function stok() {
 // ---------------------------------------------------------------- 3. aplikasi
 let pilihApp = null;
 async function aplikasi() {
-  const apps = (await q(supabase.from('apps').select('id,name,slug,description,logo_url,is_featured,is_active,sort,categories(label,sort)').order('sort')))
+  const apps = (await q(supabase.from('apps').select('id,name,slug,description,description_en,logo_url,is_featured,is_active,sort,categories(label,sort)').order('sort')))
     .sort((a, b) => (a.categories?.sort ?? 0) - (b.categories?.sort ?? 0) || a.sort - b.sort);
   if (!apps.length) { halaman.replaceChildren(el('p', { class: 'muted' }, 'Belum ada aplikasi.')); return; }
   if (!apps.some((a) => a.id === pilihApp)) pilihApp = apps[0].id;
@@ -216,7 +186,7 @@ async function aplikasi() {
 async function editorApp(app, wadah, segarkanDaftar) {
   wadah.replaceChildren(memuat());
   const [faqs, resmi] = await Promise.all([
-    q(supabase.from('app_faqs').select('id,question,answer,sort').eq('app_id', app.id).order('sort').order('id')),
+    q(supabase.from('app_faqs').select('id,question,answer,question_en,answer_en,sort').eq('app_id', app.id).order('sort').order('id')),
     q(supabase.from('official_prices').select('id,label,price,duration_days,note,checked_at,sort').eq('app_id', app.id).order('sort').order('id')),
   ]);
   const ikonBesar = el('div', {}, ikon(app, true));
@@ -252,9 +222,11 @@ async function editorApp(app, wadah, segarkanDaftar) {
     catch (err) { unggul.checked = !unggul.checked; toast('Gagal: ' + err.message, true); }
   });
   const desk = el('textarea', { 'aria-label': 'Deskripsi aplikasi', value: app.description || '' });
+  const deskEn = el('textarea', { 'aria-label': 'Deskripsi aplikasi (Inggris)', value: app.description_en || '' });
   const simpanDesk = el('button', { type: 'button', class: 'kecil' }, 'Simpan deskripsi');
   simpanDesk.addEventListener('click', async () => {
-    try { await q(supabase.from('apps').update({ description: desk.value.trim() || null }).eq('id', app.id)); app.description = desk.value.trim(); toast('Deskripsi tersimpan'); }
+    const isi = { description: desk.value.trim() || null, description_en: deskEn.value.trim() || null };
+    try { await q(supabase.from('apps').update(isi).eq('id', app.id)); Object.assign(app, isi); toast('Deskripsi tersimpan'); }
     catch (err) { toast('Gagal: ' + err.message, true); }
   });
 
@@ -263,12 +235,17 @@ async function editorApp(app, wadah, segarkanDaftar) {
   const formFaq = (f) => {
     const tanya = el('input', { type: 'text', 'aria-label': 'Pertanyaan', placeholder: 'Pertanyaan', value: f.question || '' });
     const jawab = el('textarea', { 'aria-label': 'Jawaban', placeholder: 'Jawaban', value: f.answer || '' });
-    const kotak = el('div', { class: 'item-form' }, tanya, el('div', { style: 'height:6px' }), jawab);
+    const tanyaEn = el('input', { type: 'text', 'aria-label': 'Pertanyaan (Inggris)', placeholder: 'Question (opsional)', value: f.question_en || '' });
+    const jawabEn = el('textarea', { 'aria-label': 'Jawaban (Inggris)', placeholder: 'Answer (opsional)', value: f.answer_en || '' });
+    const kotak = el('div', { class: 'item-form' }, el('div', { class: 'grid2' },
+      el('div', {}, el('label', { class: 'f' }, 'Indonesia'), tanya, el('div', { style: 'height:6px' }), jawab),
+      el('div', {}, el('label', { class: 'f' }, 'Inggris (kalau kosong, versi Indonesia yang tampil)'), tanyaEn, el('div', { style: 'height:6px' }), jawabEn)));
     const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
     const hapus = el('button', { type: 'button', class: 'kecil bahaya' }, 'Hapus');
     simpan.addEventListener('click', async () => {
       if (!tanya.value.trim() || !jawab.value.trim()) return toast('Pertanyaan dan jawaban wajib diisi', true);
-      const isi = { question: tanya.value.trim(), answer: jawab.value.trim(), updated_at: new Date().toISOString() };
+      const isi = { question: tanya.value.trim(), answer: jawab.value.trim(), question_en: tanyaEn.value.trim() || null,
+        answer_en: jawabEn.value.trim() || null, updated_at: new Date().toISOString() };
       try {
         if (f.id) await q(supabase.from('app_faqs').update(isi).eq('id', f.id));
         else Object.assign(f, await q(supabase.from('app_faqs').insert({ ...isi, app_id: app.id, sort: (faqs.length + 1) * 10 }).select('id').single()));
@@ -331,7 +308,9 @@ async function editorApp(app, wadah, segarkanDaftar) {
       el('label', { class: 'f' }, 'Logo (PNG, JPG, WebP, atau SVG, maks. 1 MB; sebaiknya kotak)'),
       el('div', { class: 'row' }, fileLogo, app.logo_url ? hapusLogo : null),
       el('div', { class: 'row', style: 'margin-top:14px' }, unggul, el('label', { for: 'unggul' }, 'Tampilkan di "Pilihan untukmu" di beranda')),
-      el('label', { class: 'f' }, 'Deskripsi (tampil di katalog)'), desk,
+      el('div', { class: 'grid2' },
+        el('div', {}, el('label', { class: 'f' }, 'Deskripsi (tampil di katalog)'), desk),
+        el('div', {}, el('label', { class: 'f' }, 'Deskripsi bahasa Inggris'), deskEn)),
       el('div', { class: 'row', style: 'margin-top:8px' }, simpanDesk)),
     el('section', { class: 'card' },
       el('h2', {}, 'Bandingkan dengan harga resmi'),
@@ -339,7 +318,7 @@ async function editorApp(app, wadah, segarkanDaftar) {
       daftarResmi, el('div', { class: 'row', style: 'margin-top:10px' }, tambahResmi)),
     el('section', { class: 'card' },
       el('h2', {}, 'Tanya jawab (FAQ)'),
-      el('p', { class: 'sub' }, 'Tampil di halaman aplikasi. Tulis jawaban sesuai aturan tokomu, misalnya soal garansi dan cara aktivasi.'),
+      el('p', { class: 'sub' }, 'Tampil di halaman aplikasi, di bawah tanya jawab otomatis (paket, harga termurah, cara pesan). Tulis jawaban sesuai aturan tokomu, misalnya soal garansi dan cara aktivasi.'),
       daftarFaq, el('div', { class: 'row', style: 'margin-top:10px' }, tambahFaq)));
 }
 

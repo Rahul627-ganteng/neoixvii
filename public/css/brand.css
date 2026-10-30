@@ -1,25 +1,63 @@
 /* ==========================================================================
-   Identitas visual ixvii.co — dipakai semua halaman.
+   Identitas visual IXVII.CO — dipakai semua halaman publik.
    Judul/branding : Helvetica Bold, huruf kapital (Akira Expanded hanya di logo)
    Isi            : Inter
+   Tema           : gelap (bawaan) dan terang (data-tema="terang" di <html>)
    ========================================================================== */
 :root {
   --maroon: #800203;          /* warna logo */
   --maroon-terang: #c0262d;   /* aksen di latar gelap */
-  --hitam: #0e0e10;
-  --abu-gelap: #1c1c20;
-  --abu: #8e8e95;
-  --putih: #f5f5f7;
+  --latar: #0e0e10;
+  --permukaan: rgba(28, 28, 32, .55);
+  --permukaan-pekat: #1c1c20;
+  --teks: #f5f5f7;
+  --teks-2: rgba(245, 245, 247, .72);
+  --teks-3: #8e8e95;
+  --garis: rgba(255, 255, 255, .12);
+  --garis-kuat: rgba(255, 255, 255, .28);
+  --kepala: rgba(14, 14, 16, .72);
+  --isian: rgba(28, 28, 32, .7);
+  --bayang: 0 20px 60px rgba(0, 0, 0, .45);
+  --sorot: rgba(255, 255, 255, .06);
+  --lencana: rgba(255, 255, 255, .08);
+  --hijau-latar: rgba(52, 199, 89, .16);
+  --hijau-teks: #7ee2a0;
+  --merah-latar: rgba(192, 38, 45, .22);
+  --merah-teks: #ff9a9e;
+  --kilau1: rgba(128, 2, 3, .45);
+  --kilau2: rgba(192, 38, 45, .18);
 
   --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-isi: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-
-  --kaca: rgba(28, 28, 32, .55);
-  --kaca-garis: rgba(255, 255, 255, .12);
   --radius: 20px;
+  color-scheme: dark;
 }
 
-body { font-family: var(--font-isi); color: var(--putih); background: var(--hitam); }
+[data-tema="terang"] {
+  --maroon-terang: #a3141b;
+  --latar: #f6f4f4;
+  --permukaan: rgba(255, 255, 255, .78);
+  --permukaan-pekat: #ffffff;
+  --teks: #16161a;
+  --teks-2: rgba(22, 22, 26, .74);
+  --teks-3: #6b6b72;
+  --garis: rgba(22, 22, 26, .11);
+  --garis-kuat: rgba(22, 22, 26, .26);
+  --kepala: rgba(255, 255, 255, .82);
+  --isian: #ffffff;
+  --bayang: 0 16px 40px rgba(60, 10, 12, .10);
+  --sorot: rgba(22, 22, 26, .05);
+  --lencana: rgba(22, 22, 26, .06);
+  --hijau-latar: #e6f4ea;
+  --hijau-teks: #146c2e;
+  --merah-latar: #fdecea;
+  --merah-teks: #b42318;
+  --kilau1: rgba(128, 2, 3, .10);
+  --kilau2: rgba(192, 38, 45, .07);
+  color-scheme: light;
+}
+
+body { font-family: var(--font-isi); color: var(--teks); background: var(--latar); }
 
 h1, h2, h3, .judul {
   font-family: var(--font-judul);
@@ -30,10 +68,13 @@ h1, h2, h3, .judul {
 }
 
 .kaca {
-  background: var(--kaca);
-  border: 1px solid var(--kaca-garis);
+  background: var(--permukaan);
+  border: 1px solid var(--garis);
   border-radius: var(--radius);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+  box-shadow: var(--bayang);
 }
+
+/* gambar yang berbeda per tema */
+[data-tema="terang"] .hanya-gelap, :root:not([data-tema="terang"]) .hanya-terang { display: none !important; }
