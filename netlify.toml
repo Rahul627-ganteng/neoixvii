@@ -1,0 +1,10 @@
+# Netlify hanya menerbitkan isi folder public/.
+# Folder supabase/ (berisi HPP di seed_katalog.sql) TIDAK ikut terbit.
+[build]
+  publish = "public"
+
+# Halaman admin jangan muncul di mesin pencari
+[[headers]]
+  for = "/admin-impor/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
