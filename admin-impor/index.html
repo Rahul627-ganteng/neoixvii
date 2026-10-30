@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Impor HPP — Admin ixvii.co</title>
+<!-- 'xlsx' diarahkan ke SheetJS 0.20.3 dari CDN resminya (bukan versi npm yang rentan) -->
+<script type="importmap">
+{ "imports": { "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs" } }
+</script>
+<style>
+  :root { --maroon:#7a1f2b; --maroon-soft:#f6e9eb; --ink:#1d1d1f; --quiet:#6b6b70; --line:#e3e3e6; --bg:#f7f7f8;
+          --red:#b42318; --red-soft:#fdecea; --amber:#8a5a00; --amber-soft:#fff4dc; --green:#146c2e; --green-soft:#e6f4ea; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  header { background:var(--maroon); color:#fff; padding:14px 16px; }
+  header h1 { margin:0; font-size:17px; font-weight:600; }
+  main { max-width:960px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .card h2 { margin:0 0 10px; font-size:16px; }
+  label { display:block; font-size:13px; color:var(--quiet); margin:8px 0 4px; }
+  input[type=email], input[type=password] { width:100%; max-width:340px; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+  button { font:inherit; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; background:var(--maroon); color:#fff; }
+  button.secondary { background:#fff; color:var(--maroon); border:1px solid var(--maroon); }
+  button:disabled { background:#c9c9cc; color:#fff; border-color:#c9c9cc; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .muted { color:var(--quiet); font-size:13px; }
+  .msg { padding:10px 12px; border-radius:8px; margin:10px 0 0; }
+  .msg.err { background:var(--red-soft); color:var(--red); }
+  .msg.ok { background:var(--green-soft); color:var(--green); }
+  .msg.warn { background:var(--amber-soft); color:var(--amber); }
+  .drop { border:2px dashed var(--line); border-radius:10px; padding:24px; text-align:center; background:#fcfcfd; }
+  .drop.over { border-color:var(--maroon); background:var(--maroon-soft); }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:12px 0; }
+  .stat { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  .stat b { display:block; font-size:22px; }
+  .stat.err b { color:var(--red); } .stat.new b { color:var(--green); } .stat.chg b { color:var(--maroon); }
+  .tablewrap { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; margin-top:6px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:#fafafa; font-weight:600; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .old { color:var(--quiet); text-decoration:line-through; }
+  details { margin-top:12px; } summary { cursor:pointer; font-weight:600; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header><h1>ixvii.co · Impor HPP &amp; Harga dari Excel</h1></header>
+<main>
+
+  <section class="card" id="kartuLogin">
+    <h2>Masuk sebagai admin</h2>
+    <form id="formLogin">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <div class="row" style="margin-top:12px"><button type="submit">Masuk</button></div>
+    </form>
+    <div id="pesanLogin"></div>
+  </section>
+
+  <section class="card hidden" id="kartuAkun">
+    <div class="row" style="justify-content:space-between">
+      <span>Masuk sebagai <b id="namaAkun"></b></span>
+      <button class="secondary" id="tombolKeluar" type="button">Keluar</button>
+    </div>
+    <div id="pesanAkun"></div>
+  </section>
+
+  <section class="card hidden" id="kartuUnggah">
+    <h2>1. Pilih file Excel</h2>
+    <div class="drop" id="areaDrop">
+      <p style="margin:0 0 8px">Tarik file <b>.xlsx</b> ke sini, atau</p>
+      <input id="inputFile" type="file" accept=".xlsx,.xlsm,.xls">
+      <p class="muted" style="margin:8px 0 0">Template baru maupun file HPP lama sama-sama bisa dibaca.</p>
+    </div>
+    <div id="pesanUnggah"></div>
+  </section>
+
+  <section class="card hidden" id="kartuPratinjau">
+    <h2>2. Cek perubahan sebelum diterapkan</h2>
+    <p class="muted" id="infoFile"></p>
+    <div class="stats" id="ringkasan"></div>
+    <div id="blokError"></div>
+    <div id="blokBerubah"></div>
+    <div id="blokBaru"></div>
+    <div id="blokHilang"></div>
+    <div id="blokPeringatan"></div>
+    <div style="margin-top:16px">
+      <label class="row" style="color:var(--ink);font-size:14px"><input type="checkbox" id="cekNonaktif"> Sembunyikan dari web varian yang tidak ada di file ini</label>
+      <div class="row" style="margin-top:10px">
+        <button id="tombolTerapkan" type="button">Terapkan ke website</button>
+        <button class="secondary" id="tombolBatalPilih" type="button">Pilih file lain</button>
+      </div>
+    </div>
+    <div id="pesanTerapkan"></div>
+  </section>
+
+  <section class="card hidden" id="kartuHasil">
+    <h2>3. Selesai</h2>
+    <div id="isiHasil"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="secondary" id="tombolBatalkan" type="button">Batalkan unggahan ini</button>
+      <button id="tombolLagi" type="button">Unggah file lain</button>
+    </div>
+    <div id="pesanBatalkan"></div>
+  </section>
+
+</main>
+
+<script type="module">
+// ====== UBAH DUA BARIS INI (Supabase → Project Settings → API) ======
+const SUPABASE_URL = 'https://ISI-PROJECT-ID.supabase.co';
+const SUPABASE_ANON_KEY = 'ISI-ANON-PUBLIC-KEY';
+// ====================================================================
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+import { siapkanPratinjau, terapkan, batalkan } from './src/alur-impor.js';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (id) => document.getElementById(id);
+const tampil = (id, ya) => $(id).classList.toggle('hidden', !ya);
+const rp = (n) => (n == null ? '—' : 'Rp' + Number(n).toLocaleString('id-ID'));
+const nilai = (kolom, v) => (v == null ? '—' : kolom === 'Harga' || kolom === 'HPP' ? rp(v)
+  : kolom === 'Tampil di Web' ? (v ? 'Ya' : 'Tidak') : kolom === 'Stok' ? (v === 'habis' ? 'Habis' : 'Tersedia') : String(v));
+
+// membuat elemen dengan aman (isi dari Excel tidak pernah dimasukkan sebagai HTML)
+function el(tag, attrs = {}, ...anak) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === 'class' ? (e.className = v) : e.setAttribute(k, v);
+  for (const a of anak.flat()) if (a != null) e.append(a instanceof Node ? a : document.createTextNode(String(a)));
+  return e;
+}
+function pesan(id, teks, jenis = 'err') { $(id).replaceChildren(teks ? el('div', { class: `msg ${jenis}` }, teks) : ''); }
+function tabel(kepala, baris) {
+  return el('div', { class: 'tablewrap' }, el('table', {},
+    el('thead', {}, el('tr', {}, kepala.map((h) => (h.startsWith('>') ? el('th', { class: 'num' }, h.slice(1)) : el('th', {}, h))))),
+    el('tbody', {}, baris.map((r) => el('tr', {}, r.map((c) => (c instanceof Node && c.tagName === 'TD' ? c : el('td', {}, c))))))));
+}
+const td = (isi, cls) => el('td', cls ? { class: cls } : {}, isi);
+
+// ---------------- login
+async function cekSesi(sesi) {
+  const session = sesi !== undefined ? sesi : (await supabase.auth.getSession()).data.session;
+  const masuk = !!session;
+  tampil('kartuLogin', !masuk); tampil('kartuAkun', masuk);
+  if (!masuk) { ['kartuUnggah', 'kartuPratinjau', 'kartuHasil'].forEach((k) => tampil(k, false)); return; }
+  $('namaAkun').textContent = session.user.email;
+  const admin = session.user.app_metadata?.role === 'admin';
+  pesan('pesanAkun', admin ? '' : 'Akun ini belum admin. Jalankan perintah di Langkah 4 panduan, lalu keluar dan masuk lagi.');
+  tampil('kartuUnggah', admin);
+}
+$('formLogin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  pesan('pesanLogin', '');
+  const { error } = await supabase.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
+  if (error) return pesan('pesanLogin', 'Gagal masuk: ' + error.message);
+});
+$('tombolKeluar').addEventListener('click', () => supabase.auth.signOut());
+
+// ---------------- pilih file
+let pratinjau = null;
+async function prosesFile(file) {
+  if (!file) return;
+  pesan('pesanUnggah', 'Membaca ' + file.name + '…', 'warn');
+  tampil('kartuPratinjau', false); tampil('kartuHasil', false);
+  try {
+    pratinjau = await siapkanPratinjau(supabase, file);
+    pesan('pesanUnggah', '');
+    tampilkanPratinjau(pratinjau);
+  } catch (err) {
+    pesan('pesanUnggah', err.message);
+  }
+}
+$('inputFile').addEventListener('change', (e) => prosesFile(e.target.files[0]));
+const drop = $('areaDrop');
+drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); prosesFile(e.dataTransfer.files[0]); });
+
+// ---------------- pratinjau
+function tampilkanPratinjau(p) {
+  const { diff, hasil, errors, warnings } = p;
+  $('infoFile').textContent = `${p.namaFile} · ${hasil.ringkasan.baris} baris terbaca · format ${hasil.format === 'template' ? 'template baru' : 'file HPP lama'}`;
+  const stat = (angka, label, cls = '') => el('div', { class: 'stat ' + cls }, el('b', {}, angka), el('span', { class: 'muted' }, label));
+  $('ringkasan').replaceChildren(
+    stat(errors.length, 'error', errors.length ? 'err' : ''),
+    stat(diff.berubah.length, 'varian berubah', 'chg'),
+    stat(diff.baru.length, 'varian baru', 'new'),
+    stat(diff.sama.length, 'tidak berubah'),
+    stat(diff.tidakAdaDiFile.length, 'tidak ada di file'),
+    stat(hasil.ringkasan.tanpaHpp, 'tanpa HPP'));
+
+  $('blokError').replaceChildren(errors.length ? el('div', {},
+    el('div', { class: 'msg err' }, `Ada ${errors.length} error. Perbaiki di Excel (lihat nomor baris), simpan, lalu pilih file lagi.`),
+    tabel(['Baris', 'Kolom', 'Masalah'], errors.map((e) => [e.baris, e.kolom, e.pesan]))) : '');
+
+  $('blokBerubah').replaceChildren(diff.berubah.length ? el('details', { open: '' },
+    el('summary', {}, `Berubah (${diff.berubah.length})`),
+    tabel(['ID', 'Aplikasi', 'Tipe · Varian', 'Perubahan'], diff.berubah.map(({ baris: b, lama, perubahan }) => [
+      lama.code, b.aplikasi, `${b.tipe} · ${b.varian}`,
+      el('span', {}, perubahan.map((c, i) => el('span', {}, i ? ' · ' : '', `${c.kolom}: `,
+        el('span', { class: 'old' }, nilai(c.kolom, c.lama)), ' → ', el('b', {}, nilai(c.kolom, c.baru))))),
+    ]))) : '');
+
+  $('blokBaru').replaceChildren(diff.baru.length ? el('details', { open: '' },
+    el('summary', {}, `Varian baru (${diff.baru.length})`),
+    tabel(['Baris', 'Aplikasi', 'Tipe · Varian', '>HPP', '>Harga'], diff.baru.map((b) => [
+      b.barisExcel, b.aplikasi, `${b.tipe} · ${b.varian}`, td(rp(b.hpp), 'num'), td(rp(b.harga), 'num')]))) : '');
+
+  $('blokHilang').replaceChildren(diff.tidakAdaDiFile.length ? el('details', {},
+    el('summary', {}, `Ada di web tapi tidak ada di file (${diff.tidakAdaDiFile.length})`),
+    el('p', { class: 'muted' }, 'Dibiarkan seperti sekarang, kecuali kotak "Sembunyikan dari web" di bawah dicentang.'),
+    tabel(['ID', 'Aplikasi', 'Tipe · Varian', '>Harga'], diff.tidakAdaDiFile.map((v) => [v.code, v.aplikasi, `${v.tipe} · ${v.varian}`, td(rp(v.harga), 'num')]))) : '');
+
+  $('blokPeringatan').replaceChildren(warnings.length ? el('details', {},
+    el('summary', {}, `Peringatan (${warnings.length}), boleh diterapkan tapi sebaiknya dicek`),
+    tabel(['Baris', 'Kolom', 'Catatan'], warnings.map((w) => [w.baris, w.kolom, w.pesan]))) : '');
+
+  const adaPerubahan = diff.berubah.length + diff.baru.length > 0 || $('cekNonaktif').checked;
+  $('tombolTerapkan').disabled = !p.bisaDiterapkan;
+  pesan('pesanTerapkan', !p.bisaDiterapkan ? '' : adaPerubahan ? '' : 'Tidak ada perubahan dibanding katalog sekarang.', 'ok');
+  tampil('kartuPratinjau', true);
+}
+$('tombolBatalPilih').addEventListener('click', () => { $('inputFile').value = ''; tampil('kartuPratinjau', false); });
+
+// ---------------- terapkan & batalkan
+let batchTerakhir = null;
+$('tombolTerapkan').addEventListener('click', async () => {
+  if (!pratinjau) return;
+  const nonaktif = $('cekNonaktif').checked;
+  if (nonaktif && !confirm(`${pratinjau.diff.tidakAdaDiFile.length} varian yang tidak ada di file akan disembunyikan dari web. Lanjutkan?`)) return;
+  $('tombolTerapkan').disabled = true;
+  pesan('pesanTerapkan', 'Menyimpan…', 'warn');
+  try {
+    const h = await terapkan(supabase, pratinjau, { nonaktifkanYangTidakAda: nonaktif });
+    batchTerakhir = h.batch_id;
+    pesan('pesanTerapkan', '');
+    $('isiHasil').replaceChildren(el('div', { class: 'msg ok' },
+      `Tersimpan: ${h.berubah} varian berubah, ${h.baru} varian baru, ${h.sama} tidak berubah` +
+      (h.dinonaktifkan ? `, ${h.dinonaktifkan} disembunyikan` : '') + '. Website langsung memakai harga baru.'));
+    tampil('kartuPratinjau', false); tampil('kartuHasil', true);
+    pesan('pesanBatalkan', '');
+    $('tombolBatalkan').disabled = false;
+  } catch (err) {
+    $('tombolTerapkan').disabled = false;
+    pesan('pesanTerapkan', 'Tidak tersimpan, tidak ada data yang berubah. ' + err.message);
+  }
+});
+$('tombolBatalkan').addEventListener('click', async () => {
+  if (!batchTerakhir || !confirm('Kembalikan harga, HPP, dan stok ke sebelum unggahan ini?')) return;
+  try {
+    const h = await batalkan(supabase, batchTerakhir);
+    pesan('pesanBatalkan', `Dibatalkan: ${h.dikembalikan} nilai dikembalikan` +
+      (h.konflik ? `, ${h.konflik} dilewati karena sudah diubah lagi oleh unggahan lain.` : '.'), h.konflik ? 'warn' : 'ok');
+    $('tombolBatalkan').disabled = true;
+  } catch (err) { pesan('pesanBatalkan', err.message); }
+});
+$('tombolLagi').addEventListener('click', () => { $('inputFile').value = ''; tampil('kartuHasil', false); $('inputFile').click(); });
+
+if (SUPABASE_URL.includes('ISI-PROJECT-ID')) {
+  pesan('pesanLogin', 'Isi dulu SUPABASE_URL dan SUPABASE_ANON_KEY di bagian atas kode halaman ini (Langkah 5 panduan).');
+} else {
+  // jangan memanggil fungsi Supabase lain langsung di dalam callback ini (saran resmi supabase-js)
+  supabase.auth.onAuthStateChange((_event, session) => setTimeout(() => cekSesi(session), 0));
+}
+</script>
+</body>
+</html>
