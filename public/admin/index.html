@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel Admin — IXVII.CO</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/admin/admin.css">
+<script type="module" src="/admin/js/panel.js"></script>
+</head>
+<body>
+<header class="atas">
+  <div class="baris">
+    <a class="merek" href="/admin/"><img src="/assets/brand/emblem-putih.png" alt="" width="274" height="183">PANEL ADMIN</a>
+    <div class="akun hidden" id="akun"><span id="namaAkun"></span><button type="button" id="tombolKeluar">Keluar</button></div>
+  </div>
+</header>
+<nav class="menu hidden" id="menu" aria-label="Menu admin">
+  <div class="baris">
+    <a href="#ringkasan">Ringkasan</a>
+    <a href="#stok">Stok</a>
+    <a href="#aplikasi">Aplikasi</a>
+    <a href="#margin">Margin</a>
+    <a href="#riwayat">Riwayat</a>
+    <a href="/admin-impor/">Impor Excel ↗</a>
+  </div>
+</nav>
+<main>
+  <section class="card hidden" id="kartuLogin">
+    <h2>Masuk sebagai admin</h2>
+    <form id="formLogin" style="max-width:340px">
+      <label class="f" for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+      <label class="f" for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+      <div class="row" style="margin-top:12px"><button type="submit">Masuk</button></div>
+    </form>
+    <div id="pesanLogin"></div>
+  </section>
+  <div id="halaman" aria-live="polite"></div>
+</main>
+<noscript><p style="padding:16px">Aktifkan JavaScript untuk memakai panel admin.</p></noscript>
+</body>
+</html>

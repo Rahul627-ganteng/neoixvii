@@ -1,0 +1,67 @@
+/* Panel admin IXVII.CO — tema terang supaya nyaman membaca tabel dan angka */
+:root { --maroon:#800203; --maroon-soft:#f6e9eb; --ink:#1d1d1f; --quiet:#6b6b70; --line:#e3e3e6; --bg:#f6f6f7;
+        --red:#b42318; --red-soft:#fdecea; --amber:#8a5a00; --amber-soft:#fff4dc; --green:#146c2e; --green-soft:#e6f4ea; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+.hidden { display: none !important; }
+header.atas { background: var(--maroon); color: #fff; position: sticky; top: 0; z-index: 10; }
+.atas .baris { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+.atas .merek { display: flex; align-items: center; gap: 10px; font: 700 15px "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: .06em; color: #fff; text-decoration: none; }
+.atas .merek img { height: 22px; width: auto; }
+.atas .akun { font-size: 13px; opacity: .9; display: flex; gap: 10px; align-items: center; }
+.atas .akun button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.5); padding: 4px 12px; border-radius: 999px; cursor: pointer; font: inherit; }
+nav.menu { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 46px; z-index: 9; }
+nav.menu .baris { max-width: 1100px; margin: 0 auto; padding: 0 12px; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+nav.menu a { flex: none; padding: 12px 12px; text-decoration: none; color: var(--quiet); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; }
+nav.menu a[aria-current="page"] { color: var(--maroon); border-bottom-color: var(--maroon); }
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.card h2 { margin: 0 0 4px; font-size: 17px; }
+.card .sub { margin: 0 0 12px; color: var(--quiet); font-size: 13px; }
+label.f { display: block; font-size: 13px; color: var(--quiet); margin: 10px 0 4px; }
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], input[type=search], textarea, select {
+  width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; color: var(--ink); }
+textarea { min-height: 80px; resize: vertical; }
+button, .btn { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 9px 14px; cursor: pointer; background: var(--maroon); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+button.sec, .btn.sec { background: #fff; color: var(--maroon); border: 1px solid var(--maroon); }
+button.kecil { padding: 5px 10px; font-size: 13px; }
+button.bahaya { background: #fff; color: var(--red); border: 1px solid #f0c3bf; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.grid2 { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.muted { color: var(--quiet); font-size: 13px; }
+.msg { padding: 10px 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; }
+.msg.err { background: var(--red-soft); color: var(--red); } .msg.ok { background: var(--green-soft); color: var(--green); } .msg.warn { background: var(--amber-soft); color: var(--amber); }
+.stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 16px; }
+.stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.stat b { display: block; font-size: 26px; line-height: 1.2; }
+.stat span { color: var(--quiet); font-size: 13px; }
+.stat.merah b { color: var(--red); } .stat.kuning b { color: var(--amber); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { background: #fafafa; font-weight: 600; white-space: nowrap; font-size: 12.5px; color: var(--quiet); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f0f0f2; color: var(--quiet); white-space: nowrap; }
+.tag.merah { background: var(--red-soft); color: var(--red); } .tag.kuning { background: var(--amber-soft); color: var(--amber); } .tag.hijau { background: var(--green-soft); color: var(--green); }
+.saklar { min-width: 96px; justify-content: center; }
+.saklar.ada { background: var(--green-soft); color: var(--green); border: 1px solid #b7dfc3; }
+.saklar.habis { background: var(--red-soft); color: var(--red); border: 1px solid #f0c3bf; }
+.app-grup { margin-top: 14px; }
+.app-grup h3 { margin: 0 0 4px; font-size: 14px; }
+.tata-aplikasi { display: grid; gap: 16px; }
+@media (min-width: 860px) { .tata-aplikasi { grid-template-columns: 280px 1fr; align-items: start; } .daftar-app { position: sticky; top: 110px; } }
+.daftar-app .item { display: flex; gap: 10px; align-items: center; width: 100%; background: none; color: var(--ink); border: 0; border-radius: 8px; padding: 7px 8px; text-align: left; font-weight: 500; }
+.daftar-app .item:hover { background: #f2f2f4; }
+.daftar-app .item[aria-current="true"] { background: var(--maroon-soft); color: var(--maroon); }
+.daftar-app .scroll { max-height: 60vh; overflow: auto; margin-top: 8px; }
+.ikon { width: 36px; height: 36px; border-radius: 9px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--maroon); color: #fff; font: 700 13px "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.ikon img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.ikon.besar { width: 64px; height: 64px; border-radius: 14px; font-size: 20px; }
+.item-form { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #1d1d1f; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 14px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: calc(100% - 32px); }
+.toast.err { background: var(--red); }
+details.batch summary { cursor: pointer; }
+.atas .baris > * { min-width: 0; }
+.atas .akun span { max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) { .atas .akun span { display: none; } }

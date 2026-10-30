@@ -37,7 +37,10 @@ export async function siapkanPratinjau(supabase, file) {
 
 export async function terapkan(supabase, pratinjau, { nonaktifkanYangTidakAda = false } = {}) {
   if (!pratinjau.bisaDiterapkan) throw new Error('Masih ada error. Perbaiki file lalu unggah ulang.');
-  const versi = pratinjau.hasil.versiData ? new Date(pratinjau.hasil.versiData).toISOString() : null;
+  // Kirim teks versi apa adanya: Date di JavaScript memotong mikrodetik, padahal database menyimpannya,
+  // sehingga file yang baru diunduh bisa dikira kedaluwarsa.
+  const v = pratinjau.hasil.versiData;
+  const versi = v && !Number.isNaN(Date.parse(v)) ? v : null;
   const { data, error } = await supabase.rpc('impor_katalog', {
     p_rows: pratinjau.hasil.baris.map(keBarisRpc),
     p_nama_file: pratinjau.namaFile,
