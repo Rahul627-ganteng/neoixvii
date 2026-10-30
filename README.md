@@ -4,7 +4,9 @@ Website ixvii.co. HTML/CSS/JS biasa tanpa build, diterbitkan Netlify dari folder
 
 | Folder / file | Isi | Terbit di web? |
 |---|---|---|
-| `public/` | Semua halaman website. `public/admin-impor/` = halaman impor HPP dari Excel. | Ya |
+| `public/` | Semua halaman website: beranda (`index.html`), `katalog/`, `aplikasi/?app=<slug>`, dan `admin-impor/` (impor HPP dari Excel). | Ya |
+| `public/js/` | `config.js` (alamat Supabase), `api.js` (ambil data lewat REST), `ui.js` (kartu, header, efek 3D), dan skrip tiap halaman. | Ya |
+| `public/css/site.css` | Tata letak dan komponen halaman publik. | Ya |
 | `supabase/migrations/` | File SQL perubahan database (dijalankan manual di Supabase SQL Editor). | Tidak |
 | `supabase/seed_katalog.sql` | Isi awal katalog, **berisi HPP**. | Tidak |
 | `public/assets/brand/` | Logo (putih untuk latar gelap, maroon, hitam) dan favicon. | Ya |
