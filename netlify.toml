@@ -7,6 +7,16 @@
 [functions]
   directory = "netlify/functions"
 
+# Header keamanan untuk semua halaman
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    Strict-Transport-Security = "max-age=31536000"
+
 # Halaman admin jangan muncul di mesin pencari
 [[headers]]
   for = "/admin-impor/*"
@@ -36,3 +46,4 @@
   for = "/admin/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache"

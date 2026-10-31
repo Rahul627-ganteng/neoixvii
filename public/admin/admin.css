@@ -162,3 +162,8 @@ details.item-form summary { cursor: pointer; padding: 4px 0; }
   .grid-aff { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-draft { grid-template-columns: 1fr 1fr; }
 }
+/* halaman kebijakan */
+.pratinjau-kebijakan { line-height: 1.6; font-size: 14px; }
+.pratinjau-kebijakan h2 { font-size: 16px; margin: 16px 0 4px; }
+.pratinjau-kebijakan h3 { font-size: 14.5px; margin: 12px 0 4px; }
+.pratinjau-kebijakan ul, .pratinjau-kebijakan ol { padding-left: 20px; }

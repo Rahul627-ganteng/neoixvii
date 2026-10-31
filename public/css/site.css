@@ -433,3 +433,16 @@ html.terjemah [data-t] { visibility: hidden; }
 .saldo-daftar .redup { font-size: 13px; }
 .saldo-daftar .plus { color: var(--hijau-teks); white-space: nowrap; }
 .saldo-catatan { font-size: 13px; margin-top: 12px; }
+/* halaman kebijakan */
+.kebijakan { padding: clamp(18px, 4vw, 32px); border-radius: 22px; line-height: 1.7; }
+.kebijakan > :first-child { margin-top: 0; }
+.kebijakan h2 { font-size: 19px; margin: 26px 0 8px; }
+.kebijakan h3 { font-size: 16px; margin: 20px 0 6px; }
+.kebijakan p, .kebijakan li { color: var(--teks-2); }
+.kebijakan ul, .kebijakan ol { padding-left: 22px; margin: 8px 0; }
+.kebijakan li { margin: 4px 0; }
+.kebijakan strong { color: var(--teks); }
+.kebijakan a { color: var(--maroon-terang); }
+.kebijakan-lain { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 8px; }
+.kebijakan-lain a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--garis-kuat); color: var(--teks-2); text-decoration: none; font-size: 14px; }
+.kebijakan-lain a[aria-current="page"] { background: var(--maroon, #800203); border-color: transparent; color: #fff; }

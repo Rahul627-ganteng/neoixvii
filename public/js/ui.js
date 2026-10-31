@@ -94,7 +94,10 @@ export function pasangKerangka(aktif, vars) {
         el('a', { href: '/film/' }, t('kaki.film')),
         el('a', { href: '/tentang/' }, t('kaki.tentang')),
         el('a', { href: '/mitra/' }, t('kaki.mitra')),
-        el('a', { href: '/testimoni/' }, t('kaki.ulasan'))),
+        el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
+        el('a', { href: '/syarat/' }, t('kaki.syarat')),
+        el('a', { href: '/privasi/' }, t('kaki.privasi')),
+        el('a', { href: '/garansi-refund/' }, t('kaki.garansi'))),
       el('span', { class: 'catatan-kurs', hidden: true })));
   }
 }
