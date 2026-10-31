@@ -25,9 +25,10 @@ export function sisaHari(ends, hari = hariIni()) {
 const usd = (n) => (n == null ? '' : ' · ' + new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n));
 
 export async function halamanPesanan(supabase, halaman) {
-  const pesanan = await q(supabase.from('orders')
-    .select('*,order_items(app_name,plan_label,variant_label,price,duration_days)')
-    .order('created_at', { ascending: false }).limit(300));
+  const ambil = (kolom) => q(supabase.from('orders').select(kolom).order('created_at', { ascending: false }).limit(300));
+  const dasar = '*,order_items(app_name,plan_label,variant_label,price,duration_days)';
+  // kolom ulasan baru ada setelah migration Tahap 8
+  const pesanan = await ambil(dasar + ',reviews(rating,status)').catch(() => ambil(dasar));
 
   const cari = el('input', { type: 'search', placeholder: 'Cari kode, nama, atau nomor WhatsApp…', 'aria-label': 'Cari pesanan' });
   const tab = el('div', { class: 'row tab', role: 'group', 'aria-label': 'Saring pesanan' });
@@ -42,6 +43,34 @@ export async function halamanPesanan(supabase, halaman) {
       stat(pesanan.filter((o) => o.status === 'dibayar').length, 'dibayar, belum dikirim'),
       stat(pesanan.filter((o) => o.status === 'aktif').length, 'langganan aktif'),
       stat(segera, 'berakhir ≤ 3 hari (tawarkan perpanjang)', segera ? 'merah' : ''));
+  };
+
+  /** Link ulasan sekali pakai (hanya pesanan Aktif/Selesai). */
+  const bagianUlasan = (o) => {
+    if (o.reviews?.length) {
+      const rata = o.reviews.reduce((s, r) => s + r.rating, 0) / o.reviews.length;
+      return el('span', { class: 'tag hijau' }, `Sudah diulas ★${rata.toLocaleString('id-ID', { maximumFractionDigits: 1 })}`);
+    }
+    if (o.status !== 'aktif' && o.status !== 'selesai') return null;
+    const wadah = el('div', { class: 'row' });
+    const buat = el('button', { type: 'button', class: 'sec kecil' }, 'Buat link ulasan');
+    buat.addEventListener('click', async () => {
+      buat.disabled = true;
+      try {
+        const h = await q(supabase.rpc('buat_link_ulasan', { p_kode: o.code }));
+        const url = `${location.origin}/ulasan/?t=${h.token}`;
+        const teks = o.lang === 'en'
+          ? `Hi ${o.customer_name}, thank you for subscribing at IXVII.CO 🙏 Could you leave a short review? This link is only for your order ${o.code} and works once:\n${url}`
+          : `Halo ${o.customer_name}, terima kasih sudah berlangganan di IXVII.CO 🙏 Boleh minta ulasan singkatnya? Link ini khusus pesanan ${o.code} dan hanya bisa dipakai sekali:\n${url}`;
+        const salin = el('button', { type: 'button', class: 'sec kecil' }, 'Salin link');
+        salin.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(url); toast('Link ulasan disalin'); } catch { prompt('Salin link ini:', url); }
+        });
+        wadah.replaceChildren(el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, teks), target: '_blank', rel: 'noopener' }, 'Kirim link ulasan lewat WhatsApp'), salin);
+      } catch (err) { toast('Gagal: ' + err.message, true); buat.disabled = false; }
+    });
+    wadah.append(buat);
+    return wadah;
   };
 
   const kartu = (o) => {
@@ -84,7 +113,8 @@ export async function halamanPesanan(supabase, halaman) {
       el('div', { class: 'row', style: 'justify-content:space-between' },
         el('b', {}, 'Total ', rp(o.total), el('span', { class: 'muted' }, usd(o.total_usd)),
           o.discount ? el('span', { class: 'muted' }, ` · diskon ${rp(o.discount)}`) : null), masa),
-      el('div', { class: 'row atur', style: 'margin-top:8px' }, pilihStatus, catatan, simpan));
+      el('div', { class: 'row atur', style: 'margin-top:8px' }, pilihStatus, catatan, simpan),
+      el('div', { style: 'margin-top:8px' }, bagianUlasan(o)));
   };
 
   const gambarDaftar = () => {

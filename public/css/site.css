@@ -285,3 +285,29 @@ html.terjemah [data-t] { visibility: hidden; }
 .tingkat-durasi { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .tingkat-durasi small { color: var(--teks-3); font-size: 12.5px; font-weight: 600; }
 .lencana.bonus { background: var(--hijau-latar); color: var(--hijau-teks); margin-left: 4px; }
+
+/* ---------------------------------------------------------------- Tahap 8: ulasan */
+:root { --bintang: #f5a524; }
+.bintang { color: var(--bintang); letter-spacing: 1px; white-space: nowrap; }
+.bintang .kosong-b { color: var(--garis-kuat); }
+.ulasan-daftar { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.ulasan-kartu { padding: 16px 18px; border-radius: 18px; display: grid; gap: 10px; align-content: start; }
+.ulasan-kartu .atas { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ulasan-kartu p { margin: 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; }
+.ulasan-kartu .bawah { font-size: 13px; }
+.ulasan-kartu .bawah a { color: var(--maroon-terang); text-decoration: none; font-weight: 600; }
+.lencana.verified { background: var(--hijau-latar); color: var(--hijau-teks); font-weight: 600; }
+.info-hasil .bintang { font-size: 15px; }
+.ringkas-ulasan { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; font-size: 14px; }
+.form-ulasan { display: grid; gap: 14px; }
+.form-ulasan > p { margin: 0; }
+.ulasan-app { border-radius: 16px; padding: 14px 16px; margin: 0; display: grid; gap: 8px; }
+.ulasan-app legend { font-weight: 700; font-family: var(--font-judul); text-transform: uppercase; letter-spacing: .04em; font-size: 13px; padding: 0 4px; }
+.ulasan-app textarea { width: 100%; border-radius: 12px; border: 1px solid var(--garis); background: var(--isian); color: var(--teks); font: 15px/1.5 var(--font-isi); padding: 10px 12px; resize: vertical; }
+.ulasan-app small { justify-self: end; font-size: 12px; }
+.bintang-input { display: flex; gap: 4px; }
+.bintang-input label { cursor: pointer; font-size: 30px; line-height: 1; color: var(--garis-kuat); padding: 2px; border-radius: 8px; }
+.bintang-input label.aktif { color: var(--bintang); }
+.bintang-input label:has(input:focus-visible) { outline: 2px solid var(--maroon-terang); }
+.row-cek { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.kaki a { color: inherit; }

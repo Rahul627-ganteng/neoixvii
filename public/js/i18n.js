@@ -102,6 +102,23 @@ const KAMUS = {
     'rakit.catatanDiskon': 'Diskon dihitung otomatis per paket (jumlah aplikasi + bonus durasi), bisa berbeda tiap paket, dan dibulatkan ke bawah.', 'rakit.tidakAda': 'Tidak ada aplikasi yang cocok.',
     'pesan.hemat': 'Hemat {n}',
     'wa.rakit': 'Rakit bundle sendiri', 'wa.bundle': 'Bundle', 'wa.subtotal': 'Subtotal', 'wa.diskon': 'Diskon bundle',
+    'kaki.ulasan': 'Ulasan pembeli', 'seksi.ulasan': 'Kata pembeli',
+    'judul.testimoni': 'Ulasan pembeli — IXVII.CO', 'judul.ulasan': 'Tulis ulasan — IXVII.CO',
+    'meta.testimoni': 'Ulasan asli dari pembeli langganan aplikasi premium di IXVII.CO, lengkap dengan bulan pembeliannya.',
+    'testi.judul': 'Ulasan pembeli', 'testi.sub': 'Semua ulasan di sini ditulis pembeli sungguhan lewat link khusus setelah pesanannya aktif.',
+    'testi.verified': 'Verified Purchase', 'testi.dibeli': 'dibeli {bulan}', 'testi.semua': 'Semua',
+    'testi.kosong': 'Belum ada ulasan. Halaman ini hanya berisi ulasan dari pembeli sungguhan.',
+    'testi.kosongApp': 'Belum ada ulasan untuk aplikasi ini.',
+    'testi.rata': '{rata} dari 5 · {n} ulasan', 'testi.lihat': 'Lihat semua ulasan →', 'testi.bintang': '{n} dari 5 bintang',
+    'app.ulasan': 'Ulasan pembeli',
+    'ulasan.judul': 'Tulis ulasan', 'ulasan.halo': 'Halo {nama}, terima kasih sudah berlangganan di IXVII.CO. Bagaimana pengalamanmu?',
+    'ulasan.dibeli': 'Pesanan tanggal {tgl}', 'ulasan.nilai': 'Nilai untuk {app}', 'ulasan.bintang': '{n} bintang',
+    'ulasan.isi': 'Ceritakan pengalamanmu (opsional)', 'ulasan.anonim': 'Jangan tampilkan namaku',
+    'ulasan.namaTampil': 'Namamu tampil sebagai “{nama}”. Nomor WhatsApp tidak pernah ditampilkan.',
+    'ulasan.kirim': 'Kirim ulasan', 'ulasan.mengirim': 'Mengirim…', 'ulasan.minimal': 'Beri bintang untuk minimal satu aplikasi.',
+    'ulasan.terima': 'Terima kasih! Ulasanmu sudah kami terima dan akan tampil setelah dicek admin.',
+    'ulasan.tidakValid': 'Link ulasan ini tidak valid, sudah dipakai, atau sudah kedaluwarsa. Ulasan hanya bisa ditulis lewat link dari admin setelah pembelian.',
+    'ulasan.keTestimoni': 'Lihat ulasan pembeli lain',
     'usd.catatan': '',
   },
   en: {
@@ -180,6 +197,23 @@ const KAMUS = {
     'rakit.catatanDiskon': 'Discounts are worked out per plan (number of apps + duration bonus), can differ between plans, and are rounded down.', 'rakit.tidakAda': 'No matching apps.',
     'pesan.hemat': 'You save {n}',
     'wa.rakit': 'Custom bundle', 'wa.bundle': 'Bundle', 'wa.subtotal': 'Subtotal', 'wa.diskon': 'Bundle discount',
+    'kaki.ulasan': 'Customer reviews', 'seksi.ulasan': 'What buyers say',
+    'judul.testimoni': 'Customer reviews — IXVII.CO', 'judul.ulasan': 'Write a review — IXVII.CO',
+    'meta.testimoni': 'Genuine reviews from IXVII.CO buyers of premium app subscriptions, with the month they purchased.',
+    'testi.judul': 'Customer reviews', 'testi.sub': 'Every review here comes from a real buyer, through a private link sent after their order went live.',
+    'testi.verified': 'Verified Purchase', 'testi.dibeli': 'purchased {bulan}', 'testi.semua': 'All',
+    'testi.kosong': 'No reviews yet. This page only shows reviews from real buyers.',
+    'testi.kosongApp': 'No reviews for this app yet.',
+    'testi.rata': '{rata} out of 5 · {n} review{s}', 'testi.lihat': 'See all reviews →', 'testi.bintang': '{n} out of 5 stars',
+    'app.ulasan': 'Customer reviews',
+    'ulasan.judul': 'Write a review', 'ulasan.halo': 'Hi {nama}, thanks for subscribing at IXVII.CO. How was your experience?',
+    'ulasan.dibeli': 'Order from {tgl}', 'ulasan.nilai': 'Rating for {app}', 'ulasan.bintang': '{n} star{s}',
+    'ulasan.isi': 'Tell us about it (optional)', 'ulasan.anonim': "Don't show my name",
+    'ulasan.namaTampil': 'Your name will appear as “{nama}”. Your WhatsApp number is never shown.',
+    'ulasan.kirim': 'Submit review', 'ulasan.mengirim': 'Submitting…', 'ulasan.minimal': 'Please rate at least one app.',
+    'ulasan.terima': 'Thank you! We received your review. It will appear after a quick check by our admin.',
+    'ulasan.tidakValid': 'This review link is invalid, already used, or expired. Reviews can only be written through the link our admin sends after a purchase.',
+    'ulasan.keTestimoni': 'See other reviews',
     'usd.catatan': 'Prices in US dollars are estimates at 1 USD = {kurs} ({tgl}).',
   },
 };
@@ -209,6 +243,8 @@ export function catatanKurs() {
 }
 /** 0.05 → "5%" */
 export const persen = (p) => `${(Math.round(Number(p) * 1000) / 10).toLocaleString(inggris() ? 'en-US' : 'id-ID')}%`;
+/** "2026-10" → "Oktober 2026" / "October 2026" */
+export const bulanTahun = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { month: 'long', year: 'numeric' });
 export const tanggal = (d) => new Date(d).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // ---------------------------------------------------------------- teks data
@@ -256,6 +292,10 @@ export function teksGalat(pesan) {
     [/Maksimal 10 paket/, 'Up to 10 plans per bundle.'],
     [/sudah tidak tersedia/, 'One of the plans is no longer available. Please reload the page.'],
     [/Pilih paket dulu/, 'Please pick a plan first.'],
+    [/Link ulasan tidak valid/, t('ulasan.tidakValid')],
+    [/Nilai harus 1 sampai 5/, 'Please choose 1 to 5 stars.'],
+    [/Ulasan maksimal 600/, 'Reviews can be up to 600 characters.'],
+    [/Beri nilai minimal/, 'Please rate at least one app.'],
     [/tidak tersedia/, 'This plan is no longer available.'],
   ];
   return peta.find(([re]) => re.test(pesan))?.[1] ?? t('pesan.gagal');

@@ -14,6 +14,12 @@
     X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
+  for = "/ulasan/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+
+[[headers]]
   for = "/admin/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
