@@ -1,6 +1,6 @@
-import { ambilFaqUmum, ambilKatalog, ambilPromo, ambilToko, diskonTertinggi } from './api.js';
+import { ambilFaqUmum, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { inggris, pasangKurs, persen, t } from './i18n.js';
-import { daftarFaq, el, kartuApp, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori } from './ui.js';
+import { daftarFaq, el, kartuApp, kartuUlasan, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori } from './ui.js';
 
 pasangKerangka('/', { n: t('hero.banyak') });
 pasangTilt();
@@ -27,6 +27,7 @@ async function muat() {
     wadahUnggulan.replaceChildren(...pilihan.slice(0, 6).map(kartuApp));
     muatFaq(toko);
     muatPromo();
+    muatUlasan();
   } catch {
     wadahUnggulan.replaceChildren(pesanGagal(t('gagal.katalog'), muat));
   }
@@ -47,6 +48,16 @@ async function muatFaq(toko) {
   }
   document.getElementById('faq').hidden = false;
   if (location.hash === '#faq') document.getElementById('faq').scrollIntoView();
+}
+
+async function muatUlasan() {
+  const data = await ambilUlasan();
+  const ulasan = data?.ulasan ?? [];
+  if (!ulasan.length) return;
+  // utamakan ulasan yang ada tulisannya
+  const pilih = [...ulasan.filter((u) => u.isi), ...ulasan.filter((u) => !u.isi)].slice(0, 3);
+  document.getElementById('ulasan-isi').replaceChildren(...pilih.map((u) => kartuUlasan(u)));
+  document.getElementById('ulasan-beranda').hidden = false;
 }
 
 async function muatPromo() {

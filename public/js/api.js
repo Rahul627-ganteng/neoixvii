@@ -4,7 +4,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { inggris } from './i18n.js';
 
 const HEADER = { apikey: SUPABASE_ANON_KEY };
-const CACHE_MS = 5 * 60 * 1000;
+const CACHE_MS = 2 * 60 * 1000;   // katalog & promo disimpan sebentar supaya pindah halaman terasa cepat
 
 export const slugify = (t) => String(t ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
@@ -33,7 +33,8 @@ export async function ambilKatalog() {
 /** Pengaturan toko yang boleh publik: nomor WhatsApp, cara bayar, kurs USD, buka/tutup pesanan. */
 export async function ambilToko() {
   try {
-    const rows = await ambilSimpan('ixvii-toko-v1', 'store_settings?select=whatsapp_number,payment_info,payment_info_en,usd_rate,usd_rate_at,orders_open&id=eq.1');
+    // tidak disimpan di cache: buka/tutup pesanan, nomor WA, dan kurs harus langsung berlaku
+    const rows = await ambil('store_settings?select=whatsapp_number,payment_info,payment_info_en,usd_rate,usd_rate_at,orders_open&id=eq.1');
     return rows[0] ?? null;
   } catch { return null; }   // tabel belum dibuat: website tetap jalan, pesanan ditutup
 }
@@ -90,6 +91,16 @@ export async function ambilPromo() {
   try { return await ambilSimpan('ixvii-promo-v1', 'rpc/promo_json'); }
   catch { return null; }
 }
+
+/** Ulasan pembeli yang sudah ditampilkan admin + ringkasan rating per aplikasi. Null kalau Tahap 8 belum dijalankan. */
+export async function ambilUlasan() {
+  try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
+  catch { return null; }
+}
+/** Data formulir ulasan dari link sekali pakai. */
+export const infoUlasan = (token) => rpc('info_ulasan', { p_token: token });
+/** Kirim ulasan: ulasan = [{ app, rating, isi }]. */
+export const kirimUlasan = (token, ulasan, anonim) => rpc('kirim_ulasan', { p_token: token, p_ulasan: ulasan, p_anonim: !!anonim });
 
 /** Diskon rakitan tertinggi yang diiklankan: tingkat jumlah aplikasi teratas + bonus durasi terbesar. */
 export function diskonTertinggi(promo) {

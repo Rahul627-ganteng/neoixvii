@@ -1,5 +1,5 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
-import { catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, temaTerang } from './i18n.js';
+import { bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, temaTerang } from './i18n.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
 export function el(tag, attrs = {}, ...anak) {
@@ -89,6 +89,7 @@ export function pasangKerangka(aktif, vars) {
     kaki.replaceChildren(el('div', { class: 'wadah' },
       el('span', {}, t('kaki.hak', { tahun: new Date().getFullYear() })),
       el('span', {}, t('kaki.info')),
+      el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
       el('span', { class: 'catatan-kurs', hidden: true })));
   }
 }
@@ -148,6 +149,25 @@ export function pesanGagal(teks, ulang) {
   return el('div', { class: 'kosong kaca' },
     el('p', {}, teks),
     el('button', { class: 'tombol garis', type: 'button', onclick: ulang }, t('gagal.ulang')));
+}
+
+/** Bintang rating, mis. ★★★★☆ (dibacakan "4 dari 5 bintang"). */
+export function bintang(n) {
+  const nilai = Math.round(Number(n));
+  return el('span', { class: 'bintang', role: 'img', 'aria-label': t('testi.bintang', { n: Number(n).toLocaleString(inggris() ? 'en-US' : 'id-ID') }) },
+    el('span', { 'aria-hidden': 'true' }, '★'.repeat(nilai)), el('span', { class: 'kosong-b', 'aria-hidden': 'true' }, '★'.repeat(5 - nilai)));
+}
+
+/** Kartu satu ulasan pembeli. */
+export function kartuUlasan(u, { denganApp = true } = {}) {
+  return el('article', { class: 'ulasan-kartu kaca' },
+    el('div', { class: 'atas' }, bintang(u.rating),
+      el('span', { class: 'lencana verified' }, '✓ ', t('testi.verified'))),
+    u.isi ? el('p', {}, u.isi) : null,
+    el('div', { class: 'bawah' },
+      el('b', {}, u.nama),
+      denganApp ? [' · ', u.slug ? el('a', { href: urlApp(u.slug) }, u.app) : u.app] : null,
+      el('span', { class: 'redup' }, ' · ', t('testi.dibeli', { bulan: bulanTahun(u.dibeli) }))));
 }
 
 /** Daftar tanya-jawab (details/summary). */

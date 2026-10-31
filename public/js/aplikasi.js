@@ -1,7 +1,7 @@
-import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, diskonTertinggi } from './api.js';
+import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
-import { daftarFaq, el, gabung, ikonApp, kartuApp, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
+import { bintang, daftarFaq, el, gabung, ikonApp, kartuApp, kartuUlasan, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
 
 pasangKerangka('/katalog/');
 pasangTilt();
@@ -66,6 +66,19 @@ function bagianTipe(app, infoTipe) {
         plus.length ? [el('p', { class: 'sub' }, t('app.kelebihan')), el('ul', { class: 'plus' }, plus.map((x) => el('li', {}, x)))] : null,
         min.length ? [el('p', { class: 'sub' }, t('app.kekurangan')), el('ul', { class: 'min' }, min.map((x) => el('li', {}, x)))] : null);
     })));
+}
+
+/** Ulasan pembeli (Verified Purchase) untuk aplikasi ini: ringkasan + 3 terbaru. */
+function bagianUlasan(app, data) {
+  const semua = (data?.ulasan ?? []).filter((u) => u.slug === app.slug);
+  if (!semua.length) return null;
+  const rata = semua.reduce((s, u) => s + u.rating, 0) / semua.length;
+  const angka = rata.toLocaleString(inggris() ? 'en-US' : 'id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return el('section', { class: 'grup kaca', id: 'ulasan-app' },
+    el('h2', {}, t('app.ulasan')),
+    el('p', { class: 'ringkas-ulasan' }, bintang(rata), t('testi.rata', { rata: angka, n: semua.length, s: semua.length === 1 ? '' : 's' })),
+    el('div', { class: 'ulasan-daftar' }, semua.slice(0, 3).map((u) => kartuUlasan(u, { denganApp: false }))),
+    el('a', { class: 'tautan-faq', href: `/testimoni/?app=${encodeURIComponent(app.slug)}` }, t('testi.lihat')));
 }
 
 // Perbandingan harga resmi vs IXVII.CO (paket dengan durasi sama, harga termurah yang tersedia).
@@ -161,7 +174,7 @@ function bagianPesan(app, toko, promo) {
 }
 
 // ---------------------------------------------------------------- susun halaman
-function tampilkan(app, semua, detail, toko, infoTipe, promo) {
+function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan) {
   document.title = `${app.nama} — IXVII.CO`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', t('meta.app', { app: app.nama, desc: app.desc }));
 
@@ -179,7 +192,7 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo) {
     el('div', { class: 'tata-detail' },
       el('div', { class: 'atas-detail' }, bagianGrup(app, infoTipe, pilih)),
       aside,
-      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
+      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianUlasan(app, ulasan), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
     lain.length ? el('section', { class: 'seksi' },
       el('div', { class: 'seksi-kepala' }, el('h2', {}, t('app.lainnya', { kat: app.kategori })),
         el('a', { href: urlKategori(app.kunciKategori) }, t('app.lihatSemua'))),
@@ -197,13 +210,13 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo) {
 async function muat() {
   isi.replaceChildren(el('div', { class: 'memuat', style: 'margin-top:32px;height:280px' }));
   try {
-    const [{ apps }, toko, infoTipe, promo] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe(), ambilPromo()]);
+    const [{ apps }, toko, infoTipe, promo, ulasan] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe(), ambilPromo(), ambilUlasan()]);
     pasangKurs(toko);
     tulisCatatanKurs();
     const app = apps.find((a) => a.slug === slug);
     if (!app) return tidakDitemukan();
     const detail = await ambilDetail(app.id);
-    tampilkan(app, apps, detail, toko, infoTipe, promo);
+    tampilkan(app, apps, detail, toko, infoTipe, promo, ulasan);
   } catch (err) {
     console.error(err);
     isi.replaceChildren(pesanGagal(t('gagal.app'), muat));
