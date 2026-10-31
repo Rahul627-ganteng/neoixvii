@@ -198,6 +198,19 @@ export function sampulFilm(f, kelas = '') {
     el('img', { class: 'emblem', src: '/assets/brand/emblem-putih.png', alt: '', width: 274, height: 183 }));
 }
 
+/** Pilihan 1–5 bintang yang bisa dipakai dengan keyboard (radio). */
+export function pilihBintang(nama, label) {
+  const grup = el('div', { class: 'bintang-input', role: 'radiogroup', 'aria-label': label });
+  const gambar = (n) => grup.querySelectorAll('label').forEach((l, i) => l.classList.toggle('aktif', i < n));
+  for (let n = 1; n <= 5; n++) {
+    const input = el('input', { type: 'radio', name: nama, value: n, class: 'tersembunyi', onchange: () => gambar(n) });
+    grup.append(el('label', { title: t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }) }, input,
+      el('span', { 'aria-hidden': 'true' }, '★'), el('span', { class: 'tersembunyi' }, t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }))));
+  }
+  grup.nilai = () => Number(grup.querySelector('input:checked')?.value || 0);
+  return grup;
+}
+
 /** Daftar tanya-jawab (details/summary). */
 export function daftarFaq(item) {
   return item.map((f) => el('details', {}, el('summary', {}, f.q), el('p', {}, f.a)));

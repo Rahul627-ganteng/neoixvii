@@ -114,6 +114,26 @@ export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
   catch { return null; }
 }
+/** Data form aktivasi garansi dari link sekali pakai. */
+export const infoGaransi = (token) => rpc('info_garansi', { p_token: token });
+/** Unggah screenshot bukti login ke bucket privat "garansi" (hanya bisa dengan link yang sah). */
+export async function unggahScreenshot(token, blob) {
+  const path = `${token}/login-${Date.now()}.jpg`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/garansi/${path}`, {
+    method: 'POST',
+    headers: { ...HEADER, 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'false' },
+    body: blob,
+  });
+  if (!res.ok) {
+    const d = await res.json().catch(() => null);
+    throw new Error(d?.message || d?.error || `Gagal mengunggah screenshot (${res.status})`);
+  }
+  return path;
+}
+/** Kirim aktivasi garansi (+ rating & ulasan opsional). */
+export const kirimGaransi = ({ token, nama, hp, device, screenshot, ulasan, anonim }) =>
+  rpc('kirim_garansi', { p_token: token, p_nama: nama, p_hp: hp, p_device: device, p_screenshot: screenshot, p_ulasan: ulasan?.length ? ulasan : null, p_anonim: !!anonim });
+
 /** Data formulir ulasan dari link sekali pakai. */
 export const infoUlasan = (token) => rpc('info_ulasan', { p_token: token });
 /** Kirim ulasan: ulasan = [{ app, rating, isi }]. */

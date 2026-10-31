@@ -145,6 +145,21 @@ const KAMUS = {
     'film.langganan': 'Langganan {app}', 'film.mulai': 'mulai {harga}', 'film.trailer': 'Trailer ↗',
     'film.kosong': 'Belum ada info film di sini.', 'film.seksi': 'Baru tayang', 'film.lihat': 'Lihat semua →',
     'film.diApp': 'Tayang di {app}', 'film.baca': 'Baca selengkapnya', 'film.tutup': 'Tutup',
+    'judul.garansi': 'Aktivasi garansi — IXVII.CO',
+    'garansi.judul': 'Aktivasi garansi', 'garansi.halo': 'Halo {nama}! Isi form ini setelah berhasil login, supaya masa garansi resmi berjalan dan nomormu masuk daftar pengingat sebelum akun berakhir.',
+    'garansi.pesanan': 'Pesananmu', 'garansi.dibeli': 'Dibeli {tgl}', 'garansi.berakhir': 'Berakhir {tgl}',
+    'garansi.batas': 'Kirim sebelum {waktu}', 'garansi.lewat': 'Batas 1x24 jam sudah lewat, jadi garansi belum aktif. Form tetap bisa dikirim dan admin akan meninjaunya.',
+    'garansi.nama': 'Nama', 'garansi.hp': 'No. HP aktif (WhatsApp)', 'garansi.hpContoh': '0812xxxxxxx', 'garansi.device': 'Device yang dipakai',
+    'garansi.deviceContoh': 'mis. iPhone 13, Smart TV Samsung', 'garansi.ss': 'Screenshot bukti sudah berhasil login', 'garansi.ssPilih': 'Pilih screenshot',
+    'garansi.ssGanti': 'Ganti screenshot', 'garansi.ulasanJudul': 'Rating & ulasan (opsional)', 'garansi.ulasanSub': 'Ulasanmu tampil di halaman Ulasan pembeli setelah dicek admin.',
+    'garansi.kirim': 'Aktifkan garansi', 'garansi.mengunggah': 'Mengunggah screenshot…', 'garansi.mengirim': 'Mengirim…',
+    'garansi.wajib': 'Isi nama, nomor HP, device, dan unggah screenshot login dulu.', 'garansi.bukanGambar': 'File harus berupa gambar (JPG, PNG, atau WebP).',
+    'garansi.aktif': 'Garansi aktif ✓ Terima kasih! Data kamu sudah tercatat dan kami akan mengingatkan sebelum akun berakhir.',
+    'garansi.ditinjau': 'Terima kasih, data kamu sudah terkirim. Karena lewat 1x24 jam, garansi belum aktif; admin akan meninjau dan menghubungimu.',
+    'garansi.masa': 'Masa aktif berakhir {tgl}',
+    'garansi.terimaUlasan': 'Ulasanmu juga sudah kami terima.',
+    'garansi.tidakValid': 'Link aktivasi garansi ini tidak valid, sudah dipakai, atau sudah kedaluwarsa. Hubungi admin lewat WhatsApp kalau butuh link baru.',
+    'garansi.chat': 'Chat admin',
     'usd.catatan': '',
   },
   en: {
@@ -266,6 +281,21 @@ const KAMUS = {
     'film.langganan': 'Get {app}', 'film.mulai': 'from {harga}', 'film.trailer': 'Trailer ↗',
     'film.kosong': 'No titles here yet.', 'film.seksi': 'New releases', 'film.lihat': 'See all →',
     'film.diApp': 'Streaming on {app}', 'film.baca': 'Read more', 'film.tutup': 'Show less',
+    'judul.garansi': 'Warranty activation — IXVII.CO',
+    'garansi.judul': 'Warranty activation', 'garansi.halo': 'Hi {nama}! Fill in this form after you have logged in, so your warranty officially starts and we can remind you before your account expires.',
+    'garansi.pesanan': 'Your order', 'garansi.dibeli': 'Purchased {tgl}', 'garansi.berakhir': 'Expires {tgl}',
+    'garansi.batas': 'Send before {waktu}', 'garansi.lewat': 'The 24-hour window has passed, so the warranty is not active yet. You can still send the form and our admin will review it.',
+    'garansi.nama': 'Name', 'garansi.hp': 'Active phone number (WhatsApp)', 'garansi.hpContoh': 'with country code, e.g. 6281…', 'garansi.device': 'Device you use',
+    'garansi.deviceContoh': 'e.g. iPhone 13, Samsung Smart TV', 'garansi.ss': 'Screenshot showing you are logged in', 'garansi.ssPilih': 'Choose screenshot',
+    'garansi.ssGanti': 'Change screenshot', 'garansi.ulasanJudul': 'Rating & review (optional)', 'garansi.ulasanSub': 'Your review appears on the Customer reviews page after a quick check.',
+    'garansi.kirim': 'Activate warranty', 'garansi.mengunggah': 'Uploading screenshot…', 'garansi.mengirim': 'Submitting…',
+    'garansi.wajib': 'Please fill in your name, phone number, device, and upload a login screenshot.', 'garansi.bukanGambar': 'The file must be an image (JPG, PNG, or WebP).',
+    'garansi.aktif': 'Warranty active ✓ Thank you! Your details are saved and we will remind you before your account expires.',
+    'garansi.ditinjau': 'Thank you, your details were sent. Since the 24-hour window has passed, your warranty is not active yet; our admin will review it and contact you.',
+    'garansi.masa': 'Active period ends {tgl}',
+    'garansi.terimaUlasan': 'We received your review too.',
+    'garansi.tidakValid': 'This warranty link is invalid, already used, or expired. Contact our admin on WhatsApp if you need a new link.',
+    'garansi.chat': 'Chat with admin',
     'usd.catatan': 'Prices in US dollars are estimates at 1 USD = {kurs} ({tgl}).',
   },
 };
@@ -298,6 +328,13 @@ export const persen = (p) => `${(Math.round(Number(p) * 1000) / 10).toLocaleStri
 /** "2026-10" → "Oktober 2026" / "October 2026" */
 export const bulanTahun = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { month: 'long', year: 'numeric' });
 export const tanggal = (d) => new Date(d).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+/** "27–30 November 2026" (rentang tanggal; satu tanggal kalau sama). */
+export function rentangTanggal(a, b) {
+  if (!a || a === b) return tanggal(b);
+  try {
+    return new Intl.DateTimeFormat(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).formatRange(new Date(a), new Date(b));
+  } catch { return `${tanggal(a)} – ${tanggal(b)}`; }
+}
 
 // ---------------------------------------------------------------- teks data
 /** Label varian ke bahasa Inggris: "3 Hari" → "3 Days", "1Bulan" → "1 Month", "1 Tahun Priv" → "1 Year Private". */
@@ -345,6 +382,11 @@ export function teksGalat(pesan) {
     [/sudah tidak tersedia/, 'One of the plans is no longer available. Please reload the page.'],
     [/Pilih paket dulu/, 'Please pick a plan first.'],
     [/Link ulasan tidak valid/, t('ulasan.tidakValid')],
+    [/Link garansi tidak valid/, t('garansi.tidakValid')],
+    [/Nama harus 2 sampai 80/, 'Name must be 2 to 80 characters.'],
+    [/Nomor HP tidak valid/, 'Please enter a valid phone number.'],
+    [/Tulis device/, 'Please tell us which device you use.'],
+    [/Unggah screenshot/, 'Please upload a screenshot showing you are logged in.'],
     [/Nilai harus 1 sampai 5/, 'Please choose 1 to 5 stars.'],
     [/Ulasan maksimal 600/, 'Reviews can be up to 600 characters.'],
     [/Beri nilai minimal/, 'Please rate at least one app.'],

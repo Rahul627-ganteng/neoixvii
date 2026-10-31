@@ -1,5 +1,6 @@
 // Menu Pesanan: daftar pesanan dari website, ubah status, hubungi pembeli lewat WhatsApp, pantau masa aktif.
 import { el, q, rp, toast, waktu, hariIni, tautanWa } from './alat.js';
+import { pesanGaransiLink, pesanGaransiManual } from './garansi-baca.js';
 
 export const STATUS = {
   menunggu_bayar: { label: 'Menunggu bayar', kelas: 'kuning' },
@@ -17,6 +18,23 @@ const SARING = [
 let saringan = 'proses';
 
 const tanggal = (d) => (d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '–');
+/** Tanggal paling awal akun bisa berakhir (1 bulan = 27–30 hari). */
+const akhirAwal = (o) => o.ends_earliest || o.ends_on;
+/** Status garansi pesanan: aktif / menunggu form (≤ 24 jam) / tidak aktif. */
+export function statusGaransi(o, sekarang = Date.now()) {
+  const g = o.warranties?.[0];
+  if (g) return g.status === 'aktif' ? { kunci: 'aktif', label: 'Garansi aktif ✓', kelas: 'hijau' }
+    : { kunci: 'tidak', label: g.on_time === false ? 'Garansi tidak aktif · form lewat 24 jam' : 'Garansi tidak aktif', kelas: 'merah' };
+  if (o.status !== 'aktif' && o.status !== 'selesai') return null;
+  if (!('warranties' in o)) return null;   // migration garansi belum dijalankan
+  const batas = o.delivered_at ? Date.parse(o.delivered_at) + 864e5 : null;
+  if (batas && sekarang < batas) {
+    const jam = Math.max(1, Math.ceil((batas - sekarang) / 36e5));
+    return { kunci: 'menunggu', label: `Menunggu form garansi · sisa ${jam} jam`, kelas: 'kuning' };
+  }
+  return { kunci: 'tidak', label: 'Garansi tidak aktif · belum isi form', kelas: 'merah' };
+}
+
 /** Sisa hari sampai ends_on (zona waktu WIB). */
 export function sisaHari(ends, hari = hariIni()) {
   if (!ends) return null;
@@ -27,8 +45,9 @@ const usd = (n) => (n == null ? '' : ' · ' + new Intl.NumberFormat('en-US', { s
 export async function halamanPesanan(supabase, halaman) {
   const ambil = (kolom) => q(supabase.from('orders').select(kolom).order('created_at', { ascending: false }).limit(300));
   const dasar = '*,order_items(app_name,plan_label,variant_label,price,duration_days)';
-  // kolom ulasan baru ada setelah migration Tahap 8
-  const pesanan = await ambil(dasar + ',reviews(rating,status)').catch(() => ambil(dasar));
+  // kolom ulasan & garansi baru ada setelah migration Tahap 8 / garansi
+  const pesanan = await ambil(dasar + ',reviews(rating,status),warranties(id,on_time,status)')
+    .catch(() => ambil(dasar + ',reviews(rating,status)')).catch(() => ambil(dasar));
 
   const cari = el('input', { type: 'search', placeholder: 'Cari kode, nama, atau nomor WhatsApp…', 'aria-label': 'Cari pesanan' });
   const tab = el('div', { class: 'row tab', role: 'group', 'aria-label': 'Saring pesanan' });
@@ -37,39 +56,51 @@ export async function halamanPesanan(supabase, halaman) {
 
   const stat = (angka, label, kelas = '') => el('div', { class: 'stat ' + kelas }, el('b', {}, angka), el('span', {}, label));
   const gambarRingkas = () => {
-    const segera = pesanan.filter((o) => o.status === 'aktif' && (sisaHari(o.ends_on) ?? 99) <= 3).length;
+    const segera = pesanan.filter((o) => o.status === 'aktif' && (sisaHari(akhirAwal(o)) ?? 99) <= 3).length;
+    const tanpaGaransi = pesanan.filter((o) => statusGaransi(o)?.kunci === 'tidak').length;
     ringkas.replaceChildren(
       stat(pesanan.filter((o) => o.status === 'menunggu_bayar').length, 'menunggu bayar', 'kuning'),
       stat(pesanan.filter((o) => o.status === 'dibayar').length, 'dibayar, belum dikirim'),
       stat(pesanan.filter((o) => o.status === 'aktif').length, 'langganan aktif'),
-      stat(segera, 'berakhir ≤ 3 hari (tawarkan perpanjang)', segera ? 'merah' : ''));
+      stat(segera, 'berakhir ≤ 3 hari (tawarkan perpanjang)', segera ? 'merah' : ''),
+      stat(tanpaGaransi, 'aktif tapi garansi tidak aktif', tanpaGaransi ? 'kuning' : ''));
   };
 
-  /** Link ulasan sekali pakai (hanya pesanan Aktif/Selesai). */
+  /** Garansi & ulasan: link form aktivasi garansi (sekaligus rating & ulasan) untuk pesanan Aktif/Selesai. */
+  const salinTeks = async (teks, pesan) => {
+    try { await navigator.clipboard.writeText(teks); toast(pesan); } catch { prompt('Salin teks ini:', teks); }
+  };
   const bagianUlasan = (o) => {
+    const tag = [];
+    const g = o.warranties?.[0];
+    const sg = statusGaransi(o);
+    if (sg) tag.push(el('span', { class: 'tag ' + sg.kelas }, sg.label));
     if (o.reviews?.length) {
       const rata = o.reviews.reduce((s, r) => s + r.rating, 0) / o.reviews.length;
-      return el('span', { class: 'tag hijau' }, `Sudah diulas ★${rata.toLocaleString('id-ID', { maximumFractionDigits: 1 })}`);
+      tag.push(el('span', { class: 'tag hijau' }, `Sudah diulas ★${rata.toLocaleString('id-ID', { maximumFractionDigits: 1 })}`));
     }
-    if (o.status !== 'aktif' && o.status !== 'selesai') return null;
-    const wadah = el('div', { class: 'row' });
-    const buat = el('button', { type: 'button', class: 'sec kecil' }, 'Buat link ulasan');
+    if (o.status !== 'aktif' && o.status !== 'selesai') return tag.length ? el('div', { class: 'row' }, tag) : null;
+    const wadah = el('div', { class: 'row' }, tag);
+    if (g && o.reviews?.length) return wadah;
+    const buat = el('button', { type: 'button', class: 'sec kecil' }, g ? 'Buat link ulasan' : 'Buat link garansi & ulasan');
     buat.addEventListener('click', async () => {
       buat.disabled = true;
       try {
         const h = await q(supabase.rpc('buat_link_ulasan', { p_kode: o.code }));
-        const url = `${location.origin}/ulasan/?t=${h.token}`;
-        const teks = o.lang === 'en'
-          ? `Hi ${o.customer_name}, thank you for subscribing at IXVII.CO 🙏 Could you leave a short review? This link is only for your order ${o.code} and works once:\n${url}`
-          : `Halo ${o.customer_name}, terima kasih sudah berlangganan di IXVII.CO 🙏 Boleh minta ulasan singkatnya? Link ini khusus pesanan ${o.code} dan hanya bisa dipakai sekali:\n${url}`;
-        const salin = el('button', { type: 'button', class: 'sec kecil' }, 'Salin link');
-        salin.addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText(url); toast('Link ulasan disalin'); } catch { prompt('Salin link ini:', url); }
-        });
-        wadah.replaceChildren(el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, teks), target: '_blank', rel: 'noopener' }, 'Kirim link ulasan lewat WhatsApp'), salin);
+        const url = `${location.origin}/${g ? 'ulasan' : 'garansi'}/?t=${h.token}`;
+        const teks = g
+          ? (o.lang === 'en'
+            ? `Hi ${o.customer_name}, thank you for subscribing at IXVII.CO 🙏 Could you leave a short review? This link is only for your order ${o.code} and works once:\n${url}`
+            : `Halo ${o.customer_name}, terima kasih sudah berlangganan di IXVII.CO 🙏 Boleh minta ulasan singkatnya? Link ini khusus pesanan ${o.code} dan hanya bisa dipakai sekali:\n${url}`)
+          : pesanGaransiLink(o, url);
+        wadah.replaceChildren(...tag,
+          el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, teks), target: '_blank', rel: 'noopener' }, g ? 'Kirim link ulasan lewat WhatsApp' : 'Kirim link garansi lewat WhatsApp'),
+          el('button', { type: 'button', class: 'sec kecil', onclick: () => salinTeks(url, 'Link disalin') }, 'Salin link'));
       } catch (err) { toast('Gagal: ' + err.message, true); buat.disabled = false; }
     });
     wadah.append(buat);
+    if (!g) wadah.append(el('button', { type: 'button', class: 'sec kecil', title: 'Format balasan teks seperti biasa; balasan pembeli bisa ditempel di menu Garansi',
+      onclick: () => salinTeks(pesanGaransiManual(o), 'Template garansi disalin') }, 'Salin template manual'));
     return wadah;
   };
 
@@ -92,9 +123,9 @@ export async function halamanPesanan(supabase, halaman) {
 
     const en = o.lang === 'en';
     const sapa = en ? `Hi ${o.customer_name}, this is IXVII.CO about your order ${o.code}.` : `Halo ${o.customer_name}, ini admin IXVII.CO soal pesanan ${o.code}.`;
-    const sisa = sisaHari(o.ends_on);
+    const sisa = sisaHari(akhirAwal(o));
     const masa = o.starts_on
-      ? el('span', {}, `Masa aktif ${tanggal(o.starts_on)} – ${tanggal(o.ends_on)}`,
+      ? el('span', {}, `Masa aktif ${tanggal(o.starts_on)} – ${o.ends_earliest && o.ends_earliest !== o.ends_on ? `${tanggal(o.ends_earliest)} s/d ` : ''}${tanggal(o.ends_on)}`,
         o.status === 'aktif' && sisa != null ? el('span', { class: 'tag ' + (sisa <= 3 ? 'merah' : '') }, sisa < 0 ? `lewat ${-sisa} hari` : `sisa ${sisa} hari`) : null)
       : null;
 
@@ -123,7 +154,7 @@ export async function halamanPesanan(supabase, halaman) {
     const cocok = pesanan.filter((o) => s.cocok(o) &&
       (!kata || `${o.code} ${o.customer_name} ${o.customer_wa}`.toLowerCase().includes(kata)));
     // pesanan aktif diurutkan dari yang paling cepat berakhir
-    if (saringan === 'aktif') cocok.sort((a, b) => (a.ends_on || '9').localeCompare(b.ends_on || '9'));
+    if (saringan === 'aktif') cocok.sort((a, b) => (akhirAwal(a) || '9').localeCompare(akhirAwal(b) || '9'));
     tab.replaceChildren(...SARING.map((x) => el('button', {
       type: 'button', class: 'kecil ' + (x.kunci === saringan ? '' : 'sec'), 'aria-pressed': String(x.kunci === saringan),
       onclick: () => { saringan = x.kunci; gambarDaftar(); },

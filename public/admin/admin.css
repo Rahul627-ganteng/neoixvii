@@ -96,3 +96,8 @@ label.row input[type=number] { width: 90px; }
 .poster-pratinjau { border: 1px dashed var(--line); border-radius: 10px; min-height: 60px; display: grid; place-items: center; overflow: hidden; background: #fafafa; max-width: 320px; }
 .poster-pratinjau img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
 .tab { flex: 1 1 auto; }
+/* Garansi */
+.template-garansi { white-space: pre-wrap; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: #f7f7f8; border: 1px solid var(--line, #e3e3e6); border-radius: 8px; padding: 12px; margin: 10px 0 0; max-height: 320px; overflow: auto; }
+.garansi-admin .grid2 { margin-top: 8px; }
+.garansi-admin textarea { min-height: 160px; }
+.ss-admin { max-width: 220px; max-height: 220px; border-radius: 8px; border: 1px solid var(--line, #e3e3e6); display: block; margin-top: 6px; }

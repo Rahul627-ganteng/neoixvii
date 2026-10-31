@@ -1,7 +1,7 @@
 // Formulir ulasan dari link sekali pakai (/ulasan/?t=TOKEN). Tanpa token yang sah, formulir tidak tampil.
 import { infoUlasan, kirimUlasan } from './api.js';
 import { t, tanggal, teksGalat } from './i18n.js';
-import { el, pasangKerangka } from './ui.js';
+import { el, pasangKerangka, pilihBintang } from './ui.js';
 
 pasangKerangka('');
 
@@ -13,19 +13,6 @@ function tidakValid() {
   isi.replaceChildren(el('div', { class: 'kosong kaca' },
     el('p', {}, t('ulasan.tidakValid')),
     el('a', { class: 'tombol garis', href: '/testimoni/' }, t('ulasan.keTestimoni'))));
-}
-
-/** Pilihan 1–5 bintang yang bisa dipakai dengan keyboard (radio). */
-function pilihBintang(nama, label) {
-  const grup = el('div', { class: 'bintang-input', role: 'radiogroup', 'aria-label': label });
-  const gambar = (n) => grup.querySelectorAll('label').forEach((l, i) => l.classList.toggle('aktif', i < n));
-  for (let n = 1; n <= 5; n++) {
-    const input = el('input', { type: 'radio', name: nama, value: n, class: 'tersembunyi', onchange: () => gambar(n) });
-    grup.append(el('label', { title: t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }) }, input,
-      el('span', { 'aria-hidden': 'true' }, '★'), el('span', { class: 'tersembunyi' }, t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }))));
-  }
-  grup.nilai = () => Number(grup.querySelector('input:checked')?.value || 0);
-  return grup;
 }
 
 function formulir(data) {
