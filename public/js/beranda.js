@@ -1,4 +1,4 @@
-import { ambilFaqUmum, ambilKatalog, ambilPromo, ambilToko } from './api.js';
+import { ambilFaqUmum, ambilKatalog, ambilPromo, ambilToko, diskonTertinggi } from './api.js';
 import { inggris, pasangKurs, persen, t } from './i18n.js';
 import { daftarFaq, el, kartuApp, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori } from './ui.js';
 
@@ -53,7 +53,7 @@ async function muatPromo() {
   const promo = await ambilPromo();
   if (!promo) return;
   const jumlah = (promo.promos?.length ?? 0) + (promo.bundles?.length ?? 0);
-  const atas = promo.rules?.at(-1);
+  const atas = diskonTertinggi(promo);
   const kartu = [];
   if (jumlah) {
     kartu.push(el('div', { class: 'ajakan kaca' },
