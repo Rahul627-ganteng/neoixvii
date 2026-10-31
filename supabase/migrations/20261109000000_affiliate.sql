@@ -84,6 +84,8 @@ language sql stable set search_path = '' as $$
   select coalesce((select commission_pct from public.partners where id = p_partner),
                   (select rate_pct from public.affiliate_settings where id = 1), 0)
 $$;
+revoke execute on function public._rate_affiliate(bigint) from public, anon;
+grant execute on function public._rate_affiliate(bigint) to authenticated;
 
 -- Catat beberapa penjualan sekaligus (hasil tempel teks). Komisi dihitung ulang di sini.
 -- p_rows: [{app, tipe?, varian?, kode?, kategori?, harga, hpp?}]
