@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0e0e10">
+<script>
+/* Pasang bahasa & tema sebelum halaman tampil supaya tidak berkedip. */
+(function () {
+  var d = document.documentElement, b = null, t = null, q = null;
+  try { q = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  try {
+    if (q === 'en' || q === 'id') localStorage.setItem('ixvii-bahasa', q);
+    b = localStorage.getItem('ixvii-bahasa'); t = localStorage.getItem('ixvii-tema');
+  } catch (e) {}
+  if (q === 'en' || q === 'id') b = q;
+  if (b === 'en') { d.lang = 'en'; d.classList.add('terjemah'); setTimeout(function () { d.classList.remove('terjemah'); }, 2000); }
+  if (t === 'terang') { d.setAttribute('data-tema', 'terang'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f6f4f4'); }
+})();
+</script>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site.css">
+<title data-t="judul.saldo">Saldo komisi — IXVII.CO</title>
+<script type="module" src="/js/saldo.js"></script>
+</head>
+<body>
+<header id="kepala" class="kepala"><div class="wadah"><a class="merek" href="/"><span>IXVII.CO</span></a></div></header>
+<main class="wadah" style="max-width:760px">
+  <section class="seksi">
+    <h1 class="judul-halaman" data-t="saldo.judul">Saldo komisi</h1>
+  </section>
+  <div id="isi" aria-live="polite"></div>
+</main>
+<footer id="kaki" class="kaki"></footer>
+<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog. / Please enable JavaScript to see the catalog.</p></noscript>
+</body>
+</html>

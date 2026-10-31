@@ -355,3 +355,81 @@ html.terjemah [data-t] { visibility: hidden; }
 .mitra-kartu .kode { font-family: var(--font-judul); letter-spacing: .08em; }
 .mitra-kartu .kontak { display: flex; gap: 8px; flex-wrap: wrap; }
 .tombol.kecil { min-height: 36px; padding: 0 14px; font-size: 14px; }
+
+/* ---------------------------------------------------------------- Tahap 10: info film */
+@media (max-width: 420px) { .nav .nav-film { display: none; } }
+.film-daftar { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.film-kartu { border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.film-kartu .sampul-wadah { position: relative; }
+.film-kartu .label-atas { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.film-kartu .label-atas .lencana { background: rgba(14, 14, 16, .72); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.film-kartu .label-atas .lencana.akan { background: var(--maroon); }
+.film-kartu .isi { padding: 14px 16px 16px; display: grid; gap: 8px; flex: 1; align-content: start; }
+.film-kartu h3 { margin: 0; font-size: 16px; text-transform: none; letter-spacing: .01em; }
+.film-kartu .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--teks-3); }
+.film-kartu .meta span:empty { display: none; }
+.film-kartu .sinopsis { margin: 0; font-size: 14px; color: var(--teks-2); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.film-kartu .sinopsis.buka { display: block; }
+.film-kartu .baca { justify-self: start; background: none; border: 0; padding: 0; color: var(--maroon-terang); font: 600 13px var(--font-isi); cursor: pointer; }
+.film-kartu .aksi { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.film-kartu .aksi .tombol { min-height: 40px; padding: 0 14px; font-size: 14px; flex-direction: column; gap: 0; line-height: 1.15; }
+.film-kartu .aksi .tombol small { font-size: 11px; font-weight: 500; opacity: .85; }
+.sampul { aspect-ratio: 2 / 3; width: 100%; overflow: hidden; background: var(--sorot); }
+.sampul img { width: 100%; height: 100%; object-fit: cover; }
+.film-kartu .sampul { aspect-ratio: 16 / 10; }
+.sampul.bawaan { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 16px;
+  background: radial-gradient(120% 90% at 0% 0%, #b3161d 0%, #5c0102 45%, #120708 100%); color: #fff; }
+.sampul.bawaan::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 0 55%, rgba(255,255,255,.07) 55% 63%, transparent 63%); }
+.sampul.bawaan .platform { position: relative; font: 700 11px var(--font-judul); letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
+.sampul.bawaan b { position: relative; font: 700 clamp(18px, 4.5vw, 24px)/1.1 var(--font-judul); text-transform: uppercase; letter-spacing: .03em; }
+.sampul.bawaan .emblem { position: absolute; right: 14px; bottom: 14px; width: 34px; height: auto; opacity: .7; }
+.film-baris { display: flex; gap: 12px; align-items: center; text-decoration: none; padding: 8px; border-radius: 12px; }
+.film-baris:hover { background: var(--sorot); }
+.film-baris .sampul.kecil { width: 52px; flex: none; border-radius: 8px; }
+.film-baris .sampul.kecil.bawaan { padding: 6px; }
+.film-baris .sampul.kecil.bawaan b { font-size: 8px; }
+.film-baris .sampul.kecil.bawaan .platform, .film-baris .sampul.kecil.bawaan .emblem { display: none; }
+.film-baris span { display: grid; gap: 2px; font-size: 14px; }
+.film-baris small { color: var(--teks-3); font-size: 12.5px; }
+.film-daftar-kecil { display: grid; gap: 2px; }
+
+/* ---------------------------------------------------------------- aktivasi garansi */
+.garansi-info { border-radius: 16px; padding: 14px 16px; display: grid; gap: 6px; }
+.garansi-info ul { margin: 0; padding-left: 18px; font-size: 14.5px; }
+.garansi-info .batas { margin-top: 4px; padding: 8px 12px; border-radius: 10px; background: var(--hijau-latar); color: var(--hijau-teks); font-size: 13.5px; font-weight: 600; }
+.garansi-info .batas.lewat { background: var(--merah-latar); color: var(--merah-teks); }
+.isian-g { display: grid; gap: 6px; font-size: 14px; color: var(--teks-2); }
+.isian-g input[type=text], .isian-g input[type=tel] { height: 46px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--garis); background: var(--isian); color: var(--teks); font: 15px var(--font-isi); }
+.isian-g .tombol { justify-self: start; }
+.ss-pratinjau { max-width: 220px; max-height: 320px; border-radius: 12px; border: 1px solid var(--garis); object-fit: contain; }
+.judul-kecil-g { font-size: 15px; margin: 8px 0 0; }
+.garansi-sukses p { margin: 0 0 12px; }
+/* stok & rating di halaman aplikasi */
+.info-app { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 6px; font-size: 13.5px; color: var(--teks-2); }
+.rating-app { color: inherit; text-decoration: none; font-weight: 600; }
+.rating-app:hover { text-decoration: underline; }
+.bintang-kuning, .rating-kecil > span { color: #f2b01e; }
+.rating-kecil { white-space: nowrap; }
+.stok-dicek { display: inline-flex; align-items: center; gap: 6px; }
+.titik-hijau { width: 8px; height: 8px; border-radius: 50%; background: #2fb36b; box-shadow: 0 0 0 3px rgba(47,179,107,.18); flex: none; }
+.lencana.sedikit { background: var(--kuning-latar); color: var(--kuning-teks); }
+/* saldo komisi affiliate */
+.saldo-kepala { margin-bottom: 14px; }
+.saldo-halo { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+.row-lencana { display: flex; flex-wrap: wrap; gap: 6px; }
+.saldo-utama { padding: 22px; border-radius: 22px; display: grid; gap: 8px; }
+.saldo-utama p { margin: 0; }
+.saldo-besar { font-size: clamp(34px, 9vw, 48px); letter-spacing: -.02em; line-height: 1.1; }
+.saldo-bar { height: 8px; border-radius: 999px; background: var(--lencana); overflow: hidden; }
+.saldo-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--maroon, #800203), #c0262d); }
+.saldo-utama .tombol { justify-self: start; margin-top: 6px; }
+.saldo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+.saldo-angka { padding: 14px; border-radius: 16px; display: grid; gap: 2px; }
+.saldo-angka span { font-size: 12.5px; color: var(--teks-2); }
+.saldo-angka b { font-size: 18px; }
+.saldo-daftar { list-style: none; margin: 0; padding: 0; }
+.saldo-daftar li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--garis); }
+.saldo-daftar li:last-child { border-bottom: 0; }
+.saldo-daftar .redup { font-size: 13px; }
+.saldo-daftar .plus { color: var(--hijau-teks); white-space: nowrap; }
+.saldo-catatan { font-size: 13px; margin-top: 12px; }

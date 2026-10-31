@@ -27,7 +27,15 @@ async function ambilSimpan(kunci, path) {
 
 /** Katalog lengkap dari rpc katalog_json. */
 export async function ambilKatalog() {
-  return olah(await ambilSimpan('ixvii-katalog-v3', 'rpc/katalog_json'));
+  // cache v4: ada sisa stok & waktu cek stok. Rating ulasan ikut ditempel ke tiap aplikasi.
+  const [data, ulasan] = await Promise.all([ambilSimpan('ixvii-katalog-v4', 'rpc/katalog_json'), ambilUlasan()]);
+  const hasil = olah(data);
+  const rating = new Map((ulasan?.ringkasan ?? []).map((r) => [r.slug, r]));
+  for (const a of hasil.apps) {
+    const r = rating.get(a.slug);
+    if (r) a.rating = { rata: Number(r.rata), jumlah: r.jumlah };
+  }
+  return hasil;
 }
 
 /** Pengaturan toko yang boleh publik: nomor WhatsApp, cara bayar, kurs USD, buka/tutup pesanan. */
@@ -92,6 +100,12 @@ export async function ambilPromo() {
   catch { return null; }
 }
 
+/** Info film & serial (sedang/akan tayang). Null kalau Tahap 10 belum dijalankan. */
+export async function ambilFilm() {
+  try { return await ambilSimpan('ixvii-film-v1', 'rpc/film_json'); }
+  catch { return null; }
+}
+
 /** Profil owner untuk halaman Tentang. Null kalau Tahap 9 belum dijalankan. */
 export async function ambilProfil() {
   try { return (await ambilSimpan('ixvii-profil-v1', 'owner_profile?select=*&id=eq.1'))[0] ?? null; }
@@ -108,6 +122,28 @@ export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
   catch { return null; }
 }
+/** Saldo komisi affiliate dari link pribadinya (tanpa HPP & nama pembeli). Null kalau link salah. */
+export const ambilSaldoAffiliate = (token) => rpc('saldo_affiliate', { p_token: token });
+/** Data form aktivasi garansi dari link sekali pakai. */
+export const infoGaransi = (token) => rpc('info_garansi', { p_token: token });
+/** Unggah screenshot bukti login ke bucket privat "garansi" (hanya bisa dengan link yang sah). */
+export async function unggahScreenshot(token, blob) {
+  const path = `${token}/login-${Date.now()}.jpg`;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/garansi/${path}`, {
+    method: 'POST',
+    headers: { ...HEADER, 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'false' },
+    body: blob,
+  });
+  if (!res.ok) {
+    const d = await res.json().catch(() => null);
+    throw new Error(d?.message || d?.error || `Gagal mengunggah screenshot (${res.status})`);
+  }
+  return path;
+}
+/** Kirim aktivasi garansi (+ rating & ulasan opsional). */
+export const kirimGaransi = ({ token, nama, hp, device, screenshot, ulasan, anonim }) =>
+  rpc('kirim_garansi', { p_token: token, p_nama: nama, p_hp: hp, p_device: device, p_screenshot: screenshot, p_ulasan: ulasan?.length ? ulasan : null, p_anonim: !!anonim });
+
 /** Data formulir ulasan dari link sekali pakai. */
 export const infoUlasan = (token) => rpc('info_ulasan', { p_token: token });
 /** Kirim ulasan: ulasan = [{ app, rating, isi }]. */
@@ -149,6 +185,8 @@ function olah(data) {
         hargaMulai: tersedia.length ? Math.min(...tersedia.map((v) => v.p)) : null,
         habisSemua: tersedia.length === 0,
         tipe: a.groups.map((g) => g.label),
+        stokAt: a.stok_at ?? null,
+        cekStok: data?.cek_stok ?? null,
       });
     }
   }

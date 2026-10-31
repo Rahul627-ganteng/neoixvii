@@ -1,5 +1,5 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
-import { bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, temaTerang } from './i18n.js';
+import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
 export function el(tag, attrs = {}, ...anak) {
@@ -48,6 +48,7 @@ const HALAMAN = [
   { href: '/katalog/', kunci: 'nav.katalog' },
   { href: '/promo/', kunci: 'nav.promo' },
   { href: '/rakit/', kunci: 'nav.rakit' },
+  { href: '/film/', kunci: 'nav.film', kelas: 'nav-film' },       // di HP sangat kecil disembunyikan (ada di footer)
 ];
 
 /** Ganti teks statis di HTML sesuai bahasa: data-t (isi), data-t-placeholder, data-t-aria, data-t-content. */
@@ -90,6 +91,7 @@ export function pasangKerangka(aktif, vars) {
       el('span', {}, t('kaki.hak', { tahun: new Date().getFullYear() })),
       el('span', {}, t('kaki.info')),
       el('nav', { class: 'kaki-nav', 'aria-label': 'Footer' },
+        el('a', { href: '/film/' }, t('kaki.film')),
         el('a', { href: '/tentang/' }, t('kaki.tentang')),
         el('a', { href: '/mitra/' }, t('kaki.mitra')),
         el('a', { href: '/testimoni/' }, t('kaki.ulasan'))),
@@ -134,7 +136,9 @@ export function kartuApp(app) {
   const tipe = [...new Set(app.tipe)].slice(0, 3);
   return el('a', { class: 'kartu-app kaca kartu-3d', href: urlApp(app.slug) },
     el('div', { class: 'atas' }, ikonApp(app),
-      el('div', {}, el('h3', {}, app.nama), el('div', { class: 'kat' }, app.kategori))),
+      el('div', {}, el('h3', {}, app.nama), el('div', { class: 'kat' }, app.kategori,
+        app.rating ? el('span', { class: 'rating-kecil', title: t('testi.bintang', { n: angkaRating(app.rating.rata) }) },
+          ' · ', el('span', { 'aria-hidden': 'true' }, '★ '), `${angkaRating(app.rating.rata)} (${app.rating.jumlah})`) : null))),
     el('p', {}, app.desc),
     el('div', { class: 'tipe' }, tipe.map((x) => el('span', { class: 'lencana' }, labelTipe(x)))),
     el('div', { class: 'bawah' },
@@ -171,6 +175,42 @@ export function kartuUlasan(u, { denganApp = true } = {}) {
       el('b', {}, u.nama),
       denganApp ? [' · ', u.slug ? el('a', { href: urlApp(u.slug) }, u.app) : u.app] : null,
       el('span', { class: 'redup' }, ' · ', t('testi.dibeli', { bulan: bulanTahun(u.dibeli) }))));
+}
+
+/** Selisih hari dari hari ini (WIB) ke tanggal "YYYY-MM-DD". */
+export function selisihHari(ymd) {
+  const hariIni = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
+  return Math.round((Date.parse(ymd + 'T00:00:00Z') - Date.parse(hariIni + 'T00:00:00Z')) / 86400000);
+}
+
+/** Label waktu tayang: "3 hari lagi", "Tayang hari ini", "Tayang sejak 12 Oktober 2026". */
+export function waktuTayang(f) {
+  const n = selisihHari(f.rilis);
+  if (f.status === 'akan') return n === 1 ? t('film.besok') : t('film.hariLagi', { n, s: n === 1 ? '' : 's' });
+  if (n === 0) return t('film.hariIni');
+  return t('film.sejak', { tgl: tanggal(f.rilis + 'T00:00:00') });
+}
+
+/** Sampul film: poster kalau ada, kalau tidak sampul bergaya IXVII.CO berisi judul. */
+export function sampulFilm(f, kelas = '') {
+  if (f.poster) return el('div', { class: 'sampul ' + kelas }, el('img', { src: f.poster, alt: '', loading: 'lazy' }));
+  return el('div', { class: 'sampul bawaan ' + kelas, 'aria-hidden': 'true' },
+    el('span', { class: 'platform' }, f.app || 'IXVII.CO'),
+    el('b', {}, f.judul),
+    el('img', { class: 'emblem', src: '/assets/brand/emblem-putih.png', alt: '', width: 274, height: 183 }));
+}
+
+/** Pilihan 1–5 bintang yang bisa dipakai dengan keyboard (radio). */
+export function pilihBintang(nama, label) {
+  const grup = el('div', { class: 'bintang-input', role: 'radiogroup', 'aria-label': label });
+  const gambar = (n) => grup.querySelectorAll('label').forEach((l, i) => l.classList.toggle('aktif', i < n));
+  for (let n = 1; n <= 5; n++) {
+    const input = el('input', { type: 'radio', name: nama, value: n, class: 'tersembunyi', onchange: () => gambar(n) });
+    grup.append(el('label', { title: t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }) }, input,
+      el('span', { 'aria-hidden': 'true' }, '★'), el('span', { class: 'tersembunyi' }, t('ulasan.bintang', { n, s: n === 1 ? '' : 's' }))));
+  }
+  grup.nilai = () => Number(grup.querySelector('input:checked')?.value || 0);
+  return grup;
 }
 
 /** Daftar tanya-jawab (details/summary). */

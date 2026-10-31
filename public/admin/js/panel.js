@@ -10,6 +10,10 @@ import { halamanToko } from './toko.js';
 import { halamanPromo } from './promo.js';
 import { halamanUlasan } from './ulasan.js';
 import { halamanMitra } from './mitra.js';
+import { halamanFilm } from './film.js';
+import { halamanGaransi } from './garansi.js';
+import { halamanStok } from './stok.js';
+import { halamanAffiliate } from './affiliate.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -56,17 +60,22 @@ supabase.auth.onAuthStateChange((_e, session) => setTimeout(() => mulai(session)
 
 // ---------------------------------------------------------------- router
 const RUTE = {
-  ringkasan, stok, aplikasi, margin, riwayat,
+  ringkasan, aplikasi, margin, riwayat,
+  stok: () => halamanStok(supabase, halaman),
   pesanan: () => halamanPesanan(supabase, halaman),
   toko: () => halamanToko(supabase, halaman),
   promo: () => halamanPromo(supabase, halaman),
   ulasan: () => halamanUlasan(supabase, halaman),
   mitra: () => halamanMitra(supabase, halaman),
+  film: () => halamanFilm(supabase, halaman),
+  garansi: () => halamanGaransi(supabase, halaman),
+  affiliate: () => halamanAffiliate(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;
   const nama = RUTE[location.hash.slice(1)] ? location.hash.slice(1) : 'ringkasan';
   for (const a of document.querySelectorAll('nav.menu a')) a.setAttribute('aria-current', a.getAttribute('href') === '#' + nama ? 'page' : 'false');
+  document.querySelector('nav.menu a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
   halaman.replaceChildren(memuat());
   try { await RUTE[nama](); }
   catch (err) { halaman.replaceChildren(el('div', { class: 'msg err' }, 'Gagal memuat: ' + err.message)); }
@@ -119,49 +128,6 @@ async function ringkasan() {
         masalah.map(({ r, teks, kelas }) => el('tr', {}, td(r.code), td(r.aplikasi), td(`${r.tipe} · ${r.varian}`),
           td(rp(r.harga), true), td(rp(r.hpp), true), td(persen(r.margin_pct), true), td(el('span', { class: 'tag ' + kelas }, teks)))))
         : el('p', { class: 'muted' }, 'Tidak ada. Semua varian punya HPP dan marginnya aman.')));
-}
-
-// ---------------------------------------------------------------- 2. stok
-async function stok() {
-  const rows = await q(urutKatalog(supabase.from('v_katalog_admin').select('code,aplikasi,tipe,varian,harga,stok,tampil')));
-  const cari = el('input', { type: 'search', placeholder: 'Cari aplikasi atau varian…', 'aria-label': 'Cari' });
-  const saring = el('select', { 'aria-label': 'Saring stok' },
-    el('option', { value: 'semua' }, 'Semua'), el('option', { value: 'tersedia' }, 'Tersedia'), el('option', { value: 'habis' }, 'Habis'));
-  const daftar = el('div');
-
-  const saklar = (r) => {
-    const b = el('button', { type: 'button', class: 'kecil saklar' });
-    const gambar = () => { b.className = 'kecil saklar ' + (r.stok === 'habis' ? 'habis' : 'ada'); b.textContent = r.stok === 'habis' ? 'Habis' : 'Tersedia'; };
-    gambar();
-    b.addEventListener('click', async () => {
-      const baru = r.stok === 'habis' ? 'tersedia' : 'habis';
-      b.disabled = true;
-      try { await q(supabase.rpc('ubah_stok', { p_code: r.code, p_stok: baru })); r.stok = baru; gambar(); toast(`${r.aplikasi} ${r.varian}: ${baru === 'habis' ? 'Habis' : 'Tersedia'}`); }
-      catch (err) { toast('Gagal: ' + err.message, true); }
-      finally { b.disabled = false; }
-    });
-    return b;
-  };
-
-  const gambarDaftar = () => {
-    const kata = cari.value.trim().toLowerCase();
-    const cocok = rows.filter((r) => (saring.value === 'semua' || r.stok === saring.value) &&
-      (!kata || `${r.aplikasi} ${r.tipe} ${r.varian}`.toLowerCase().includes(kata)));
-    const perApp = new Map();
-    for (const r of cocok) { if (!perApp.has(r.aplikasi)) perApp.set(r.aplikasi, []); perApp.get(r.aplikasi).push(r); }
-    daftar.replaceChildren(...(cocok.length ? [...perApp].map(([app, isi]) => el('div', { class: 'app-grup' },
-      el('h3', {}, app),
-      tabel(['ID', 'Tipe · Varian', '>Harga', 'Stok'], isi.map((r) => el('tr', {},
-        td(r.code), td(`${r.tipe} · ${r.varian}`, false), td(rp(r.harga), true),
-        td(el('div', { class: 'row' }, saklar(r), r.tampil ? null : el('span', { class: 'tag' }, 'disembunyikan')))))))) : [el('p', { class: 'muted' }, 'Tidak ada yang cocok.')]));
-  };
-  cari.addEventListener('input', gambarDaftar);
-  saring.addEventListener('change', gambarDaftar);
-  gambarDaftar();
-  halaman.replaceChildren(el('section', { class: 'card' },
-    el('h2', {}, 'Stok cepat'),
-    el('p', { class: 'sub' }, 'Klik tombol untuk mengganti Tersedia ↔ Habis. Langsung berlaku di website dan tercatat di Riwayat.'),
-    el('div', { class: 'grid2' }, cari, saring), daftar));
 }
 
 // ---------------------------------------------------------------- 3. aplikasi
@@ -361,7 +327,7 @@ async function margin() {
 }
 
 // ---------------------------------------------------------------- 5. riwayat
-const NAMA_FIELD = { dibuat: 'Dibuat', harga: 'Harga', hpp: 'HPP', stok: 'Stok', tampil: 'Tampil', label: 'Nama varian' };
+const NAMA_FIELD = { dibuat: 'Dibuat', harga: 'Harga', hpp: 'HPP', stok: 'Stok', tampil: 'Tampil', label: 'Nama varian', jumlah: 'Sisa stok', durasi: 'Durasi (hari)', tipe: 'Tipe akun' };
 const nilaiField = (f, v) => (v == null ? '–' : (f === 'harga' || f === 'hpp' || f === 'dibuat') && /^\d+$/.test(v) ? rp(v)
   : f === 'tampil' ? (v === 'true' ? 'Ya' : 'Tidak') : f === 'stok' ? (v === 'habis' ? 'Habis' : 'Tersedia') : v);
 const barisRiwayat = (h) => el('tr', {}, td(waktu(h.changed_at)), td(h.variants ? `${h.variants.code} · ${h.variants.label}` : '–'),
@@ -404,7 +370,7 @@ async function riwayat() {
     el('section', { class: 'card' }, el('h2', {}, 'Riwayat impor Excel'),
       el('p', { class: 'sub' }, 'Setiap unggahan bisa dibatalkan. Nilai yang sudah diubah lagi oleh unggahan berikutnya tidak ditimpa.'),
       batches.length ? batches.map(kartuBatch) : el('p', { class: 'muted' }, 'Belum ada unggahan.')),
-    el('section', { class: 'card' }, el('h2', {}, 'Perubahan stok manual'),
-      el('p', { class: 'sub' }, '50 perubahan terakhir dari menu Stok.'),
+    el('section', { class: 'card' }, el('h2', {}, 'Perubahan dari panel'),
+      el('p', { class: 'sub' }, '50 perubahan terakhir dari menu Stok & harga (harga, sisa stok, varian).'),
       manual.length ? tabel(['Waktu', 'Varian', 'Kolom', 'Lama → baru'], manual.map(barisRiwayat)) : el('p', { class: 'muted' }, 'Belum ada.')));
 }

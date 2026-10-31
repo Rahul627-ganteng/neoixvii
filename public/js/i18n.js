@@ -44,7 +44,8 @@ const KAMUS = {
     'gagal.katalog': 'Katalog belum bisa dimuat. Periksa koneksi internet lalu coba lagi.', 'gagal.ulang': 'Coba lagi',
     'gagal.app': 'Data aplikasi belum bisa dimuat. Periksa koneksi internet lalu coba lagi.',
     'app.tidakAda': 'Aplikasi tidak ditemukan', 'app.tidakAdaSub': 'Mungkin namanya berubah atau sedang tidak dijual.', 'app.kembali': 'Kembali ke katalog',
-    'app.tersedia': 'Tersedia', 'app.habis': 'Habis', 'app.pilihanmu': 'Pilihanmu', 'app.belumPilih': 'Belum ada paket dipilih.',
+    'app.tersedia': 'Tersedia', 'app.habis': 'Habis', 'app.sisa': 'Sisa {n}', 'app.stokDicek': 'Stok dicek otomatis {waktu}', 'app.stokDiubah': 'Stok diperbarui {waktu}',
+    'app.ratingSingkat': '{rata} · {n} ulasan', 'app.pilihanmu': 'Pilihanmu', 'app.belumPilih': 'Belum ada paket dipilih.',
     'app.pesan': 'Pesan sekarang', 'app.tutup': 'Pemesanan belum dibuka. Tanyakan dulu lewat WhatsApp kami.',
     'app.lainnya': '{kat} lainnya', 'app.lihatSemua': 'Lihat semua →',
     'app.tentangTipe': 'Tentang tipe paket', 'app.kelebihan': 'Kelebihan', 'app.kekurangan': 'Kekurangan',
@@ -135,6 +136,43 @@ const KAMUS = {
     'mitra.kosong': 'Daftar mitra resmi sedang disiapkan.', 'mitra.tidakAda': 'Tidak ada mitra yang cocok.', 'mitra.jumlah': '{n} mitra',
     'mitra.gabungJ': 'Ingin jadi mitra?', 'mitra.gabungT': 'Jadi reseller atau affiliator IXVII.CO dan dapatkan bimbingan langsung dari admin.',
     'mitra.gabungTombol': 'Daftar lewat WhatsApp', 'mitra.gabungWa': 'Halo IXVII.CO, saya tertarik jadi reseller/affiliator.',
+    'nav.film': 'Film', 'kaki.film': 'Info film',
+    'judul.film': 'Info film & serial — IXVII.CO',
+    'meta.film': 'Film dan serial baru di Netflix, Disney+, Viu, dan platform lain. Langganan sekalian di IXVII.CO.',
+    'film.judul': 'Info film & serial', 'film.sub': 'Judul baru di platform yang kami jual, dirangkum oleh tim IXVII.CO.',
+    'film.sedang': 'Sedang tayang', 'film.akan': 'Akan tayang', 'film.semuaPlatform': 'Semua platform',
+    'film.film': 'Film', 'film.serial': 'Serial', 'film.tayang': 'Tayang {tgl}', 'film.sejak': 'Tayang sejak {tgl}', 'film.sampai': 'sampai {tgl}',
+    'film.hariIni': 'Tayang hari ini', 'film.hariLagi': '{n} hari lagi', 'film.besok': 'Besok',
+    'film.langganan': 'Langganan {app}', 'film.mulai': 'mulai {harga}', 'film.trailer': 'Trailer ↗',
+    'film.kosong': 'Belum ada info film di sini.', 'film.seksi': 'Baru tayang', 'film.lihat': 'Lihat semua →',
+    'film.diApp': 'Tayang di {app}', 'film.baca': 'Baca selengkapnya', 'film.tutup': 'Tutup',
+    'judul.garansi': 'Aktivasi garansi — IXVII.CO',
+    'judul.saldo': 'Saldo komisi — IXVII.CO', 'saldo.judul': 'Saldo komisi', 'saldo.halo': 'Halo {nama}!',
+    'saldo.kode': 'Kode kamu: {kode}', 'saldo.persen': 'Komisi {pct}% dari untung tiap penjualan',
+    'saldo.bisa': 'Saldo bisa ditarik', 'saldo.saldo': 'Saldo komisi', 'saldo.kurang': 'Kurang {rp} lagi untuk bisa ditarik (minimum {min}).',
+    'saldo.cukup': 'Sudah lewat minimum penarikan {min}.', 'saldo.bayar': 'Pembayaran berikutnya {tgl}', 'saldo.hariIni': 'hari ini',
+    'saldo.lagi': '{n} hari lagi', 'saldo.total': 'Komisi total', 'saldo.bulanIni': 'Bulan ini', 'saldo.dibayar': 'Sudah dibayar',
+    'saldo.diproses': 'Sedang diproses', 'saldo.penjualan': 'Penjualan', 'saldo.tarik': 'Tarik saldo lewat WhatsApp',
+    'saldo.tanya': 'Tanya admin', 'saldo.waTarik': 'Halo admin IXVII.CO, aku {nama} ({kode}) mau tarik saldo komisi {rp}.',
+    'saldo.waTanya': 'Halo admin IXVII.CO, aku {nama} ({kode}) mau tanya soal komisi affiliate.',
+    'saldo.riwayat': 'Riwayat komisi', 'saldo.riwayatTarik': 'Riwayat penarikan', 'saldo.kosong': 'Belum ada penjualan tercatat. Bagikan kode kamu ke calon pembeli, ya!',
+    'saldo.st.dibayar': 'Dibayar {tgl}', 'saldo.st.dijadwalkan': 'Dijadwalkan {tgl}', 'saldo.pribadi': 'Halaman ini khusus untukmu. Jangan bagikan link-nya ke orang lain.',
+    'saldo.tidakValid': 'Link saldo tidak valid. Minta link terbaru ke admin lewat WhatsApp.', 'saldo.chat': 'Chat admin',
+    'saldo.cara': 'Komisi dihitung dari untung setiap penjualan dan tercatat setelah pembeli terkonfirmasi. Saldo dibayar tiap tanggal {tgl} setelah kamu minta tarik.',
+    'garansi.judul': 'Aktivasi garansi', 'garansi.halo': 'Halo {nama}! Isi form ini setelah berhasil login, supaya masa garansi resmi berjalan dan nomormu masuk daftar pengingat sebelum akun berakhir.',
+    'garansi.pesanan': 'Pesananmu', 'garansi.dibeli': 'Dibeli {tgl}', 'garansi.berakhir': 'Berakhir {tgl}',
+    'garansi.batas': 'Kirim sebelum {waktu}', 'garansi.lewat': 'Batas 1x24 jam sudah lewat, jadi garansi belum aktif. Form tetap bisa dikirim dan admin akan meninjaunya.',
+    'garansi.nama': 'Nama', 'garansi.hp': 'No. HP aktif (WhatsApp)', 'garansi.hpContoh': '0812xxxxxxx', 'garansi.device': 'Device yang dipakai',
+    'garansi.deviceContoh': 'mis. iPhone 13, Smart TV Samsung', 'garansi.ss': 'Screenshot bukti sudah berhasil login', 'garansi.ssPilih': 'Pilih screenshot',
+    'garansi.ssGanti': 'Ganti screenshot', 'garansi.ulasanJudul': 'Rating & ulasan (opsional)', 'garansi.ulasanSub': 'Ulasanmu tampil di halaman Ulasan pembeli setelah dicek admin.',
+    'garansi.kirim': 'Aktifkan garansi', 'garansi.mengunggah': 'Mengunggah screenshot…', 'garansi.mengirim': 'Mengirim…',
+    'garansi.wajib': 'Isi nama, nomor HP, device, dan unggah screenshot login dulu.', 'garansi.bukanGambar': 'File harus berupa gambar (JPG, PNG, atau WebP).',
+    'garansi.aktif': 'Garansi aktif ✓ Terima kasih! Data kamu sudah tercatat dan kami akan mengingatkan sebelum akun berakhir.',
+    'garansi.ditinjau': 'Terima kasih, data kamu sudah terkirim. Karena lewat 1x24 jam, garansi belum aktif; admin akan meninjau dan menghubungimu.',
+    'garansi.masa': 'Masa aktif berakhir {tgl}',
+    'garansi.terimaUlasan': 'Ulasanmu juga sudah kami terima.',
+    'garansi.tidakValid': 'Link aktivasi garansi ini tidak valid, sudah dipakai, atau sudah kedaluwarsa. Hubungi admin lewat WhatsApp kalau butuh link baru.',
+    'garansi.chat': 'Chat admin',
     'usd.catatan': '',
   },
   en: {
@@ -155,7 +193,8 @@ const KAMUS = {
     'gagal.katalog': 'The catalog could not be loaded. Check your connection and try again.', 'gagal.ulang': 'Try again',
     'gagal.app': 'This app could not be loaded. Check your connection and try again.',
     'app.tidakAda': 'App not found', 'app.tidakAdaSub': 'It may have been renamed or is no longer sold.', 'app.kembali': 'Back to catalog',
-    'app.tersedia': 'Available', 'app.habis': 'Sold out', 'app.pilihanmu': 'Your pick', 'app.belumPilih': 'No plan selected yet.',
+    'app.tersedia': 'Available', 'app.habis': 'Sold out', 'app.sisa': 'Only {n} left', 'app.stokDicek': 'Stock checked automatically {waktu}', 'app.stokDiubah': 'Stock updated {waktu}',
+    'app.ratingSingkat': '{rata} · {n} review{s}', 'app.pilihanmu': 'Your pick', 'app.belumPilih': 'No plan selected yet.',
     'app.pesan': 'Order now', 'app.tutup': 'Ordering is not open yet. Ask us on WhatsApp first.',
     'app.lainnya': 'More in {kat}', 'app.lihatSemua': 'See all →',
     'app.tentangTipe': 'About the plan types', 'app.kelebihan': 'Pros', 'app.kekurangan': 'Cons',
@@ -246,6 +285,43 @@ const KAMUS = {
     'mitra.kosong': 'Our list of official partners is coming soon.', 'mitra.tidakAda': 'No matching partners.', 'mitra.jumlah': '{n} partner{s}',
     'mitra.gabungJ': 'Want to become a partner?', 'mitra.gabungT': 'Become an IXVII.CO reseller or affiliate and get guidance straight from our admin.',
     'mitra.gabungTombol': 'Apply on WhatsApp', 'mitra.gabungWa': 'Hello IXVII.CO, I am interested in becoming a reseller/affiliate.',
+    'nav.film': 'Shows', 'kaki.film': 'New releases',
+    'judul.film': 'New films & series — IXVII.CO',
+    'meta.film': 'New films and series on Netflix, Disney+, Viu and more. Subscribe at IXVII.CO.',
+    'film.judul': 'New films & series', 'film.sub': 'New titles on the platforms we sell, summed up by the IXVII.CO team.',
+    'film.sedang': 'Now streaming', 'film.akan': 'Coming soon', 'film.semuaPlatform': 'All platforms',
+    'film.film': 'Film', 'film.serial': 'Series', 'film.tayang': 'Releases {tgl}', 'film.sejak': 'Streaming since {tgl}', 'film.sampai': 'until {tgl}',
+    'film.hariIni': 'Out today', 'film.hariLagi': 'in {n} day{s}', 'film.besok': 'Tomorrow',
+    'film.langganan': 'Get {app}', 'film.mulai': 'from {harga}', 'film.trailer': 'Trailer ↗',
+    'film.kosong': 'No titles here yet.', 'film.seksi': 'New releases', 'film.lihat': 'See all →',
+    'film.diApp': 'Streaming on {app}', 'film.baca': 'Read more', 'film.tutup': 'Show less',
+    'judul.garansi': 'Warranty activation — IXVII.CO',
+    'judul.saldo': 'Commission balance — IXVII.CO', 'saldo.judul': 'Commission balance', 'saldo.halo': 'Hi {nama}!',
+    'saldo.kode': 'Your code: {kode}', 'saldo.persen': '{pct}% commission from the profit of every sale',
+    'saldo.bisa': 'Available to withdraw', 'saldo.saldo': 'Commission balance', 'saldo.kurang': '{rp} more until you can withdraw (minimum {min}).',
+    'saldo.cukup': 'Above the minimum withdrawal of {min}.', 'saldo.bayar': 'Next payout {tgl}', 'saldo.hariIni': 'today',
+    'saldo.lagi': 'in {n} days', 'saldo.total': 'Total commission', 'saldo.bulanIni': 'This month', 'saldo.dibayar': 'Paid out',
+    'saldo.diproses': 'Processing', 'saldo.penjualan': 'Sales', 'saldo.tarik': 'Withdraw via WhatsApp',
+    'saldo.tanya': 'Ask admin', 'saldo.waTarik': 'Hi IXVII.CO admin, this is {nama} ({kode}). I would like to withdraw my commission of {rp}.',
+    'saldo.waTanya': 'Hi IXVII.CO admin, this is {nama} ({kode}). I have a question about my affiliate commission.',
+    'saldo.riwayat': 'Commission history', 'saldo.riwayatTarik': 'Withdrawals', 'saldo.kosong': 'No sales recorded yet. Share your code with potential buyers!',
+    'saldo.st.dibayar': 'Paid {tgl}', 'saldo.st.dijadwalkan': 'Scheduled {tgl}', 'saldo.pribadi': 'This page is just for you. Please do not share the link.',
+    'saldo.tidakValid': 'This balance link is not valid. Ask the admin for a new link on WhatsApp.', 'saldo.chat': 'Chat admin',
+    'saldo.cara': 'Commission comes from the profit of each sale and is recorded once the buyer is confirmed. Payouts happen on day {tgl} of each month after you ask to withdraw.',
+    'garansi.judul': 'Warranty activation', 'garansi.halo': 'Hi {nama}! Fill in this form after you have logged in, so your warranty officially starts and we can remind you before your account expires.',
+    'garansi.pesanan': 'Your order', 'garansi.dibeli': 'Purchased {tgl}', 'garansi.berakhir': 'Expires {tgl}',
+    'garansi.batas': 'Send before {waktu}', 'garansi.lewat': 'The 24-hour window has passed, so the warranty is not active yet. You can still send the form and our admin will review it.',
+    'garansi.nama': 'Name', 'garansi.hp': 'Active phone number (WhatsApp)', 'garansi.hpContoh': 'with country code, e.g. 6281…', 'garansi.device': 'Device you use',
+    'garansi.deviceContoh': 'e.g. iPhone 13, Samsung Smart TV', 'garansi.ss': 'Screenshot showing you are logged in', 'garansi.ssPilih': 'Choose screenshot',
+    'garansi.ssGanti': 'Change screenshot', 'garansi.ulasanJudul': 'Rating & review (optional)', 'garansi.ulasanSub': 'Your review appears on the Customer reviews page after a quick check.',
+    'garansi.kirim': 'Activate warranty', 'garansi.mengunggah': 'Uploading screenshot…', 'garansi.mengirim': 'Submitting…',
+    'garansi.wajib': 'Please fill in your name, phone number, device, and upload a login screenshot.', 'garansi.bukanGambar': 'The file must be an image (JPG, PNG, or WebP).',
+    'garansi.aktif': 'Warranty active ✓ Thank you! Your details are saved and we will remind you before your account expires.',
+    'garansi.ditinjau': 'Thank you, your details were sent. Since the 24-hour window has passed, your warranty is not active yet; our admin will review it and contact you.',
+    'garansi.masa': 'Active period ends {tgl}',
+    'garansi.terimaUlasan': 'We received your review too.',
+    'garansi.tidakValid': 'This warranty link is invalid, already used, or expired. Contact our admin on WhatsApp if you need a new link.',
+    'garansi.chat': 'Chat with admin',
     'usd.catatan': 'Prices in US dollars are estimates at 1 USD = {kurs} ({tgl}).',
   },
 };
@@ -278,6 +354,26 @@ export const persen = (p) => `${(Math.round(Number(p) * 1000) / 10).toLocaleStri
 /** "2026-10" → "Oktober 2026" / "October 2026" */
 export const bulanTahun = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { month: 'long', year: 'numeric' });
 export const tanggal = (d) => new Date(d).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+/** "3 jam lalu", "kemarin", "2 hari lalu" */
+export function relatif(iso) {
+  const detik = (Date.parse(iso) - Date.now()) / 1000;
+  const rtf = new Intl.RelativeTimeFormat(inggris() ? 'en' : 'id', { numeric: 'auto' });
+  const abs = Math.abs(detik);
+  if (abs < 60) return rtf.format(0, 'second');
+  if (abs < 3600) return rtf.format(Math.round(detik / 60), 'minute');
+  if (abs < 86400) return rtf.format(Math.round(detik / 3600), 'hour');
+  if (abs < 86400 * 30) return rtf.format(Math.round(detik / 86400), 'day');
+  return tanggal(iso);
+}
+/** Angka rating 4,9 / 4.9 */
+export const angkaRating = (x) => Number(x).toLocaleString(inggris() ? 'en-US' : 'id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+/** "27–30 November 2026" (rentang tanggal; satu tanggal kalau sama). */
+export function rentangTanggal(a, b) {
+  if (!a || a === b) return tanggal(b);
+  try {
+    return new Intl.DateTimeFormat(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).formatRange(new Date(a), new Date(b));
+  } catch { return `${tanggal(a)} – ${tanggal(b)}`; }
+}
 
 // ---------------------------------------------------------------- teks data
 /** Label varian ke bahasa Inggris: "3 Hari" → "3 Days", "1Bulan" → "1 Month", "1 Tahun Priv" → "1 Year Private". */
@@ -325,6 +421,11 @@ export function teksGalat(pesan) {
     [/sudah tidak tersedia/, 'One of the plans is no longer available. Please reload the page.'],
     [/Pilih paket dulu/, 'Please pick a plan first.'],
     [/Link ulasan tidak valid/, t('ulasan.tidakValid')],
+    [/Link garansi tidak valid/, t('garansi.tidakValid')],
+    [/Nama harus 2 sampai 80/, 'Name must be 2 to 80 characters.'],
+    [/Nomor HP tidak valid/, 'Please enter a valid phone number.'],
+    [/Tulis device/, 'Please tell us which device you use.'],
+    [/Unggah screenshot/, 'Please upload a screenshot showing you are logged in.'],
     [/Nilai harus 1 sampai 5/, 'Please choose 1 to 5 stars.'],
     [/Ulasan maksimal 600/, 'Reviews can be up to 600 characters.'],
     [/Beri nilai minimal/, 'Please rate at least one app.'],

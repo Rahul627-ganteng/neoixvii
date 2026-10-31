@@ -1,5 +1,6 @@
-import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
-import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal, teksDurasi } from './i18n.js';
+import { ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
+import { barisFilm } from './film-kartu.js';
+import { angkaRating, harga, inggris, labelTipe, labelVarian, pasangKurs, persen, relatif, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { bintang, daftarFaq, el, gabung, ikonApp, kartuApp, kartuUlasan, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
 
@@ -42,7 +43,8 @@ function bagianGrup(app, infoTipe, pilih) {
           return el('label', { class: 'opsi' + (habis ? ' habis' : '') },
             el('input', { type: 'radio', name: 'paket', value: v.id, disabled: habis, onchange: () => pilih(data) }),
             el('span', {}, el('span', { class: 'lbl' }, labelVarian(v.d)), el('br'),
-              el('span', { class: 'lencana ' + (habis ? 'habis' : 'ada') }, habis ? t('app.habis') : t('app.tersedia'))),
+              el('span', { class: 'lencana ' + (habis ? 'habis' : v.q != null && v.q <= 5 ? 'sedikit' : 'ada') },
+                habis ? t('app.habis') : v.q != null && v.q <= 5 ? t('app.sisa', { n: v.q }) : t('app.tersedia'))),
             el('span', { class: 'hrg' }, harga(v.p)));
         })));
   });
@@ -79,6 +81,16 @@ function bagianUlasan(app, data) {
     el('p', { class: 'ringkas-ulasan' }, bintang(rata), t('testi.rata', { rata: angka, n: semua.length, s: semua.length === 1 ? '' : 's' })),
     el('div', { class: 'ulasan-daftar' }, semua.slice(0, 3).map((u) => kartuUlasan(u, { denganApp: false }))),
     el('a', { class: 'tautan-faq', href: `/testimoni/?app=${encodeURIComponent(app.slug)}` }, t('testi.lihat')));
+}
+
+/** Film & serial yang sedang/akan tayang di aplikasi ini. */
+function bagianFilm(app, film) {
+  const di = (film ?? []).filter((f) => f.slug === app.slug);
+  if (!di.length) return null;
+  return el('section', { class: 'grup kaca', id: 'film-app' },
+    el('h2', {}, t('film.diApp', { app: app.nama })),
+    el('div', { class: 'film-daftar-kecil' }, di.slice(0, 4).map(barisFilm)),
+    el('a', { class: 'tautan-faq', href: `/film/?app=${encodeURIComponent(app.slug)}` }, t('film.lihat')));
 }
 
 // Perbandingan harga resmi vs IXVII.CO (paket dengan durasi sama, harga termurah yang tersedia).
@@ -173,8 +185,17 @@ function bagianPesan(app, toko, promo) {
   return { aside, pilih };
 }
 
+/** "Stok dicek otomatis 2 jam lalu" — waktu paling baru antara perubahan stok aplikasi ini dan pemeriksaan otomatis. */
+function infoStok(app) {
+  const ubah = app.stokAt ? Date.parse(app.stokAt) : 0, cek = app.cekStok ? Date.parse(app.cekStok) : 0;
+  if (!ubah && !cek) return null;
+  const iso = new Date(Math.max(ubah, cek)).toISOString();
+  return el('span', { class: 'stok-dicek' }, el('span', { class: 'titik-hijau', 'aria-hidden': 'true' }),
+    t(ubah >= cek ? 'app.stokDiubah' : 'app.stokDicek', { waktu: relatif(iso) }));
+}
+
 // ---------------------------------------------------------------- susun halaman
-function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan) {
+function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film) {
   document.title = `${app.nama} — IXVII.CO`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', t('meta.app', { app: app.nama, desc: app.desc }));
 
@@ -187,12 +208,16 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan) {
       el('a', { href: urlKategori(app.kunciKategori) }, app.kategori), ' / ', app.nama),
     el('div', { class: 'kepala-app' }, ikonApp(app, true),
       el('div', {}, el('a', { class: 'kat', href: urlKategori(app.kunciKategori) }, app.kategori),
-        el('h1', {}, app.nama))),
+        el('h1', {}, app.nama),
+        el('div', { class: 'info-app' },
+          app.rating ? el('a', { class: 'rating-app', href: '#ulasan-app' }, el('span', { class: 'bintang-kuning', 'aria-hidden': 'true' }, '★'),
+            ' ', t('app.ratingSingkat', { rata: angkaRating(app.rating.rata), n: app.rating.jumlah, s: app.rating.jumlah === 1 ? '' : 's' })) : null,
+          infoStok(app)))),
     el('p', { class: 'desk-app redup' }, app.desc),
     el('div', { class: 'tata-detail' },
       el('div', { class: 'atas-detail' }, bagianGrup(app, infoTipe, pilih)),
       aside,
-      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianUlasan(app, ulasan), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
+      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianUlasan(app, ulasan), bagianFilm(app, film), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
     lain.length ? el('section', { class: 'seksi' },
       el('div', { class: 'seksi-kepala' }, el('h2', {}, t('app.lainnya', { kat: app.kategori })),
         el('a', { href: urlKategori(app.kunciKategori) }, t('app.lihatSemua'))),
@@ -210,13 +235,13 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan) {
 async function muat() {
   isi.replaceChildren(el('div', { class: 'memuat', style: 'margin-top:32px;height:280px' }));
   try {
-    const [{ apps }, toko, infoTipe, promo, ulasan] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe(), ambilPromo(), ambilUlasan()]);
+    const [{ apps }, toko, infoTipe, promo, ulasan, film] = await Promise.all([ambilKatalog(), ambilToko(), ambilInfoTipe(), ambilPromo(), ambilUlasan(), ambilFilm()]);
     pasangKurs(toko);
     tulisCatatanKurs();
     const app = apps.find((a) => a.slug === slug);
     if (!app) return tidakDitemukan();
     const detail = await ambilDetail(app.id);
-    tampilkan(app, apps, detail, toko, infoTipe, promo, ulasan);
+    tampilkan(app, apps, detail, toko, infoTipe, promo, ulasan, film);
   } catch (err) {
     console.error(err);
     isi.replaceChildren(pesanGagal(t('gagal.app'), muat));
