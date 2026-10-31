@@ -24,6 +24,8 @@
   --hijau-teks: #7ee2a0;
   --merah-latar: rgba(192, 38, 45, .22);
   --merah-teks: #ff9a9e;
+  --kuning-latar: rgba(242, 176, 30, .16);
+  --kuning-teks: #f5c451;
   --kilau1: rgba(128, 2, 3, .45);
   --kilau2: rgba(192, 38, 45, .18);
 
@@ -52,6 +54,8 @@
   --hijau-teks: #146c2e;
   --merah-latar: #fdecea;
   --merah-teks: #b42318;
+  --kuning-latar: #fff4dc;
+  --kuning-teks: #8a5a00;
   --kilau1: rgba(128, 2, 3, .10);
   --kilau2: rgba(192, 38, 45, .07);
   color-scheme: light;

@@ -17,9 +17,13 @@ export function el(tag, attrs = {}, ...anak) {
   return e;
 }
 export function tabel(kepala, baris) {
-  return el('div', { class: 'tablewrap' }, el('table', {},
+  const t = el('table', { class: 'kartu-hp' },
     el('thead', {}, el('tr', {}, kepala.map((h) => (h.startsWith('>') ? el('th', { class: 'num' }, h.slice(1)) : el('th', {}, h))))),
-    el('tbody', {}, baris)));
+    el('tbody', {}, baris));
+  // di HP setiap baris tampil sebagai kartu; judul kolom ikut tampil di samping isinya
+  const label = kepala.map((h) => h.replace(/^>/, ''));
+  for (const tr of t.tBodies[0].rows) [...tr.cells].forEach((c, i) => { if (label[i] && c.colSpan <= 1) c.dataset.label = label[i]; });
+  return el('div', { class: 'tablewrap' }, t);
 }
 export const td = (isi, num) => el('td', num ? { class: 'num' } : {}, isi);
 let toastJeda;

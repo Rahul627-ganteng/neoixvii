@@ -1,6 +1,6 @@
 import { ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { barisFilm } from './film-kartu.js';
-import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal, teksDurasi } from './i18n.js';
+import { angkaRating, harga, inggris, labelTipe, labelVarian, pasangKurs, persen, relatif, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { bintang, daftarFaq, el, gabung, ikonApp, kartuApp, kartuUlasan, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
 
@@ -43,7 +43,8 @@ function bagianGrup(app, infoTipe, pilih) {
           return el('label', { class: 'opsi' + (habis ? ' habis' : '') },
             el('input', { type: 'radio', name: 'paket', value: v.id, disabled: habis, onchange: () => pilih(data) }),
             el('span', {}, el('span', { class: 'lbl' }, labelVarian(v.d)), el('br'),
-              el('span', { class: 'lencana ' + (habis ? 'habis' : 'ada') }, habis ? t('app.habis') : t('app.tersedia'))),
+              el('span', { class: 'lencana ' + (habis ? 'habis' : v.q != null && v.q <= 5 ? 'sedikit' : 'ada') },
+                habis ? t('app.habis') : v.q != null && v.q <= 5 ? t('app.sisa', { n: v.q }) : t('app.tersedia'))),
             el('span', { class: 'hrg' }, harga(v.p)));
         })));
   });
@@ -184,6 +185,15 @@ function bagianPesan(app, toko, promo) {
   return { aside, pilih };
 }
 
+/** "Stok dicek otomatis 2 jam lalu" — waktu paling baru antara perubahan stok aplikasi ini dan pemeriksaan otomatis. */
+function infoStok(app) {
+  const ubah = app.stokAt ? Date.parse(app.stokAt) : 0, cek = app.cekStok ? Date.parse(app.cekStok) : 0;
+  if (!ubah && !cek) return null;
+  const iso = new Date(Math.max(ubah, cek)).toISOString();
+  return el('span', { class: 'stok-dicek' }, el('span', { class: 'titik-hijau', 'aria-hidden': 'true' }),
+    t(ubah >= cek ? 'app.stokDiubah' : 'app.stokDicek', { waktu: relatif(iso) }));
+}
+
 // ---------------------------------------------------------------- susun halaman
 function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film) {
   document.title = `${app.nama} — IXVII.CO`;
@@ -198,7 +208,11 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film) {
       el('a', { href: urlKategori(app.kunciKategori) }, app.kategori), ' / ', app.nama),
     el('div', { class: 'kepala-app' }, ikonApp(app, true),
       el('div', {}, el('a', { class: 'kat', href: urlKategori(app.kunciKategori) }, app.kategori),
-        el('h1', {}, app.nama))),
+        el('h1', {}, app.nama),
+        el('div', { class: 'info-app' },
+          app.rating ? el('a', { class: 'rating-app', href: '#ulasan-app' }, el('span', { class: 'bintang-kuning', 'aria-hidden': 'true' }, '★'),
+            ' ', t('app.ratingSingkat', { rata: angkaRating(app.rating.rata), n: app.rating.jumlah, s: app.rating.jumlah === 1 ? '' : 's' })) : null,
+          infoStok(app)))),
     el('p', { class: 'desk-app redup' }, app.desc),
     el('div', { class: 'tata-detail' },
       el('div', { class: 'atas-detail' }, bagianGrup(app, infoTipe, pilih)),

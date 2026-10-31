@@ -44,7 +44,8 @@ const KAMUS = {
     'gagal.katalog': 'Katalog belum bisa dimuat. Periksa koneksi internet lalu coba lagi.', 'gagal.ulang': 'Coba lagi',
     'gagal.app': 'Data aplikasi belum bisa dimuat. Periksa koneksi internet lalu coba lagi.',
     'app.tidakAda': 'Aplikasi tidak ditemukan', 'app.tidakAdaSub': 'Mungkin namanya berubah atau sedang tidak dijual.', 'app.kembali': 'Kembali ke katalog',
-    'app.tersedia': 'Tersedia', 'app.habis': 'Habis', 'app.pilihanmu': 'Pilihanmu', 'app.belumPilih': 'Belum ada paket dipilih.',
+    'app.tersedia': 'Tersedia', 'app.habis': 'Habis', 'app.sisa': 'Sisa {n}', 'app.stokDicek': 'Stok dicek otomatis {waktu}', 'app.stokDiubah': 'Stok diperbarui {waktu}',
+    'app.ratingSingkat': '{rata} · {n} ulasan', 'app.pilihanmu': 'Pilihanmu', 'app.belumPilih': 'Belum ada paket dipilih.',
     'app.pesan': 'Pesan sekarang', 'app.tutup': 'Pemesanan belum dibuka. Tanyakan dulu lewat WhatsApp kami.',
     'app.lainnya': '{kat} lainnya', 'app.lihatSemua': 'Lihat semua →',
     'app.tentangTipe': 'Tentang tipe paket', 'app.kelebihan': 'Kelebihan', 'app.kekurangan': 'Kekurangan',
@@ -180,7 +181,8 @@ const KAMUS = {
     'gagal.katalog': 'The catalog could not be loaded. Check your connection and try again.', 'gagal.ulang': 'Try again',
     'gagal.app': 'This app could not be loaded. Check your connection and try again.',
     'app.tidakAda': 'App not found', 'app.tidakAdaSub': 'It may have been renamed or is no longer sold.', 'app.kembali': 'Back to catalog',
-    'app.tersedia': 'Available', 'app.habis': 'Sold out', 'app.pilihanmu': 'Your pick', 'app.belumPilih': 'No plan selected yet.',
+    'app.tersedia': 'Available', 'app.habis': 'Sold out', 'app.sisa': 'Only {n} left', 'app.stokDicek': 'Stock checked automatically {waktu}', 'app.stokDiubah': 'Stock updated {waktu}',
+    'app.ratingSingkat': '{rata} · {n} review{s}', 'app.pilihanmu': 'Your pick', 'app.belumPilih': 'No plan selected yet.',
     'app.pesan': 'Order now', 'app.tutup': 'Ordering is not open yet. Ask us on WhatsApp first.',
     'app.lainnya': 'More in {kat}', 'app.lihatSemua': 'See all →',
     'app.tentangTipe': 'About the plan types', 'app.kelebihan': 'Pros', 'app.kekurangan': 'Cons',
@@ -328,6 +330,19 @@ export const persen = (p) => `${(Math.round(Number(p) * 1000) / 10).toLocaleStri
 /** "2026-10" → "Oktober 2026" / "October 2026" */
 export const bulanTahun = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { month: 'long', year: 'numeric' });
 export const tanggal = (d) => new Date(d).toLocaleDateString(inggris() ? 'en-US' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+/** "3 jam lalu", "kemarin", "2 hari lalu" */
+export function relatif(iso) {
+  const detik = (Date.parse(iso) - Date.now()) / 1000;
+  const rtf = new Intl.RelativeTimeFormat(inggris() ? 'en' : 'id', { numeric: 'auto' });
+  const abs = Math.abs(detik);
+  if (abs < 60) return rtf.format(0, 'second');
+  if (abs < 3600) return rtf.format(Math.round(detik / 60), 'minute');
+  if (abs < 86400) return rtf.format(Math.round(detik / 3600), 'hour');
+  if (abs < 86400 * 30) return rtf.format(Math.round(detik / 86400), 'day');
+  return tanggal(iso);
+}
+/** Angka rating 4,9 / 4.9 */
+export const angkaRating = (x) => Number(x).toLocaleString(inggris() ? 'en-US' : 'id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 /** "27–30 November 2026" (rentang tanggal; satu tanggal kalau sama). */
 export function rentangTanggal(a, b) {
   if (!a || a === b) return tanggal(b);

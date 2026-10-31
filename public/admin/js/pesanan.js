@@ -82,24 +82,26 @@ export async function halamanPesanan(supabase, halaman) {
     if (o.status !== 'aktif' && o.status !== 'selesai') return tag.length ? el('div', { class: 'row' }, tag) : null;
     const wadah = el('div', { class: 'row' }, tag);
     if (g && o.reviews?.length) return wadah;
-    const buat = el('button', { type: 'button', class: 'sec kecil' }, g ? 'Buat link ulasan' : 'Buat link garansi & ulasan');
+    // tanpa migration garansi: tetap link ulasan seperti sebelumnya
+    const ulasanSaja = !!g || !('warranties' in o);
+    const buat = el('button', { type: 'button', class: 'sec kecil' }, ulasanSaja ? 'Buat link ulasan' : 'Buat link garansi & ulasan');
     buat.addEventListener('click', async () => {
       buat.disabled = true;
       try {
         const h = await q(supabase.rpc('buat_link_ulasan', { p_kode: o.code }));
-        const url = `${location.origin}/${g ? 'ulasan' : 'garansi'}/?t=${h.token}`;
-        const teks = g
+        const url = `${location.origin}/${ulasanSaja ? 'ulasan' : 'garansi'}/?t=${h.token}`;
+        const teks = ulasanSaja
           ? (o.lang === 'en'
             ? `Hi ${o.customer_name}, thank you for subscribing at IXVII.CO 🙏 Could you leave a short review? This link is only for your order ${o.code} and works once:\n${url}`
             : `Halo ${o.customer_name}, terima kasih sudah berlangganan di IXVII.CO 🙏 Boleh minta ulasan singkatnya? Link ini khusus pesanan ${o.code} dan hanya bisa dipakai sekali:\n${url}`)
           : pesanGaransiLink(o, url);
         wadah.replaceChildren(...tag,
-          el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, teks), target: '_blank', rel: 'noopener' }, g ? 'Kirim link ulasan lewat WhatsApp' : 'Kirim link garansi lewat WhatsApp'),
+          el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, teks), target: '_blank', rel: 'noopener' }, ulasanSaja ? 'Kirim link ulasan lewat WhatsApp' : 'Kirim link garansi lewat WhatsApp'),
           el('button', { type: 'button', class: 'sec kecil', onclick: () => salinTeks(url, 'Link disalin') }, 'Salin link'));
       } catch (err) { toast('Gagal: ' + err.message, true); buat.disabled = false; }
     });
     wadah.append(buat);
-    if (!g) wadah.append(el('button', { type: 'button', class: 'sec kecil', title: 'Format balasan teks seperti biasa; balasan pembeli bisa ditempel di menu Garansi',
+    if (!ulasanSaja) wadah.append(el('button', { type: 'button', class: 'sec kecil', title: 'Format balasan teks seperti biasa; balasan pembeli bisa ditempel di menu Garansi',
       onclick: () => salinTeks(pesanGaransiManual(o), 'Template garansi disalin') }, 'Salin template manual'));
     return wadah;
   };

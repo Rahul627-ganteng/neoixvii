@@ -101,3 +101,46 @@ label.row input[type=number] { width: 90px; }
 .garansi-admin .grid2 { margin-top: 8px; }
 .garansi-admin textarea { min-height: 160px; }
 .ss-admin { max-width: 220px; max-height: 220px; border-radius: 8px; border: 1px solid var(--line, #e3e3e6); display: block; margin-top: 6px; }
+/* Stok & harga */
+.varian-baris { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "nama harga stok ubah"; gap: 8px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.varian-baris .kolom-nama { grid-area: nama; min-width: 0; }
+.varian-baris .kolom-harga { grid-area: harga; }
+.varian-baris .stok-hitung { grid-area: stok; }
+.varian-baris .tombol-ubah { grid-area: ubah; justify-self: end; }
+.varian-baris.redup .kolom-nama b { color: var(--quiet); }
+.harga-ubah { background: #fff; color: var(--ink); border: 1px dashed #c9c9ce; padding: 7px 10px; font-weight: 700; white-space: nowrap; }
+.harga-ubah span { color: var(--quiet); font-weight: 400; }
+.kolom-harga input.harga-input { width: 110px; }
+.stok-hitung { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid #c9c9ce; border-radius: 10px; overflow: hidden; background: #fff; }
+.stepper .langkah { background: #fff; color: var(--maroon); border-radius: 0; width: 42px; min-height: 40px; justify-content: center; font-size: 20px; line-height: 1; padding: 0; }
+.stepper .langkah:active { background: var(--maroon-soft); }
+.stepper input.jumlah { width: 56px; text-align: center; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; font-weight: 700; padding: 6px 4px; }
+button.tautan { background: none; color: var(--maroon); padding: 4px 2px; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+.saklar { min-height: 36px; }
+
+/* ---------------------------------------------------------------- nyaman di HP */
+nav.menu .baris { scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+nav.menu a { scroll-snap-align: center; }
+@media (max-width: 640px) {
+  main { padding: 12px; }
+  .card { padding: 14px 12px; border-radius: 14px; }
+  input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], input[type=search], input[type=tel], input[type=datetime-local], textarea, select { font-size: 16px; padding: 10px 11px; }
+  button, .btn { min-height: 42px; }
+  button.kecil, .btn.kecil { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat b { font-size: 22px; }
+  .tab { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; padding-bottom: 2px; }
+  .tab button { flex: none; }
+  .varian-baris { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nama ubah" "harga stok"; }
+  .varian-baris .stok-hitung { justify-content: flex-end; }
+  /* tabel jadi kartu */
+  .tablewrap { overflow: visible; }
+  table.kartu-hp thead { display: none; }
+  table.kartu-hp, table.kartu-hp tbody, table.kartu-hp tr { display: block; width: 100%; }
+  table.kartu-hp tr { border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; margin-bottom: 8px; background: #fff; }
+  table.kartu-hp td { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 0; padding: 5px 0; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+  table.kartu-hp td[data-label]::before { content: attr(data-label); color: var(--quiet); font-size: 12.5px; text-align: left; flex: none; max-width: 42%; }
+  table.kartu-hp td:not([data-label]) { justify-content: flex-start; text-align: left; }
+  table.kartu-hp td:empty { display: none; }
+}

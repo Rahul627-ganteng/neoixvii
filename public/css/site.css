@@ -404,3 +404,12 @@ html.terjemah [data-t] { visibility: hidden; }
 .ss-pratinjau { max-width: 220px; max-height: 320px; border-radius: 12px; border: 1px solid var(--garis); object-fit: contain; }
 .judul-kecil-g { font-size: 15px; margin: 8px 0 0; }
 .garansi-sukses p { margin: 0 0 12px; }
+/* stok & rating di halaman aplikasi */
+.info-app { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: 6px; font-size: 13.5px; color: var(--teks-2); }
+.rating-app { color: inherit; text-decoration: none; font-weight: 600; }
+.rating-app:hover { text-decoration: underline; }
+.bintang-kuning, .rating-kecil > span { color: #f2b01e; }
+.rating-kecil { white-space: nowrap; }
+.stok-dicek { display: inline-flex; align-items: center; gap: 6px; }
+.titik-hijau { width: 8px; height: 8px; border-radius: 50%; background: #2fb36b; box-shadow: 0 0 0 3px rgba(47,179,107,.18); flex: none; }
+.lencana.sedikit { background: var(--kuning-latar); color: var(--kuning-teks); }

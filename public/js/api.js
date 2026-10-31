@@ -27,7 +27,15 @@ async function ambilSimpan(kunci, path) {
 
 /** Katalog lengkap dari rpc katalog_json. */
 export async function ambilKatalog() {
-  return olah(await ambilSimpan('ixvii-katalog-v3', 'rpc/katalog_json'));
+  // cache v4: ada sisa stok & waktu cek stok. Rating ulasan ikut ditempel ke tiap aplikasi.
+  const [data, ulasan] = await Promise.all([ambilSimpan('ixvii-katalog-v4', 'rpc/katalog_json'), ambilUlasan()]);
+  const hasil = olah(data);
+  const rating = new Map((ulasan?.ringkasan ?? []).map((r) => [r.slug, r]));
+  for (const a of hasil.apps) {
+    const r = rating.get(a.slug);
+    if (r) a.rating = { rata: Number(r.rata), jumlah: r.jumlah };
+  }
+  return hasil;
 }
 
 /** Pengaturan toko yang boleh publik: nomor WhatsApp, cara bayar, kurs USD, buka/tutup pesanan. */
@@ -175,6 +183,8 @@ function olah(data) {
         hargaMulai: tersedia.length ? Math.min(...tersedia.map((v) => v.p)) : null,
         habisSemua: tersedia.length === 0,
         tipe: a.groups.map((g) => g.label),
+        stokAt: a.stok_at ?? null,
+        cekStok: data?.cek_stok ?? null,
       });
     }
   }

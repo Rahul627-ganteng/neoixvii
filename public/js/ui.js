@@ -1,5 +1,5 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
-import { bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
+import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
 export function el(tag, attrs = {}, ...anak) {
@@ -136,7 +136,9 @@ export function kartuApp(app) {
   const tipe = [...new Set(app.tipe)].slice(0, 3);
   return el('a', { class: 'kartu-app kaca kartu-3d', href: urlApp(app.slug) },
     el('div', { class: 'atas' }, ikonApp(app),
-      el('div', {}, el('h3', {}, app.nama), el('div', { class: 'kat' }, app.kategori))),
+      el('div', {}, el('h3', {}, app.nama), el('div', { class: 'kat' }, app.kategori,
+        app.rating ? el('span', { class: 'rating-kecil', title: t('testi.bintang', { n: angkaRating(app.rating.rata) }) },
+          ' · ', el('span', { 'aria-hidden': 'true' }, '★ '), `${angkaRating(app.rating.rata)} (${app.rating.jumlah})`) : null))),
     el('p', {}, app.desc),
     el('div', { class: 'tipe' }, tipe.map((x) => el('span', { class: 'lencana' }, labelTipe(x)))),
     el('div', { class: 'bawah' },
