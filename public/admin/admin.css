@@ -144,3 +144,21 @@ nav.menu a { scroll-snap-align: center; }
   table.kartu-hp td:not([data-label]) { justify-content: flex-start; text-align: left; }
   table.kartu-hp td:empty { display: none; }
 }
+/* Affiliate */
+.sub-tab { margin-bottom: 12px; }
+.kartu-aff { margin-top: 12px; }
+.grid-aff { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 14px; margin-top: 10px; }
+.angka-aff { display: flex; flex-direction: column; border-left: 2px solid var(--line); padding-left: 10px; }
+.angka-aff span { font-size: 12.5px; color: var(--quiet); }
+.angka-aff b { font-size: 17px; }
+.angka-aff.kuat { border-left-color: var(--maroon); }
+.angka-aff.kuat b { color: var(--maroon); }
+button.wa-tombol { background: #1f8f4e; }
+.draft-baris { border-top: 1px solid var(--line); padding: 10px 0; }
+.grid-draft { display: grid; gap: 8px; grid-template-columns: 1.4fr 1fr 1fr .9fr .9fr; margin-top: 6px; }
+.grid-draft label.f { margin-top: 0; }
+details.item-form summary { cursor: pointer; padding: 4px 0; }
+@media (max-width: 640px) {
+  .grid-aff { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-draft { grid-template-columns: 1fr 1fr; }
+}

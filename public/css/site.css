@@ -413,3 +413,23 @@ html.terjemah [data-t] { visibility: hidden; }
 .stok-dicek { display: inline-flex; align-items: center; gap: 6px; }
 .titik-hijau { width: 8px; height: 8px; border-radius: 50%; background: #2fb36b; box-shadow: 0 0 0 3px rgba(47,179,107,.18); flex: none; }
 .lencana.sedikit { background: var(--kuning-latar); color: var(--kuning-teks); }
+/* saldo komisi affiliate */
+.saldo-kepala { margin-bottom: 14px; }
+.saldo-halo { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+.row-lencana { display: flex; flex-wrap: wrap; gap: 6px; }
+.saldo-utama { padding: 22px; border-radius: 22px; display: grid; gap: 8px; }
+.saldo-utama p { margin: 0; }
+.saldo-besar { font-size: clamp(34px, 9vw, 48px); letter-spacing: -.02em; line-height: 1.1; }
+.saldo-bar { height: 8px; border-radius: 999px; background: var(--lencana); overflow: hidden; }
+.saldo-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--maroon, #800203), #c0262d); }
+.saldo-utama .tombol { justify-self: start; margin-top: 6px; }
+.saldo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+.saldo-angka { padding: 14px; border-radius: 16px; display: grid; gap: 2px; }
+.saldo-angka span { font-size: 12.5px; color: var(--teks-2); }
+.saldo-angka b { font-size: 18px; }
+.saldo-daftar { list-style: none; margin: 0; padding: 0; }
+.saldo-daftar li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--garis); }
+.saldo-daftar li:last-child { border-bottom: 0; }
+.saldo-daftar .redup { font-size: 13px; }
+.saldo-daftar .plus { color: var(--hijau-teks); white-space: nowrap; }
+.saldo-catatan { font-size: 13px; margin-top: 12px; }

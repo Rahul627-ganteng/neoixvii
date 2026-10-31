@@ -20,6 +20,13 @@
     Referrer-Policy = "no-referrer"
 
 [[headers]]
+  for = "/mitra/saldo/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
+[[headers]]
   for = "/ulasan/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"

@@ -48,6 +48,9 @@ export async function halamanPesanan(supabase, halaman) {
   // kolom ulasan & garansi baru ada setelah migration Tahap 8 / garansi
   const pesanan = await ambil(dasar + ',reviews(rating,status),warranties(id,on_time,status)')
     .catch(() => ambil(dasar + ',reviews(rating,status)')).catch(() => ambil(dasar));
+  // affiliate (setelah migration affiliate): pesanan bisa diatasnamakan affiliate → komisi otomatis saat Aktif
+  const mitra = pesanan.some((o) => 'partner_id' in o)
+    ? await q(supabase.from('partners').select('id,name,kind,referral_code,is_active').order('name')).catch(() => []) : [];
 
   const cari = el('input', { type: 'search', placeholder: 'Cari kode, nama, atau nomor WhatsApp…', 'aria-label': 'Cari pesanan' });
   const tab = el('div', { class: 'row tab', role: 'group', 'aria-label': 'Saring pesanan' });
@@ -147,8 +150,29 @@ export async function halamanPesanan(supabase, halaman) {
         el('b', {}, 'Total ', rp(o.total), el('span', { class: 'muted' }, usd(o.total_usd)),
           o.discount ? el('span', { class: 'muted' }, ` · diskon ${rp(o.discount)}`) : null), masa),
       el('div', { class: 'row atur', style: 'margin-top:8px' }, pilihStatus, catatan, simpan),
+      bagianAffiliate(o),
       el('div', { style: 'margin-top:8px' }, bagianUlasan(o)));
   };
+
+  function bagianAffiliate(o) {
+    if (!('partner_id' in o) || !mitra.length || o.status === 'batal') return null;
+    const pilih = el('select', { 'aria-label': `Affiliate pesanan ${o.code}` }, el('option', { value: '' }, '— tanpa affiliate —'),
+      mitra.filter((m) => m.is_active || m.id === o.partner_id).map((m) => el('option', { value: m.id, selected: m.id === o.partner_id },
+        `${m.name}${m.referral_code ? ` (${m.referral_code})` : ''}${m.kind === 'reseller' ? ' · reseller' : ''}`)));
+    const info = el('span', { class: 'muted' }, o.partner_id ? (o.status === 'aktif' || o.status === 'selesai' ? 'komisi tercatat' : 'komisi tercatat saat Aktif') : '');
+    pilih.addEventListener('change', async () => {
+      pilih.disabled = true;
+      try {
+        const h = await q(supabase.rpc('atur_affiliate_pesanan', { p_kode: o.code, p_partner: pilih.value ? Number(pilih.value) : null }));
+        o.partner_id = h.partner;
+        const nama = mitra.find((m) => m.id === h.partner)?.name;
+        info.textContent = !h.partner ? '' : h.komisi ? `komisi ${rp(h.komisi)}` : 'komisi tercatat saat Aktif';
+        toast(!h.partner ? 'Affiliate dilepas dari pesanan' : h.komisi ? `Komisi ${rp(h.komisi)} untuk ${nama}` : `Pesanan atas nama ${nama}. Komisi tercatat saat pesanan Aktif.`);
+      } catch (err) { toast('Gagal: ' + err.message, true); pilih.value = o.partner_id ?? ''; }
+      finally { pilih.disabled = false; }
+    });
+    return el('div', { class: 'row atur', style: 'margin-top:8px' }, el('span', { class: 'muted' }, 'Affiliate'), pilih, info);
+  }
 
   const gambarDaftar = () => {
     const s = SARING.find((x) => x.kunci === saringan);

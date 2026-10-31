@@ -122,6 +122,8 @@ export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
   catch { return null; }
 }
+/** Saldo komisi affiliate dari link pribadinya (tanpa HPP & nama pembeli). Null kalau link salah. */
+export const ambilSaldoAffiliate = (token) => rpc('saldo_affiliate', { p_token: token });
 /** Data form aktivasi garansi dari link sekali pakai. */
 export const infoGaransi = (token) => rpc('info_garansi', { p_token: token });
 /** Unggah screenshot bukti login ke bucket privat "garansi" (hanya bisa dengan link yang sah). */

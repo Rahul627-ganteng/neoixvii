@@ -13,6 +13,7 @@ import { halamanMitra } from './mitra.js';
 import { halamanFilm } from './film.js';
 import { halamanGaransi } from './garansi.js';
 import { halamanStok } from './stok.js';
+import { halamanAffiliate } from './affiliate.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -68,6 +69,7 @@ const RUTE = {
   mitra: () => halamanMitra(supabase, halaman),
   film: () => halamanFilm(supabase, halaman),
   garansi: () => halamanGaransi(supabase, halaman),
+  affiliate: () => halamanAffiliate(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;
