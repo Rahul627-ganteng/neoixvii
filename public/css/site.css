@@ -355,3 +355,40 @@ html.terjemah [data-t] { visibility: hidden; }
 .mitra-kartu .kode { font-family: var(--font-judul); letter-spacing: .08em; }
 .mitra-kartu .kontak { display: flex; gap: 8px; flex-wrap: wrap; }
 .tombol.kecil { min-height: 36px; padding: 0 14px; font-size: 14px; }
+
+/* ---------------------------------------------------------------- Tahap 10: info film */
+@media (max-width: 420px) { .nav .nav-film { display: none; } }
+.film-daftar { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.film-kartu { border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.film-kartu .sampul-wadah { position: relative; }
+.film-kartu .label-atas { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.film-kartu .label-atas .lencana { background: rgba(14, 14, 16, .72); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.film-kartu .label-atas .lencana.akan { background: var(--maroon); }
+.film-kartu .isi { padding: 14px 16px 16px; display: grid; gap: 8px; flex: 1; align-content: start; }
+.film-kartu h3 { margin: 0; font-size: 16px; text-transform: none; letter-spacing: .01em; }
+.film-kartu .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--teks-3); }
+.film-kartu .meta span:empty { display: none; }
+.film-kartu .sinopsis { margin: 0; font-size: 14px; color: var(--teks-2); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.film-kartu .sinopsis.buka { display: block; }
+.film-kartu .baca { justify-self: start; background: none; border: 0; padding: 0; color: var(--maroon-terang); font: 600 13px var(--font-isi); cursor: pointer; }
+.film-kartu .aksi { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.film-kartu .aksi .tombol { min-height: 40px; padding: 0 14px; font-size: 14px; flex-direction: column; gap: 0; line-height: 1.15; }
+.film-kartu .aksi .tombol small { font-size: 11px; font-weight: 500; opacity: .85; }
+.sampul { aspect-ratio: 2 / 3; width: 100%; overflow: hidden; background: var(--sorot); }
+.sampul img { width: 100%; height: 100%; object-fit: cover; }
+.film-kartu .sampul { aspect-ratio: 16 / 10; }
+.sampul.bawaan { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 16px;
+  background: radial-gradient(120% 90% at 0% 0%, #b3161d 0%, #5c0102 45%, #120708 100%); color: #fff; }
+.sampul.bawaan::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 0 55%, rgba(255,255,255,.07) 55% 63%, transparent 63%); }
+.sampul.bawaan .platform { position: relative; font: 700 11px var(--font-judul); letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
+.sampul.bawaan b { position: relative; font: 700 clamp(18px, 4.5vw, 24px)/1.1 var(--font-judul); text-transform: uppercase; letter-spacing: .03em; }
+.sampul.bawaan .emblem { position: absolute; right: 14px; bottom: 14px; width: 34px; height: auto; opacity: .7; }
+.film-baris { display: flex; gap: 12px; align-items: center; text-decoration: none; padding: 8px; border-radius: 12px; }
+.film-baris:hover { background: var(--sorot); }
+.film-baris .sampul.kecil { width: 52px; flex: none; border-radius: 8px; }
+.film-baris .sampul.kecil.bawaan { padding: 6px; }
+.film-baris .sampul.kecil.bawaan b { font-size: 8px; }
+.film-baris .sampul.kecil.bawaan .platform, .film-baris .sampul.kecil.bawaan .emblem { display: none; }
+.film-baris span { display: grid; gap: 2px; font-size: 14px; }
+.film-baris small { color: var(--teks-3); font-size: 12.5px; }
+.film-daftar-kecil { display: grid; gap: 2px; }

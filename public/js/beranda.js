@@ -1,4 +1,5 @@
-import { ambilFaqUmum, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
+import { ambilFaqUmum, ambilFilm, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
+import { kartuFilm } from './film-kartu.js';
 import { inggris, pasangKurs, persen, t } from './i18n.js';
 import { daftarFaq, el, kartuApp, kartuUlasan, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori } from './ui.js';
 
@@ -28,6 +29,7 @@ async function muat() {
     muatFaq(toko);
     muatPromo();
     muatUlasan();
+    muatFilm(apps);
   } catch {
     wadahUnggulan.replaceChildren(pesanGagal(t('gagal.katalog'), muat));
   }
@@ -48,6 +50,18 @@ async function muatFaq(toko) {
   }
   document.getElementById('faq').hidden = false;
   if (location.hash === '#faq') document.getElementById('faq').scrollIntoView();
+}
+
+async function muatFilm(apps) {
+  const film = (await ambilFilm()) ?? [];
+  if (!film.length) return;
+  // 2 sedang tayang terbaru + 2 akan tayang terdekat (atau sisanya dari yang ada)
+  const sedang = film.filter((f) => f.status === 'sedang');
+  const akan = film.filter((f) => f.status === 'akan');
+  const pilih = [...sedang.slice(0, 2), ...akan.slice(0, 2)];
+  for (const f of [...sedang.slice(2), ...akan.slice(2)]) if (pilih.length < 4) pilih.push(f);
+  document.getElementById('film-isi').replaceChildren(...pilih.map((f) => kartuFilm(f, apps)));
+  document.getElementById('film-beranda').hidden = false;
 }
 
 async function muatUlasan() {

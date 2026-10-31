@@ -90,3 +90,9 @@ label.row input[type=number] { width: 90px; }
 /* mitra & profil */
 .foto-pratinjau { width: 72px; height: 90px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); background: #fafafa; flex: none; }
 .avatar-kecil { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block; }
+/* film */
+.poster-kecil { width: 48px; height: 30px; object-fit: cover; border-radius: 6px; display: grid; place-items: center; }
+.poster-kecil.kosong { background: linear-gradient(135deg, #b3161d, #3d0001); color: #fff; font: 700 10px "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.poster-pratinjau { border: 1px dashed var(--line); border-radius: 10px; min-height: 60px; display: grid; place-items: center; overflow: hidden; background: #fafafa; max-width: 320px; }
+.poster-pratinjau img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.tab { flex: 1 1 auto; }

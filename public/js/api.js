@@ -92,6 +92,12 @@ export async function ambilPromo() {
   catch { return null; }
 }
 
+/** Info film & serial (sedang/akan tayang). Null kalau Tahap 10 belum dijalankan. */
+export async function ambilFilm() {
+  try { return await ambilSimpan('ixvii-film-v1', 'rpc/film_json'); }
+  catch { return null; }
+}
+
 /** Profil owner untuk halaman Tentang. Null kalau Tahap 9 belum dijalankan. */
 export async function ambilProfil() {
   try { return (await ambilSimpan('ixvii-profil-v1', 'owner_profile?select=*&id=eq.1'))[0] ?? null; }
