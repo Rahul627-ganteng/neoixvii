@@ -9,6 +9,7 @@ import { halamanPesanan } from './pesanan.js';
 import { halamanToko } from './toko.js';
 import { halamanPromo } from './promo.js';
 import { halamanUlasan } from './ulasan.js';
+import { halamanMitra } from './mitra.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -60,6 +61,7 @@ const RUTE = {
   toko: () => halamanToko(supabase, halaman),
   promo: () => halamanPromo(supabase, halaman),
   ulasan: () => halamanUlasan(supabase, halaman),
+  mitra: () => halamanMitra(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;

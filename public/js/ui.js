@@ -89,7 +89,10 @@ export function pasangKerangka(aktif, vars) {
     kaki.replaceChildren(el('div', { class: 'wadah' },
       el('span', {}, t('kaki.hak', { tahun: new Date().getFullYear() })),
       el('span', {}, t('kaki.info')),
-      el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
+      el('nav', { class: 'kaki-nav', 'aria-label': 'Footer' },
+        el('a', { href: '/tentang/' }, t('kaki.tentang')),
+        el('a', { href: '/mitra/' }, t('kaki.mitra')),
+        el('a', { href: '/testimoni/' }, t('kaki.ulasan'))),
       el('span', { class: 'catatan-kurs', hidden: true })));
   }
 }

@@ -87,3 +87,6 @@ label.row input[type=number] { width: 90px; }
 .judul-kecil { font-size: 14px; margin: 14px 0 0; }
 .aturan select { width: auto; flex: none; }
 .bintang-admin { color: #d98b00; letter-spacing: 1px; }
+/* mitra & profil */
+.foto-pratinjau { width: 72px; height: 90px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); background: #fafafa; flex: none; }
+.avatar-kecil { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block; }
