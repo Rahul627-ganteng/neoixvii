@@ -91,6 +91,14 @@ export async function ambilPromo() {
   catch { return null; }
 }
 
+/** Diskon rakitan tertinggi yang diiklankan: tingkat jumlah aplikasi teratas + bonus durasi terbesar. */
+export function diskonTertinggi(promo) {
+  const atas = promo?.rules?.at(-1);
+  if (!atas) return null;
+  const bonus = Math.max(0, ...(promo.durasi ?? []).map((d) => Number(d.pct)));
+  return { pct: Number(atas.pct) + bonus, min: Number(atas.min) };
+}
+
 /** Hitung total rakitan (diskon dibatasi batas aman di server). */
 export const hitungRakit = (kode) => rpc('bundle_quote', { p_codes: kode });
 

@@ -1,5 +1,5 @@
 // Halaman Promo & bundle: promo yang berjalan, bundle harga tetap (bisa langsung dipesan), dan ajakan rakit bundle.
-import { ambilKatalog, ambilPromo, ambilToko } from './api.js';
+import { ambilKatalog, ambilPromo, ambilToko, diskonTertinggi } from './api.js';
 import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { el, ikonApp, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlApp } from './ui.js';
@@ -20,9 +20,9 @@ function kartuPromo(p) {
       p.link ? el('a', { class: 'lihat', href: p.link }, t('promo.lihat')) : null));
 }
 
-function ajakanRakit(aturan) {
-  if (!aturan?.length) return null;
-  const atas = aturan.at(-1);
+function ajakanRakit(promo) {
+  const atas = diskonTertinggi(promo);
+  if (!atas) return null;
   return el('section', { class: 'seksi' }, el('div', { class: 'ajakan kaca' },
     el('div', {}, el('h3', {}, t('promo.rakitJ')), el('p', {}, t('promo.rakitT', { pct: persen(atas.pct), n: atas.min }))),
     el('a', { class: 'tombol', href: '/rakit/' }, t('promo.rakitTombol'))));
@@ -79,7 +79,7 @@ function tampilkan(promo, apps, toko) {
   }
 
   if (!promos.length && !bundles.length) bagian.push(el('div', { class: 'kosong kaca' }, el('p', {}, t('promo.kosong'))));
-  bagian.push(ajakanRakit(promo?.rules));
+  bagian.push(ajakanRakit(promo));
   isi.replaceChildren(...bagian.filter(Boolean));
 }
 

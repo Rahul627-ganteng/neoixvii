@@ -5,20 +5,22 @@ const pct = (x) => (x == null ? '–' : (Number(x) * 100).toLocaleString('id-ID'
 const MAKS_BANNER = 2 * 1024 * 1024;
 
 export async function halamanPromo(supabase, halaman) {
-  const [aturan, setelan, bundles, ringkas, items, promos, varian] = await Promise.all([
+  const [aturan, durasi, setelan, bundles, ringkas, items, promos, varian] = await Promise.all([
     q(supabase.from('bundle_rules').select('*').order('min_apps')),
+    q(supabase.from('bundle_duration_rules').select('*').order('min_days')),
     q(supabase.from('pricing_settings').select('*').eq('id', 1).single()),
     q(supabase.from('bundles').select('*').order('sort').order('id')),
     q(supabase.from('v_bundle_admin').select('*')),
     q(supabase.from('bundle_items').select('bundle_id,variant_id')),
     q(supabase.from('promos').select('*').order('sort').order('id')),
-    q(supabase.from('v_katalog_admin').select('code,aplikasi,tipe,varian,harga,hpp,harga_minimum,stok,tampil')
+    q(supabase.from('v_katalog_admin').select('code,aplikasi,tipe,varian,harga,hpp,harga_minimum,batas_bundle,batas_diskon_manual,stok,tampil')
       .order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian')),
   ]);
   const idVarian = await q(supabase.from('variants').select('id,code'));
   const ctx = { supabase, halaman, setelan, varian, kodeKeId: new Map(idVarian.map((v) => [v.code, v.id])), idKeKode: new Map(idVarian.map((v) => [v.id, v.code])) };
   halaman.replaceChildren(
-    kartuAturan(ctx, aturan),
+    kartuAturan(ctx, aturan, durasi),
+    kartuBatas(ctx),
     kartuBundle(ctx, bundles, ringkas, items),
     kartuPromoList(ctx, promos));
 }
@@ -49,7 +51,7 @@ function pilihBanner(supabase, awalan, saatBerubah, urlAwal) {
 }
 
 // ---------------------------------------------------------------- 1. aturan diskon
-function kartuAturan(ctx, aturan) {
+function kartuAturan(ctx, aturan, durasi) {
   const { supabase, setelan } = ctx;
   const daftar = el('div');
   const baris = (r) => {
@@ -88,19 +90,94 @@ function kartuAturan(ctx, aturan) {
     if (!daftarKode.length) return;
     try {
       const h = await q(supabase.rpc('bundle_quote', { p_codes: daftarKode }));
-      hasil.replaceChildren(`${h.jumlah_app} aplikasi · normal ${rp(h.total_normal)} · diskon ${rp(h.diskon)} (aturan ${pct(h.persen)}) · total ${rp(h.total)}`);
+      hasil.replaceChildren(`${h.jumlah_app} aplikasi · normal ${rp(h.total_normal)} · diskon ${rp(h.diskon)} (aturan ${pct(h.persen)}${Number(h.bonus_durasi) ? ` + bonus durasi s.d. ${pct(h.bonus_durasi)}` : ''}) · total ${rp(h.total)}`);
     } catch (err) { hasil.replaceChildren(el('span', { style: 'color:var(--red)' }, err.message)); }
   });
 
+  // bonus durasi
+  const daftarDurasi = el('div');
+  const barisDurasi = (r) => {
+    const hari = el('select', { 'aria-label': 'Durasi minimum' },
+      [[30, '1 bulan'], [60, '2 bulan'], [90, '3 bulan'], [180, '6 bulan'], [365, '1 tahun'], [730, '2 tahun']].map(([h, l]) =>
+        el('option', { value: h, selected: Number(r.min_days ?? 90) === h }, l)));
+    if (r.min_days && ![30, 60, 90, 180, 365, 730].includes(r.min_days)) hari.append(el('option', { value: r.min_days, selected: true }, `${r.min_days} hari`));
+    const persen = el('input', { type: 'number', min: '0.5', max: '30', step: '0.5', value: r.extra_pct != null ? +(r.extra_pct * 100).toFixed(2) : '', 'aria-label': 'Bonus (%)' });
+    const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
+    const hapus = el('button', { type: 'button', class: 'kecil bahaya' }, 'Hapus');
+    const kotak = el('div', { class: 'row aturan' }, el('label', { class: 'row muted' }, 'Paket mulai', hari, '→'),
+      el('label', { class: 'row muted' }, 'bonus +', persen, '%'), simpan, hapus);
+    simpan.addEventListener('click', async () => {
+      const p = Number(persen.value);
+      if (!(p > 0 && p <= 30)) return toast('Bonus harus 0,5–30%', true);
+      const isi = { min_days: Number(hari.value), extra_pct: p / 100, updated_at: new Date().toISOString() };
+      try {
+        Object.assign(r, r.id ? await q(supabase.from('bundle_duration_rules').update(isi).eq('id', r.id).select().single())
+          : await q(supabase.from('bundle_duration_rules').insert(isi).select().single()));
+        toast('Bonus durasi tersimpan');
+      } catch (err) { toast(/duplicate|unique/i.test(err.message) ? 'Sudah ada bonus untuk durasi itu' : 'Gagal: ' + err.message, true); }
+    });
+    hapus.addEventListener('click', async () => {
+      if (r.id && !confirm('Hapus bonus ini?')) return;
+      try { if (r.id) await q(supabase.from('bundle_duration_rules').delete().eq('id', r.id)); kotak.remove(); toast('Bonus dihapus'); }
+      catch (err) { toast('Gagal: ' + err.message, true); }
+    });
+    return kotak;
+  };
+  daftarDurasi.append(...durasi.map(barisDurasi));
+  const tambahDurasi = el('button', { type: 'button', class: 'sec kecil', onclick: () => daftarDurasi.append(barisDurasi({})) }, '+ Tambah bonus durasi');
+
   return el('section', { class: 'card' },
     el('h2', {}, 'Diskon Rakit Bundle'),
-    el('p', { class: 'sub' }, 'Diskon bertingkat untuk pembeli yang merakit bundle sendiri di halaman Rakit. Angka awal (5%, 8%, 10%) hanya contoh, ubah sesuai keputusanmu.'),
+    el('p', { class: 'sub' }, 'Diskon tiap paket = diskon jumlah aplikasi + bonus durasi. Makin banyak aplikasi dan makin panjang durasinya, makin besar diskonnya. Angka awal hanya contoh, ubah sesuai keputusanmu.'),
     el('div', { class: 'msg warn', style: 'margin:0 0 10px' },
-      `Batas aman tetap berlaku: diskon tiap paket berhenti di harga minimum (HPP + margin minimum di menu Margin). `,
-      `Paket yang HPP-nya kosong atau 0 hanya ikut diskon maksimal ${pct(setelan.bundle_fallback_pct)}.`),
+      `Kamu tidak akan pernah rugi: diskon tiap paket berhenti di harga minimum (HPP + margin minimum ${pct(setelan.min_margin_pct)} / ${rp(setelan.min_margin_rp)} di menu Margin). `,
+      `Paket tanpa HPP memakai batas di kartu "Batas diskon paket tanpa HPP" di bawah.`),
+    el('h3', { class: 'judul-kecil' }, 'Menurut jumlah aplikasi'),
     daftar, el('div', { class: 'row', style: 'margin-top:10px' }, tambah),
+    el('h3', { class: 'judul-kecil' }, 'Bonus durasi panjang (ditambahkan ke diskon jumlah aplikasi)'),
+    daftarDurasi, el('div', { class: 'row', style: 'margin-top:10px' }, tambahDurasi),
     el('label', { class: 'f' }, 'Simulasi (pakai aturan yang sudah tersimpan)'),
     el('div', { class: 'row' }, el('div', { style: 'flex:1 1 260px' }, kode), hitung), hasil);
+}
+
+// ---------------------------------------------------------------- batas diskon paket tanpa HPP
+function kartuBatas(ctx) {
+  const { supabase, setelan, varian, kodeKeId } = ctx;
+  const rows = varian.filter((v) => !(v.hpp > 0) || v.batas_diskon_manual != null);
+  const baris = (v) => {
+    const persen = el('input', { type: 'number', min: '0', max: '50', step: '0.5', style: 'width:80px',
+      value: v.batas_diskon_manual != null ? +(v.batas_diskon_manual * 100).toFixed(2) : '', placeholder: (+(setelan.bundle_fallback_pct * 100).toFixed(2)).toString(),
+      'aria-label': `Batas diskon ${v.code}` });
+    const terendah = el('span', { class: 'muted' });
+    const hitung = () => {
+      const p = persen.value === '' ? Number(setelan.bundle_fallback_pct) : Number(persen.value) / 100;
+      const batas = v.hpp > 0 ? v.batas_bundle : v.harga - Math.floor(v.harga * p);
+      terendah.textContent = rp(batas);
+    };
+    persen.addEventListener('input', hitung);
+    hitung();
+    const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
+    simpan.addEventListener('click', async () => {
+      const kosong = persen.value === '';
+      const p = Number(persen.value);
+      if (!kosong && !(p >= 0 && p <= 50)) return toast('Isi 0–50%, atau kosongkan untuk memakai pengaturan umum', true);
+      try {
+        await q(supabase.from('variant_costs').upsert({ variant_id: kodeKeId.get(v.code), bundle_max_pct: kosong ? null : p / 100 }, { onConflict: 'variant_id' }));
+        v.batas_diskon_manual = kosong ? null : p / 100;
+        toast(`${v.aplikasi} ${v.varian}: batas diskon tersimpan`);
+      } catch (err) { toast('Gagal: ' + err.message, true); }
+    });
+    return el('tr', {}, td(v.code), td(`${v.aplikasi} · ${v.tipe} · ${v.varian}`), td(rp(v.harga), true),
+      td(v.hpp == null ? el('span', { class: 'tag kuning' }, 'kosong') : v.hpp === 0 ? el('span', { class: 'tag kuning' }, '0') : rp(v.hpp), true),
+      td(el('label', { class: 'row muted' }, persen, '%')), td(terendah, true), td(simpan));
+  };
+  return el('section', { class: 'card' },
+    el('h2', {}, 'Batas diskon paket tanpa HPP'),
+    el('p', { class: 'sub' }, `Paket ini belum punya HPP (atau HPP-nya 0), jadi sistem tidak bisa menghitung batas untungnya sendiri. `,
+      `Isi berapa persen paket ini boleh dipotong di bundle. Kosong = pakai pengaturan umum di menu Margin (sekarang ${pct(setelan.bundle_fallback_pct)}). `,
+      `Kalau nanti HPP-nya diisi lewat Excel, batas dari HPP yang dipakai.`),
+    rows.length ? tabel(['Kode', 'Paket', '>Harga', '>HPP', 'Boleh dipotong', '>Harga terendah', ''], rows.map(baris))
+      : el('p', { class: 'muted' }, 'Semua paket sudah punya HPP.'));
 }
 
 // ---------------------------------------------------------------- 2. bundle harga tetap
@@ -114,14 +191,13 @@ function kartuBundle(ctx, bundles, ringkas, items) {
     if (!r) return [];
     const w = [];
     if (r.jumlah_item < 2) w.push(['merah', 'Isi minimal 2 paket']);
-    if (r.batas_aman != null && r.price < r.batas_aman) w.push(['merah', `Di bawah batas aman ${rp(r.batas_aman)}`]);
-    if (r.batas_aman == null && r.jumlah_item) w.push(['kuning', 'Ada HPP kosong, batas aman tidak bisa dihitung']);
+    if (r.jumlah_item && r.price < r.batas_aman) w.push(['merah', `Di bawah batas untung, website memakai ${rp(r.harga_tampil)}`]);
     if (r.total_normal && r.price >= r.total_normal) w.push(['kuning', 'Tidak lebih murah dari harga normal']);
     if (r.jumlah_item && !r.semua_tersedia) w.push(['kuning', 'Ada paket habis/tersembunyi, bundle tidak tampil']);
     return w;
   };
   const gambarDaftar = () => {
-    daftar.replaceChildren(bundles.length ? tabel(['Bundle', '>Harga', '>Normal', '>Batas aman', 'Status', ''],
+    daftar.replaceChildren(bundles.length ? tabel(['Bundle', '>Harga', '>Normal', '>Harga terendah', 'Status', ''],
       bundles.map((b) => {
         const r = ringkas.find((x) => x.id === b.id);
         return el('tr', {}, td(el('span', {}, el('b', {}, b.name), el('br'), el('span', { class: 'muted' }, `${r?.jumlah_item ?? 0} paket`))),
@@ -161,23 +237,22 @@ function kartuBundle(ctx, bundles, ringkas, items) {
 
     function gambarIsi() {
       const rows = terpilih.map((k) => perKode.get(k)).filter(Boolean);
-      daftarIsi.replaceChildren(rows.length ? tabel(['Kode', 'Paket', '>Harga', '>Harga min.', 'Stok', ''], rows.map((v) => el('tr', {},
-        td(v.code), td(`${v.aplikasi} · ${v.tipe} · ${v.varian}`), td(rp(v.harga), true), td(rp(v.hpp > 0 ? v.harga_minimum : null), true),
+      daftarIsi.replaceChildren(rows.length ? tabel(['Kode', 'Paket', '>Harga', '>Harga terendah', 'Stok', ''], rows.map((v) => el('tr', {},
+        td(v.code), td(`${v.aplikasi} · ${v.tipe} · ${v.varian}`), td(rp(v.harga), true), td(rp(v.batas_bundle), true),
         td(el('span', { class: 'tag ' + (v.stok === 'habis' || !v.tampil ? 'merah' : 'hijau') }, !v.tampil ? 'tersembunyi' : v.stok === 'habis' ? 'habis' : 'tersedia')),
         td(el('button', { type: 'button', class: 'kecil bahaya', onclick: () => { terpilih.splice(terpilih.indexOf(v.code), 1); gambarIsi(); } }, 'Keluarkan')))))
         : el('p', { class: 'muted' }, 'Belum ada paket. Tambahkan minimal 2.'));
       const normal = rows.reduce((s, v) => s + v.harga, 0);
-      const batas = rows.length && rows.every((v) => v.hpp > 0) ? rows.reduce((s, v) => s + Math.min(v.harga, v.harga_minimum), 0) : null;
+      const batas = rows.length ? Math.min(normal, Math.ceil(rows.reduce((s, v) => s + v.batas_bundle, 0) / 500) * 500) : null;
       const h = Number(harga.value);
       const teks = [`Harga normal ${rp(normal)}`];
       let kelas = 'ok';
-      if (batas != null) teks.push(`batas aman ${rp(batas)}`);
+      if (batas != null) teks.push(`harga terendah yang masih untung ${rp(batas)}`);
       if (h > 0 && normal) {
         teks.push(`harga bundle ${rp(h)} (hemat ${pct(1 - h / normal)})`);
-        if (batas != null && h < batas) { kelas = 'err'; teks.push('DI BAWAH BATAS AMAN'); }
+        if (batas != null && h < batas) { kelas = 'err'; teks.push(`DI BAWAH BATAS UNTUNG: website akan memakai ${rp(batas)}`); }
         if (h >= normal) { kelas = 'warn'; teks.push('tidak lebih murah dari harga normal'); }
       }
-      if (batas == null && rows.length) { kelas = kelas === 'err' ? 'err' : 'warn'; teks.push('ada HPP kosong/0, batas aman tidak bisa dihitung'); }
       hitungan.className = 'msg ' + kelas;
       hitungan.textContent = teks.join(' · ');
     }
@@ -189,7 +264,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
       const h = Math.round(Number(harga.value));
       if (!nama.value.trim() || !(h >= 1000)) return toast('Isi nama dan harga bundle', true);
       if (terpilih.length < 2) return toast('Bundle butuh minimal 2 paket', true);
-      if (aktif.checked && hitungan.classList.contains('err') && !confirm('Harga bundle di bawah batas aman. Tetap aktifkan?')) return;
+      if (hitungan.classList.contains('err') && !confirm('Harga ini di bawah batas untung, jadi website otomatis memakai harga terendah yang masih untung. Lanjut simpan?')) return;
       const isi = {
         name: nama.value.trim(), name_en: namaEn.value.trim() || null, description: desk.value.trim() || null, description_en: deskEn.value.trim() || null,
         price: h, starts_on: mulai.value || null, ends_on: selesai.value || null, is_active: aktif.checked, banner_url: banner, updated_at: new Date().toISOString(),

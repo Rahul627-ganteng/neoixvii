@@ -84,3 +84,5 @@ label.row input[type=number] { width: 90px; }
 .banner-pratinjau { border: 1px dashed var(--line); border-radius: 10px; min-height: 60px; display: grid; place-items: center; overflow: hidden; background: #fafafa; }
 .banner-pratinjau img { width: 100%; max-height: 180px; object-fit: cover; }
 .item-form h3 { font-size: 15px; }
+.judul-kecil { font-size: 14px; margin: 14px 0 0; }
+.aturan select { width: auto; flex: none; }

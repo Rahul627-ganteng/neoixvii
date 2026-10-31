@@ -1,7 +1,7 @@
 // Rakit bundle sendiri: pembeli memilih satu paket dari beberapa aplikasi, diskon dihitung di server
 // (rpc bundle_quote) dan tidak pernah membuat harga turun di bawah batas aman.
 import { ambilKatalog, ambilPromo, ambilToko, hitungRakit } from './api.js';
-import { harga, labelTipe, labelVarian, pasangKurs, persen, t, teksGalat } from './i18n.js';
+import { harga, labelTipe, labelVarian, pasangKurs, persen, t, teksDurasi, teksGalat } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { el, ikonApp, kerangkaMemuat, pasangKerangka, pesanGagal, tulisCatatanKurs } from './ui.js';
 
@@ -14,6 +14,7 @@ const bersih = (s) => String(s ?? '').toLowerCase().normalize('NFKD').replace(/[
 
 let data = null;          // { kategori, apps }
 let aturan = [];          // [{min, pct}]
+let bonusDurasi = [];     // [{hari, pct}] bonus untuk paket berdurasi panjang
 const pilihan = new Map(); // slug aplikasi → varian (dengan tipe & nama aplikasi)
 let panel = null;
 let petunjuk = null;
@@ -31,8 +32,13 @@ function gambarTingkat() {
   const aktif = [...aturan].reverse().find((a) => n >= a.min);
   wadahTingkat.replaceChildren(...aturan.map((a, i) => el('span', { 'aria-current': String(a === aktif) },
     el('b', {}, t(i === aturan.length - 1 ? 'rakit.tingkatPlus' : 'rakit.tingkat', { n: a.min })),
-    t('rakit.hingga', { pct: persen(a.pct) }))));
+    t('rakit.hingga', { pct: persen(a.pct) }))),
+  bonusDurasi.length ? el('div', { class: 'tingkat-durasi' }, el('small', {}, t('rakit.bonusJudul')),
+    bonusDurasi.map((d) => el('span', {}, el('b', {}, t('rakit.durasiMin', { d: teksDurasi(d.hari) })), `+${persen(d.pct)}`))) : null);
 }
+
+/** Bonus durasi untuk paket dengan durasi h hari (0 kalau tidak ada). */
+const bonusUntuk = (h) => Math.max(0, ...bonusDurasi.filter((d) => (h ?? 0) >= d.hari).map((d) => d.pct));
 
 // ---------------------------------------------------------------- daftar aplikasi
 function simpanUrl() {
@@ -65,9 +71,11 @@ function kartuApp(app) {
               d.open = false;
               perbarui();
             });
+            const bonus = aturan.length ? bonusUntuk(i.h) : 0;
             return el('label', { class: 'opsi' + (habis ? ' habis' : '') }, input,
               el('span', {}, el('span', { class: 'lbl' }, labelVarian(i.d)), el('br'),
-                el('span', { class: 'lencana ' + (habis ? 'habis' : 'ada') }, habis ? t('app.habis') : t('app.tersedia'))),
+                el('span', { class: 'lencana ' + (habis ? 'habis' : 'ada') }, habis ? t('app.habis') : t('app.tersedia')),
+                bonus && !habis ? el('span', { class: 'lencana bonus' }, t('rakit.bonusLencana', { pct: persen(bonus) })) : null),
               el('span', { class: 'hrg' }, harga(i.p)));
           })))),
       pilihan.has(app.slug) ? el('button', { class: 'tombol garis hapus-pilihan', type: 'button', onclick: () => { pilihan.delete(app.slug); perbarui(); } }, t('rakit.hapusPilihan')) : null));
@@ -157,6 +165,7 @@ async function muat() {
     tulisCatatanKurs();
     data = katalog;
     aturan = (promo?.rules ?? []).map((r) => ({ min: Number(r.min), pct: Number(r.pct) })).sort((a, b) => a.min - b.min);
+    bonusDurasi = (promo?.durasi ?? []).map((d) => ({ hari: Number(d.hari), pct: Number(d.pct) })).sort((a, b) => a.hari - b.hari);
 
     // pilihan awal dari URL (?pilih=V0004,V0171), misalnya dari halaman aplikasi
     const kodeAwal = (new URLSearchParams(location.search).get('pilih') || '').split(',').filter(Boolean);

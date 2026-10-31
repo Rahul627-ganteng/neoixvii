@@ -1,4 +1,4 @@
-import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko } from './api.js';
+import { ambilDetail, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, diskonTertinggi } from './api.js';
 import { harga, inggris, labelTipe, labelVarian, pasangKurs, persen, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { daftarFaq, el, gabung, ikonApp, kartuApp, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
@@ -150,8 +150,7 @@ function bagianFaq(app, infoTipe, faqs) {
 // ---------------------------------------------------------------- ringkasan & pemesanan
 function bagianPesan(app, toko, promo) {
   // ajakan rakit bundle (kalau aturan diskon rakitan sudah ada)
-  const aturan = promo?.rules ?? [];
-  const tertinggi = aturan.at(-1);
+  const tertinggi = diskonTertinggi(promo);
   const ajak = tertinggi ? el('a', { class: 'ajak-rakit', href: '/rakit/' }, t('rakit.ajak', { pct: persen(tertinggi.pct) })) : null;
   const { aside, atur } = panelPesan({ toko, tanya: t('wa.tanya', { app: app.nama }), sisipan: ajak ? [ajak] : [] });
   const pilih = (v) => {
