@@ -311,3 +311,47 @@ html.terjemah [data-t] { visibility: hidden; }
 .bintang-input label:has(input:focus-visible) { outline: 2px solid var(--maroon-terang); }
 .row-cek { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 .kaki a { color: inherit; }
+
+/* ---------------------------------------------------------------- Tahap 9: tentang & mitra */
+.kaki-nav { display: flex; gap: 16px; flex-wrap: wrap; flex-basis: 100%; }
+.kaki-nav a { text-decoration: none; color: var(--teks-2); font-weight: 500; }
+.kaki-nav a:hover { color: var(--teks); }
+.profil { display: grid; gap: 28px; align-items: center; padding-top: 36px; }
+@media (min-width: 860px) { .profil { grid-template-columns: minmax(280px, 380px) 1fr; gap: 56px; padding-top: 56px; } }
+.profil-foto { position: relative; margin: 0 auto; width: 100%; max-width: 380px; aspect-ratio: 4 / 5; border-radius: 28px; overflow: hidden;
+  background: #fff; border: 1px solid var(--garis); box-shadow: 0 30px 80px var(--kilau1), var(--bayang); }
+.profil-foto > img:first-child { width: 100%; height: 100%; object-fit: cover; }
+.profil-foto::after { content: ""; position: absolute; inset: auto 0 0 0; height: 38%; background: linear-gradient(to top, rgba(96, 1, 2, .78), rgba(96, 1, 2, 0)); }
+.profil-foto .emblem { position: absolute; left: 18px; bottom: 16px; width: 56px; height: auto; z-index: 1; }
+.profil-teks .label { margin: 0; color: var(--maroon-terang); font: 700 13px var(--font-judul); letter-spacing: .14em; text-transform: uppercase; }
+.profil-teks h1 { margin: 8px 0 4px; font-size: clamp(34px, 9vw, 64px); letter-spacing: .03em; }
+.profil-teks .nama-lengkap { margin: 0 0 14px; color: var(--teks-3); font-size: 15px; }
+.profil-teks .meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.profil-teks .meta .lencana { height: 28px; padding: 0 12px; font-size: 13px; }
+.kutipan { margin: 24px 0 0; padding: 14px 18px; border-left: 3px solid var(--maroon-terang); border-radius: 0 14px 14px 0;
+  background: var(--sorot); font-size: clamp(16px, 2.6vw, 19px); font-style: italic; line-height: 1.5; color: var(--teks); }
+.profil-teks .aksi { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.profil-tentang p { max-width: 44em; font-size: 16.5px; line-height: 1.75; color: var(--teks-2); margin: 0 0 14px; }
+.profil-tentang p:first-child { color: var(--teks); font-size: 18px; }
+.fokus .kaca { position: relative; padding: 18px 20px; }
+.fokus .nomor { display: block; font: 700 12px var(--font-judul); letter-spacing: .14em; color: var(--maroon-terang); margin-bottom: 8px; }
+.minat { display: flex; flex-wrap: wrap; gap: 8px; }
+.minat span { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--garis); background: var(--sorot); font-size: 14px; }
+
+.saring-mitra { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.saring-mitra .chips { flex: 1 1 auto; min-width: 0; }
+.saring-mitra select { height: 38px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--garis); background: var(--isian); color: var(--teks); font: 14px var(--font-isi); }
+.cek { padding: 12px 14px; border-radius: 14px; font-size: 14.5px; margin: 0 0 14px; }
+.cek.ok { background: var(--hijau-latar); color: var(--hijau-teks); }
+.cek.tidak { background: var(--merah-latar); color: var(--merah-teks); }
+.mitra-daftar { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); }
+.mitra-kartu { padding: 16px 18px; border-radius: 18px; display: grid; gap: 10px; align-content: start; }
+.mitra-kartu .atas { display: flex; gap: 12px; align-items: center; }
+.mitra-kartu .avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; border: 2px solid var(--garis); background: var(--sorot); }
+.mitra-kartu h3 { margin: 0 0 4px; font-size: 16px; text-transform: none; letter-spacing: .01em; }
+.mitra-kartu .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.mitra-kartu .bio { margin: 0; font-size: 14px; }
+.mitra-kartu .baris-kode { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13.5px; }
+.mitra-kartu .kode { font-family: var(--font-judul); letter-spacing: .08em; }
+.mitra-kartu .kontak { display: flex; gap: 8px; flex-wrap: wrap; }
+.tombol.kecil { min-height: 36px; padding: 0 14px; font-size: 14px; }

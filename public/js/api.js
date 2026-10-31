@@ -92,6 +92,17 @@ export async function ambilPromo() {
   catch { return null; }
 }
 
+/** Profil owner untuk halaman Tentang. Null kalau Tahap 9 belum dijalankan. */
+export async function ambilProfil() {
+  try { return (await ambilSimpan('ixvii-profil-v1', 'owner_profile?select=*&id=eq.1'))[0] ?? null; }
+  catch { return null; }
+}
+/** Mitra resmi yang aktif (kontak hanya kalau mitra mengizinkan). */
+export async function ambilMitra() {
+  try { return await ambilSimpan('ixvii-mitra-v1', 'rpc/mitra_json'); }
+  catch { return null; }
+}
+
 /** Ulasan pembeli yang sudah ditampilkan admin + ringkasan rating per aplikasi. Null kalau Tahap 8 belum dijalankan. */
 export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
