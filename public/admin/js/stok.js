@@ -164,6 +164,16 @@ export async function halamanStok(supabase, halaman) {
     const tampil = el('input', { type: 'checkbox', id: 'vTampil' });
     tampil.checked = r.tampil !== false;
 
+    const hapus = baru ? null : el('button', { type: 'button', class: 'bahaya' }, 'Hapus varian');
+    hapus?.addEventListener('click', async () => {
+      if (!confirm(`Hapus permanen ${r.code} · ${r.aplikasi} ${r.tipe} ${r.varian}?\n\nPesanan lama tetap tersimpan lengkap. Kalau hanya ingin tidak tampil di website sementara, hilangkan centang "Tampilkan di website" saja.`)) return;
+      hapus.disabled = true;
+      try {
+        const h = await q(supabase.rpc('hapus_varian', { p_code: r.code }));
+        toast(`${r.code} dihapus${h.pesanan_lama ? ` (${h.pesanan_lama} pesanan lama tetap tersimpan)` : ''}`);
+        segarkan();
+      } catch (err) { toast(err.message, true); hapus.disabled = false; }
+    });
     const simpan = el('button', { type: 'button' }, baru ? 'Tambah varian' : 'Simpan varian');
     simpan.addEventListener('click', async () => {
       const p = {
@@ -194,7 +204,7 @@ export async function halamanStok(supabase, halaman) {
       el('div', { class: 'row', style: 'margin-top:10px' }, hitung, el('label', { for: 'vHitung' }, 'Hitung jumlah stok (otomatis Habis kalau 0)')),
       kotakJumlah,
       el('div', { class: 'row', style: 'margin-top:8px' }, tampil, el('label', { for: 'vTampil' }, 'Tampilkan di website')),
-      el('div', { class: 'row', style: 'margin-top:12px' }, simpan, el('button', { type: 'button', class: 'sec', onclick: () => editor.replaceChildren() }, 'Tutup'))));
+      el('div', { class: 'row', style: 'margin-top:12px' }, simpan, el('button', { type: 'button', class: 'sec', onclick: () => editor.replaceChildren() }, 'Tutup'), hapus)));
     editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
     (baru ? (app.value ? tipe : app) : harga).focus({ preventScroll: true });
   }

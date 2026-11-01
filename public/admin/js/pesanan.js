@@ -1,6 +1,7 @@
 // Menu Pesanan: daftar pesanan dari website, ubah status, hubungi pembeli lewat WhatsApp, pantau masa aktif.
 import { el, q, rp, toast, waktu, hariIni, tautanWa } from './alat.js';
 import { pesanGaransiLink, pesanGaransiManual } from './garansi-baca.js';
+import { formPesananBaru, SUMBER } from './pesanan-baru.js';
 
 export const STATUS = {
   menunggu_bayar: { label: 'Menunggu bayar', kelas: 'kuning' },
@@ -139,7 +140,8 @@ export async function halamanPesanan(supabase, halaman) {
         el('div', {}, el('b', { class: 'kode' }, o.code), ' ', el('span', { class: 'tag ' + st.kelas }, st.label),
           en ? el('span', { class: 'tag' }, 'EN') : null,
           o.kind === 'bundle' ? el('span', { class: 'tag biru' }, 'Bundle: ' + (o.bundle_name || '–')) : null,
-          o.kind === 'rakit' ? el('span', { class: 'tag biru' }, 'Rakitan') : null),
+          o.kind === 'rakit' ? el('span', { class: 'tag biru' }, 'Rakitan') : null,
+          o.channel && o.channel !== 'web' ? el('span', { class: 'tag' }, SUMBER[o.channel] || o.channel) : null),
         el('span', { class: 'muted' }, waktu(o.created_at))),
       el('div', { class: 'row', style: 'margin-top:6px' },
         el('span', {}, o.customer_name), el('span', { class: 'muted' }, '+' + o.customer_wa),
@@ -191,8 +193,21 @@ export async function halamanPesanan(supabase, halaman) {
   gambarRingkas();
   gambarDaftar();
 
-  halaman.replaceChildren(ringkas, el('section', { class: 'card' },
-    el('h2', {}, 'Pesanan'),
+  // pesanan dari panel admin (setelah migration pesanan_admin_laporan)
+  const wadahBaru = el('div');
+  const tombolBaru = el('button', { type: 'button' }, '+ Pesanan baru');
+  tombolBaru.addEventListener('click', async () => {
+    tombolBaru.disabled = true;
+    try {
+      wadahBaru.replaceChildren(await formPesananBaru(supabase, {
+        selesai: (kode) => { saringan = 'semua'; halamanPesanan(supabase, halaman).then(() => document.querySelector(`article.pesanan .kode`)?.scrollIntoView({ block: 'center' })); },
+        tutup: () => { wadahBaru.replaceChildren(); tombolBaru.disabled = false; },
+      }));
+      wadahBaru.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) { toast('Gagal membuka form: ' + err.message, true); tombolBaru.disabled = false; }
+  });
+  halaman.replaceChildren(ringkas, wadahBaru, el('section', { class: 'card' },
+    el('div', { class: 'row', style: 'justify-content:space-between' }, el('h2', {}, 'Pesanan'), 'channel' in (pesanan[0] ?? { channel: 1 }) ? tombolBaru : null),
     el('p', { class: 'sub' }, 'Pembeli membuat pesanan di website lalu mengirimnya ke WhatsApp toko. Ubah status setelah pembayaran masuk. Status "Aktif" otomatis mengisi tanggal mulai (hari ini) dan tanggal berakhir sesuai durasi paket.'),
     tab, el('div', { style: 'margin-top:10px' }, cari), daftar));
 }
