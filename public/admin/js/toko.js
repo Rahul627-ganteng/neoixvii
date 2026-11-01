@@ -1,5 +1,6 @@
 // Menu Toko & konten: nomor WhatsApp, cara bayar, kurs dolar, buka/tutup pesanan,
 // FAQ beranda, dan penjelasan tipe paket (Sharing, Private, ...).
+import { kartuKebijakan } from './kebijakan.js';
 import { el, isian, q, rapikanWa, rp, toast, waktu } from './alat.js';
 
 const kata = (s) => String(s ?? '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
@@ -13,7 +14,7 @@ export async function halamanToko(supabase, halaman) {
     q(supabase.from('plan_type_info').select('*').order('sort').order('id')),
     q(supabase.from('plan_groups').select('label,apps(name)')),
   ]);
-  halaman.replaceChildren(kartuToko(supabase, toko ?? { id: 1, orders_open: true }), kartuFaq(supabase, faqs), kartuTipe(supabase, tipe, grup));
+  halaman.replaceChildren(kartuToko(supabase, toko ?? { id: 1, orders_open: true }), await kartuKebijakan(supabase), kartuFaq(supabase, faqs), kartuTipe(supabase, tipe, grup));
 }
 
 // ---------------------------------------------------------------- pengaturan toko

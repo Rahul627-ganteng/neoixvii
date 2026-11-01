@@ -122,6 +122,11 @@ export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
   catch { return null; }
 }
+/** Halaman kebijakan (syarat, privasi, garansi). Null kalau belum ada. */
+export async function ambilHalaman(slug) {
+  try { return (await ambil(`site_pages?select=slug,title,title_en,body,body_en,updated_at&slug=eq.${encodeURIComponent(slug)}`))[0] ?? null; }
+  catch { return null; }
+}
 /** Saldo komisi affiliate dari link pribadinya (tanpa HPP & nama pembeli). Null kalau link salah. */
 export const ambilSaldoAffiliate = (token) => rpc('saldo_affiliate', { p_token: token });
 /** Data form aktivasi garansi dari link sekali pakai. */

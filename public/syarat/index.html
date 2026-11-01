@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0e10">
+<script>
+/* Pasang bahasa & tema sebelum halaman tampil supaya tidak berkedip. */
+(function () {
+  var d = document.documentElement, b = null, t = null, q = null;
+  try { q = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+  try {
+    if (q === 'en' || q === 'id') localStorage.setItem('ixvii-bahasa', q);
+    b = localStorage.getItem('ixvii-bahasa'); t = localStorage.getItem('ixvii-tema');
+  } catch (e) {}
+  if (q === 'en' || q === 'id') b = q;
+  if (b === 'en') { d.lang = 'en'; d.classList.add('terjemah'); setTimeout(function () { d.classList.remove('terjemah'); }, 2000); }
+  if (t === 'terang') { d.setAttribute('data-tema', 'terang'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f6f4f4'); }
+})();
+</script>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site.css">
+<title>Syarat layanan — IXVII.CO</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IXVII.CO">
+<meta property="og:title" content="Syarat layanan — IXVII.CO">
+<meta property="og:description" content="Syarat layanan, kebijakan privasi, serta garansi dan refund IXVII.CO.">
+<meta property="og:url" content="https://neoixvii.netlify.app/syarat/">
+<meta property="og:image" content="https://neoixvii.netlify.app/assets/brand/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" data-t-content="meta.kebijakan" content="Syarat layanan, kebijakan privasi, serta garansi dan refund IXVII.CO.">
+<script type="module" src="/js/kebijakan.js"></script>
+</head>
+<body data-halaman="syarat">
+<header id="kepala" class="kepala"><div class="wadah"><a class="merek" href="/"><span>IXVII.CO</span></a></div></header>
+<main class="wadah" id="isi" aria-live="polite" style="max-width:780px"></main>
+<footer id="kaki" class="kaki"></footer>
+<noscript><p class="wadah">Aktifkan JavaScript untuk melihat katalog. / Please enable JavaScript to see the catalog.</p></noscript>
+</body>
+</html>
