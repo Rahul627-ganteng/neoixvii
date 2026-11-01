@@ -14,6 +14,7 @@ import { halamanFilm } from './film.js';
 import { halamanGaransi } from './garansi.js';
 import { halamanStok } from './stok.js';
 import { halamanAffiliate } from './affiliate.js';
+import { halamanLaporan } from './laporan.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -70,6 +71,7 @@ const RUTE = {
   film: () => halamanFilm(supabase, halaman),
   garansi: () => halamanGaransi(supabase, halaman),
   affiliate: () => halamanAffiliate(supabase, halaman),
+  laporan: () => halamanLaporan(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;
@@ -327,7 +329,7 @@ async function margin() {
 }
 
 // ---------------------------------------------------------------- 5. riwayat
-const NAMA_FIELD = { dibuat: 'Dibuat', harga: 'Harga', hpp: 'HPP', stok: 'Stok', tampil: 'Tampil', label: 'Nama varian', jumlah: 'Sisa stok', durasi: 'Durasi (hari)', tipe: 'Tipe akun' };
+const NAMA_FIELD = { dibuat: 'Dibuat', harga: 'Harga', hpp: 'HPP', stok: 'Stok', tampil: 'Tampil', label: 'Nama varian', jumlah: 'Sisa stok', durasi: 'Durasi (hari)', tipe: 'Tipe akun', dihapus: 'Varian dihapus' };
 const nilaiField = (f, v) => (v == null ? '–' : (f === 'harga' || f === 'hpp' || f === 'dibuat') && /^\d+$/.test(v) ? rp(v)
   : f === 'tampil' ? (v === 'true' ? 'Ya' : 'Tidak') : f === 'stok' ? (v === 'habis' ? 'Habis' : 'Tersedia') : v);
 const barisRiwayat = (h) => el('tr', {}, td(waktu(h.changed_at)), td(h.variants ? `${h.variants.code} · ${h.variants.label}` : '–'),
