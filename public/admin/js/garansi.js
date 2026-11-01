@@ -1,6 +1,7 @@
 // Menu Garansi: baca balasan WhatsApp aktivasi garansi secara otomatis, daftar garansi, screenshot login,
 // dan pengingat WhatsApp sebelum langganan berakhir.
 import { el, hariIni, isian, q, tabel, td, toast, waktu, tautanWa } from './alat.js';
+import { formGaransiManual } from './garansi-manual.js';
 import { bacaBalasanGaransi, cocokkanPesanan, pesanGaransiLink, pesanGaransiManual, pesanPengingat, rapikanHp } from './garansi-baca.js';
 
 const MAKS_SS = 3 * 1024 * 1024;
@@ -24,11 +25,12 @@ export async function halamanGaransi(supabase, halaman) {
     return;
   }
   const segarkan = () => halamanGaransi(supabase, halaman);
-  halaman.replaceChildren(kartuBelum(supabase, pesanan, garansi), kartuTempel(supabase, pesanan, segarkan), kartuDaftar(supabase, garansi), kartuTemplate());
+  halaman.replaceChildren(kartuBelum(supabase, pesanan, garansi, segarkan), kartuTempel(supabase, pesanan, segarkan), kartuDaftar(supabase, garansi), kartuTemplate());
 }
 
 // ---------------------------------------------------------------- pesanan aktif tanpa garansi
-function kartuBelum(supabase, pesanan, garansi) {
+function kartuBelum(supabase, pesanan, garansi, segarkan) {
+  const slot = el('div');
   const sudah = new Set(garansi.map((g) => g.order_id).filter(Boolean));
   const sekarang = Date.now();
   const daftar = pesanan.filter((o) => o.status === 'aktif' && !sudah.has(o.id))
@@ -43,7 +45,12 @@ function kartuBelum(supabase, pesanan, garansi) {
         aksi.replaceChildren(el('a', { class: 'btn kecil wa', href: tautanWa(o.customer_wa, pesanGaransiLink(o, `${location.origin}/garansi/?t=${h.token}`)), target: '_blank', rel: 'noopener' }, 'Kirim lewat WhatsApp'));
       } catch (err) { toast('Gagal: ' + err.message, true); buat.disabled = false; }
     });
-    aksi.append(buat);
+    const aktifkan = el('button', { type: 'button', class: 'kecil' }, 'Aktifkan garansi');
+    aktifkan.addEventListener('click', () => {
+      slot.replaceChildren(formGaransiManual(supabase, o, { selesai: segarkan, tutup: () => slot.replaceChildren() }));
+      slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    aksi.append(aktifkan, buat);
     const jam = menunggu ? Math.max(1, Math.ceil((Date.parse(o.delivered_at) + 864e5 - sekarang) / 36e5)) : 0;
     return el('tr', {}, td(el('b', {}, o.code)), td(o.customer_name), td([...new Set(o.order_items.map((i) => i.app_name))].join(', ')),
       td(o.delivered_at ? waktu(o.delivered_at) : '–'),
@@ -51,7 +58,8 @@ function kartuBelum(supabase, pesanan, garansi) {
   };
   return el('section', { class: 'card' },
     el('h2', {}, `Pesanan aktif tanpa garansi (${daftar.length})`),
-    el('p', { class: 'sub' }, 'Garansi hanya aktif kalau pembeli mengirim form (atau balasan) dalam 1x24 jam sejak akun dikirim. Kuning = masih ditunggu, merah = garansi tidak aktif.'),
+    el('p', { class: 'sub' }, 'Garansi hanya aktif kalau pembeli mengirim form (atau balasan) dalam 1x24 jam sejak akun dikirim. Kuning = masih ditunggu, merah = garansi tidak aktif. Kalau pembeli sudah kirim screenshot lewat chat, klik "Aktifkan garansi" lalu tempel atau pilih screenshot-nya.'),
+    slot,
     daftar.length ? tabel(['Pesanan', 'Pembeli', 'Aplikasi', 'Akun dikirim', 'Garansi', ''], daftar.map(baris))
       : el('p', { class: 'muted' }, 'Semua pesanan aktif sudah punya garansi.'));
 }
@@ -175,7 +183,7 @@ function kartuDaftar(supabase, garansi) {
           el('div', {}, el('b', {}, g.customer_name), ' ',
             el('span', { class: 'tag ' + (g.status === 'aktif' ? 'hijau' : 'merah') }, g.status === 'aktif' ? 'Garansi aktif ✓' : 'Garansi tidak aktif'),
             g.on_time === false ? el('span', { class: 'tag kuning' }, 'lewat 1x24 jam') : g.on_time ? el('span', { class: 'tag' }, 'tepat waktu') : null,
-            el('span', { class: 'tag' }, g.source === 'form' ? 'lewat form' : 'dari balasan WA')),
+            el('span', { class: 'tag' }, g.source === 'form' ? 'lewat form' : g.source === 'admin' ? 'diaktifkan admin' : 'dari balasan WA')),
           el('span', { class: 'muted' }, waktu(g.submitted_at))),
         el('div', { class: 'muted', style: 'margin-top:6px' },
           `${g.app_name || '–'}${g.duration ? ` · ${g.duration}` : ''} · device: ${g.device || '–'} · dibeli ${tgl(g.purchased_on) !== '–' ? tgl(g.purchased_on) : g.purchased_text || '–'}`),

@@ -192,3 +192,19 @@ details.item-form summary { cursor: pointer; padding: 4px 0; }
 .kolom-grafik { cursor: pointer; }
 .tip-grafik { position: absolute; top: 24px; width: 180px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.12); pointer-events: none; }
 .stats-laporan .stat b { font-size: 20px; overflow-wrap: anywhere; }
+/* blog */
+.baris-berita { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.sampul-kecil { width: 84px; height: 48px; border-radius: 8px; object-fit: cover; flex: none; }
+.sampul-kecil.kosong { display: grid; place-items: center; background: linear-gradient(135deg, #8a1c22, #2a0204); color: #fff; font: 700 12px "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.qris-pratinjau { width: 160px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+/* garansi manual & HPP pesanan */
+.zona-ss { display: grid; gap: 4px; justify-items: start; border: 2px dashed #c9c9ce; border-radius: 12px; padding: 14px; margin-top: 10px; cursor: pointer; background: #fafafa; }
+.zona-ss:focus-visible, .zona-ss.aktif { border-color: var(--maroon); background: var(--maroon-soft); outline: none; }
+.zona-ss span { font-size: 13px; color: var(--quiet); }
+.tersembunyi { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.baris-hpp { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.baris-hpp input { width: 130px; flex: none; }
+.kolom-harga { display: grid; gap: 4px; justify-items: start; }
+.hpp-ubah { background: none; color: var(--quiet); border: 0; padding: 2px 0; font-weight: 500; font-size: 12.5px; min-height: 0 !important; }
+.hpp-ubah.kosong { color: var(--amber); }
+.hpp-ubah span { color: var(--quiet); }

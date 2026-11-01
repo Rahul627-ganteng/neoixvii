@@ -1,5 +1,6 @@
-import { ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
+import { ambilBerita, ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { barisFilm } from './film-kartu.js';
+import { kartuBerita } from './blog-kartu.js';
 import { angkaRating, harga, inggris, labelTipe, labelVarian, pasangKurs, persen, relatif, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
 import { bintang, daftarFaq, el, gabung, ikonApp, kartuApp, kartuUlasan, pasangKerangka, pasangTilt, pesanGagal, tulisCatatanKurs, urlKategori } from './ui.js';
@@ -81,6 +82,15 @@ function bagianUlasan(app, data) {
     el('p', { class: 'ringkas-ulasan' }, bintang(rata), t('testi.rata', { rata: angka, n: semua.length, s: semua.length === 1 ? '' : 's' })),
     el('div', { class: 'ulasan-daftar' }, semua.slice(0, 3).map((u) => kartuUlasan(u, { denganApp: false }))),
     el('a', { class: 'tautan-faq', href: `/testimoni/?app=${encodeURIComponent(app.slug)}` }, t('testi.lihat')));
+}
+
+/** Berita blog tentang aplikasi ini (3 terbaru). */
+function bagianBerita(app, berita) {
+  if (!berita?.length) return null;
+  return el('section', { class: 'grup kaca', id: 'berita-app' },
+    el('h2', {}, t('app.berita', { app: app.nama })),
+    el('div', { class: 'grid-berita kecil' }, berita.slice(0, 3).map(kartuBerita)),
+    el('a', { class: 'tautan-faq', href: `/blog/?app=${encodeURIComponent(app.slug)}` }, t('app.beritaLihat', { app: app.nama })));
 }
 
 /** Film & serial yang sedang/akan tayang di aplikasi ini. */
@@ -195,7 +205,7 @@ function infoStok(app) {
 }
 
 // ---------------------------------------------------------------- susun halaman
-function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film) {
+function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film, berita) {
   document.title = `${app.nama} — IXVII.CO`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', t('meta.app', { app: app.nama, desc: app.desc }));
 
@@ -217,7 +227,7 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film) {
     el('div', { class: 'tata-detail' },
       el('div', { class: 'atas-detail' }, bagianGrup(app, infoTipe, pilih)),
       aside,
-      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianUlasan(app, ulasan), bagianFilm(app, film), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
+      el('div', { class: 'bawah-detail' }, bagianTipe(app, infoTipe), bagianUlasan(app, ulasan), bagianFilm(app, film), bagianBerita(app, berita), bagianBanding(app, detail.resmi), bagianFaq(app, infoTipe, detail.faqs))),
     lain.length ? el('section', { class: 'seksi' },
       el('div', { class: 'seksi-kepala' }, el('h2', {}, t('app.lainnya', { kat: app.kategori })),
         el('a', { href: urlKategori(app.kunciKategori) }, t('app.lihatSemua'))),
@@ -240,8 +250,8 @@ async function muat() {
     tulisCatatanKurs();
     const app = apps.find((a) => a.slug === slug);
     if (!app) return tidakDitemukan();
-    const detail = await ambilDetail(app.id);
-    tampilkan(app, apps, detail, toko, infoTipe, promo, ulasan, film);
+    const [detail, berita] = await Promise.all([ambilDetail(app.id), app.id ? ambilBerita({ app: app.id, batas: 3 }) : null]);
+    tampilkan(app, apps, detail, toko, infoTipe, promo, ulasan, film, berita);
   } catch (err) {
     console.error(err);
     isi.replaceChildren(pesanGagal(t('gagal.app'), muat));

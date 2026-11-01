@@ -82,6 +82,33 @@ export async function halamanStok(supabase, halaman) {
       inp.focus(); inp.select();
     });
 
+    // HPP / modal: ketuk untuk mengubah (dipakai laporan profit, diskon bundle, komisi affiliate, dan pesanan berikutnya)
+    const margin = r.hpp != null && r.harga ? Math.round(((r.harga - r.hpp) / r.harga) * 100) : null;
+    const tombolHpp = el('button', { type: 'button', class: 'hpp-ubah' + (r.hpp == null ? ' kosong' : ''), 'aria-label': `Ubah HPP ${r.tipe} ${r.varian}` },
+      r.hpp == null ? 'HPP belum diisi' : `HPP ${rp(r.hpp)} · untung ${margin}%`, el('span', { 'aria-hidden': 'true' }, ' ✎'));
+    tombolHpp.addEventListener('click', () => {
+      const inp = el('input', { type: 'text', inputmode: 'numeric', value: r.hpp ?? '', 'aria-label': 'HPP baru', class: 'harga-input', placeholder: 'HPP' });
+      const info = el('div', { class: 'muted' });
+      const hitungInfo = () => {
+        const h = angka(inp.value), min = hargaMinimum(h, aturan);
+        info.textContent = h == null ? 'Kosongkan kalau modal belum diketahui.' : `Untung ${rp(r.harga - h)} (${Math.round(((r.harga - h) / r.harga) * 100)}%) · harga aman minimal ${rp(min)}${min && r.harga < min ? ' — harga jual sekarang di bawahnya!' : ''}`;
+      };
+      inp.addEventListener('input', hitungInfo); hitungInfo();
+      const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
+      const batal = el('button', { type: 'button', class: 'kecil sec', onclick: gambarUlang }, 'Batal');
+      const kirim = () => {
+        const baru = angka(inp.value);
+        if (baru === (r.hpp ?? null)) return gambarUlang();
+        sibuk(simpan, q(supabase.rpc('simpan_varian', { p: { code: r.code, tipe: r.tipe, varian: r.varian, harga: r.harga, durasi_hari: r.durasi_hari, hpp: baru } })))
+          .then(() => { r.hpp = baru; toast(`${r.aplikasi} ${r.varian}: HPP ${baru == null ? 'dikosongkan' : rp(baru)}`); gambarUlang(); })
+          .catch((err) => toast('Gagal: ' + err.message, true));
+      };
+      simpan.addEventListener('click', kirim);
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') kirim(); if (e.key === 'Escape') gambarUlang(); });
+      kotak.querySelector('.kolom-harga').replaceChildren(el('div', { class: 'row' }, inp, simpan, batal), info);
+      inp.focus(); inp.select();
+    });
+
     // stok: dihitung (− angka +) atau cukup Tersedia/Habis
     let stok;
     if (r.stok_jumlah != null) {
@@ -126,7 +153,7 @@ export async function halamanStok(supabase, halaman) {
         el('b', {}, `${r.tipe} · ${r.varian}`),
         el('div', { class: 'muted' }, `${r.code}${r.durasi_hari ? ` · ${r.durasi_hari} hari` : ''}${r.stok_diubah ? ` · stok diubah ${waktu(r.stok_diubah)}` : ''}`),
         r.tampil ? null : el('span', { class: 'tag' }, 'disembunyikan')),
-      el('div', { class: 'kolom-harga' }, tombolHarga),
+      el('div', { class: 'kolom-harga' }, tombolHarga, tombolHpp),
       stok,
       el('button', { type: 'button', class: 'sec kecil tombol-ubah', onclick: () => buka(r) }, 'Ubah'),
     ];

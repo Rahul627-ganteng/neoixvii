@@ -42,7 +42,9 @@ export async function ambilKatalog() {
 export async function ambilToko() {
   try {
     // tidak disimpan di cache: buka/tutup pesanan, nomor WA, dan kurs harus langsung berlaku
-    const rows = await ambil('store_settings?select=whatsapp_number,payment_info,payment_info_en,usd_rate,usd_rate_at,orders_open&id=eq.1');
+    const kolom = 'whatsapp_number,payment_info,payment_info_en,usd_rate,usd_rate_at,orders_open';
+    // kolom QRIS baru ada setelah migration revisi; kalau belum, ambil tanpa QRIS
+    const rows = await ambil(`store_settings?select=${kolom},qris_url,qris_aktif&id=eq.1`).catch(() => ambil(`store_settings?select=${kolom}&id=eq.1`));
     return rows[0] ?? null;
   } catch { return null; }   // tabel belum dibuat: website tetap jalan, pesanan ditutup
 }
@@ -96,7 +98,7 @@ export function buatPesanan({ kode = [], bundle = null, rakit = false, nama, wa 
 
 /** Promo, bundle yang berlaku, dan aturan diskon rakitan. Null kalau migration Tahap 7 belum dijalankan. */
 export async function ambilPromo() {
-  try { return await ambilSimpan('ixvii-promo-v1', 'rpc/promo_json'); }
+  try { return await ambilSimpan('ixvii-promo-v9', 'rpc/promo_json'); }
   catch { return null; }
 }
 
@@ -120,6 +122,18 @@ export async function ambilMitra() {
 /** Ulasan pembeli yang sudah ditampilkan admin + ringkasan rating per aplikasi. Null kalau Tahap 8 belum dijalankan. */
 export async function ambilUlasan() {
   try { return await ambilSimpan('ixvii-ulasan-v1', 'rpc/ulasan_json'); }
+  catch { return null; }
+}
+/** Berita blog yang sudah terbit (terbaru dulu). app = id aplikasi untuk menyaring. Null kalau blog belum dibuat. */
+export async function ambilBerita({ app = null, batas = 30 } = {}) {
+  const kolom = 'slug,title,title_en,excerpt,excerpt_en,cover_url,published_at,app_id,apps(name,slug,logo_url)';
+  const saring = app ? `&app_id=eq.${encodeURIComponent(app)}` : '';
+  try { return await ambilSimpan(`ixvii-blog-v1-${app ?? 'semua'}-${batas}`, `posts?select=${kolom}&order=published_at.desc&limit=${batas}${saring}`); }
+  catch { return null; }
+}
+/** Satu artikel blog. Null kalau tidak ada / belum terbit. */
+export async function ambilArtikel(slug) {
+  try { return (await ambil(`posts?select=*,apps(name,slug,logo_url)&slug=eq.${encodeURIComponent(slug)}`))[0] ?? null; }
   catch { return null; }
 }
 /** Halaman kebijakan (syarat, privasi, garansi). Null kalau belum ada. */

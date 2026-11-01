@@ -99,14 +99,44 @@ export function panelPesan({ toko, tanya, judul: teksJudul = t('app.pilihanmu'),
       `${t('wa.total')}: ${teksTotal}`,
       `${t('wa.nama')}: ${nama}`,
     ].filter((x) => x != null).join('\n');
-    sukses.replaceChildren(
+    const nomorWa = hasil.whatsapp || toko.whatsapp_number;
+    const kepala = [
       el('h2', {}, t('pesan.berhasil')),
-      el('div', {}, el('div', { class: 'redup', style: 'font-size:12px' }, t('pesan.kodeLabel')), el('div', { class: 'kode' }, hasil.kode)),
-      el('pre', {}, pesanWa),
-      el('a', { class: 'tombol wa', href: tautanWa(hasil.whatsapp || toko.whatsapp_number, pesanWa), target: '_blank', rel: 'noopener' }, t('pesan.lanjutWa')),
-      el('p', { class: 'catatan', style: 'margin:0' }, t('pesan.catatanWa')),
-      ...(hasil.pembayaran ? [el('p', { class: 'sub' }, t('pesan.bayar')), el('pre', {}, hasil.pembayaran)] : []),
-      el('button', { class: 'tombol garis', type: 'button', onclick: () => tampil('pilih') }, t('pesan.lagi')));
+      el('div', {}, el('div', { class: 'redup', style: 'font-size:12px' }, t('pesan.kodeLabel')), el('div', { class: 'kode' }, hasil.kode))];
+    const caraLain = hasil.pembayaran ? el('details', { class: 'cara-lain' }, el('summary', {}, t('pesan.caraLain')), el('pre', {}, hasil.pembayaran)) : null;
+    const lagi = el('button', { class: 'tombol garis', type: 'button', onclick: () => tampil('pilih') }, t('pesan.lagi'));
+    const qris = toko?.qris_aktif === false ? null : (toko?.qris_url || '/assets/bayar/qris-ixvii.jpg');
+    if (!qris) {
+      sukses.replaceChildren(...kepala, el('pre', {}, pesanWa),
+        el('a', { class: 'tombol wa', href: tautanWa(nomorWa, pesanWa), target: '_blank', rel: 'noopener' }, t('pesan.lanjutWa')),
+        el('p', { class: 'catatan', style: 'margin:0' }, t('pesan.catatanWa')), caraLain, lagi);
+      return;
+    }
+    // stok tersedia: pembeli bisa langsung bayar QRIS, atau tanya stok dulu ke admin
+    const nominal = rupiah(hasil.total);
+    const salin = el('button', { class: 'salin-nominal', type: 'button', 'aria-label': t('pesan.salin') }, t('pesan.salin'));
+    salin.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(String(hasil.total)); salin.textContent = t('pesan.disalin'); } catch { /* biarkan */ }
+    });
+    const bagianQris = el('div', { class: 'bayar-qris', hidden: true },
+      el('div', { class: 'nominal-qris' }, el('span', {}, t('pesan.bayarTepat')), el('b', {}, nominal), salin),
+      el('img', { class: 'gambar-qris', src: qris, alt: t('pesan.altQris'), width: 1135, height: 1600, loading: 'lazy' }),
+      el('a', { class: 'tombol garis', href: qris, download: 'QRIS-IXVII.CO.jpg' }, t('pesan.unduhQris')),
+      el('ol', { class: 'langkah-qris' }, el('li', {}, t('pesan.langkah1')), el('li', {}, t('pesan.langkah2', { nominal })), el('li', {}, t('pesan.langkah3'))),
+      inggris() ? el('p', { class: 'catatan', style: 'margin:0' }, t('pesan.qrisIndo')) : null,
+      el('a', { class: 'tombol wa', href: tautanWa(nomorWa, `${pesanWa}\n\n${t('wa.sudahBayar', { nominal })}`), target: '_blank', rel: 'noopener' }, t('pesan.sudahBayar')),
+      el('p', { class: 'catatan', style: 'margin:0' }, t('pesan.akunDikirim')));
+    const tombolBayar = el('button', { class: 'tombol', type: 'button', 'aria-expanded': 'false' }, t('pesan.bayarQris'));
+    tombolBayar.addEventListener('click', () => {
+      bagianQris.hidden = !bagianQris.hidden;
+      tombolBayar.setAttribute('aria-expanded', String(!bagianQris.hidden));
+      if (!bagianQris.hidden) bagianQris.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    sukses.replaceChildren(...kepala,
+      el('p', { style: 'margin:0' }, t('pesan.pilihLanjut')),
+      el('div', { class: 'pilihan-bayar' }, tombolBayar,
+        el('a', { class: 'tombol garis wa', href: tautanWa(nomorWa, `${pesanWa}\n\n${t('wa.tanyaStok')}`), target: '_blank', rel: 'noopener' }, t('pesan.tanyaStok'))),
+      bagianQris, caraLain, lagi);
   }
 
   const aside = el('aside', { class: 'ringkasan kaca', 'aria-label': t('app.ringkasan') },

@@ -44,11 +44,14 @@ const SIMBOL = {
 };
 
 const HALAMAN = [
-  { href: '/', kunci: 'nav.beranda', kelas: 'nav-beranda' },   // di HP disembunyikan; logo juga menuju beranda
+  { href: '/', kunci: 'nav.beranda' },
   { href: '/katalog/', kunci: 'nav.katalog' },
-  { href: '/promo/', kunci: 'nav.promo' },
+  { href: '/promo/', kunci: 'nav.promo', kelas: 'nav-promo' },
   { href: '/rakit/', kunci: 'nav.rakit' },
-  { href: '/film/', kunci: 'nav.film', kelas: 'nav-film' },       // di HP sangat kecil disembunyikan (ada di footer)
+  { href: '/film/', kunci: 'nav.film' },
+  { href: '/blog/', kunci: 'nav.blog' },
+  { href: '/testimoni/', kunci: 'nav.testimoni' },
+  { href: '/mitra/', kunci: 'nav.affiliator' },
 ];
 
 /** Ganti teks statis di HTML sesuai bahasa: data-t (isi), data-t-placeholder, data-t-aria, data-t-content. */
@@ -80,10 +83,11 @@ export function pasangKerangka(aktif, vars) {
         el('img', { class: 'hanya-gelap', src: '/assets/brand/emblem-putih.png', alt: '', width: 274, height: 183 }),
         el('img', { class: 'hanya-terang', src: '/assets/brand/emblem-maroon.png', alt: '', width: 273, height: 183 }),
         el('span', {}, 'IXVII.CO')),
-      el('div', { class: 'kanan' },
-        el('nav', { class: 'nav', 'aria-label': 'Menu' },
-          HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
-        tombolBahasa, tombolTema)));
+      el('nav', { class: 'nav', 'aria-label': 'Menu' },
+        HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
+      el('div', { class: 'kanan' }, tombolBahasa, tombolTema)));
+    // di HP menu bisa digeser; menu halaman ini langsung terlihat
+    requestAnimationFrame(() => kepala.querySelector('.nav a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' }));
   }
   const kaki = document.getElementById('kaki');
   if (kaki) {
@@ -95,6 +99,7 @@ export function pasangKerangka(aktif, vars) {
         el('a', { href: '/tentang/' }, t('kaki.tentang')),
         el('a', { href: '/mitra/' }, t('kaki.mitra')),
         el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
+        el('a', { href: '/blog/' }, t('nav.blog')),
         el('a', { href: '/syarat/' }, t('kaki.syarat')),
         el('a', { href: '/privasi/' }, t('kaki.privasi')),
         el('a', { href: '/garansi-refund/' }, t('kaki.garansi'))),

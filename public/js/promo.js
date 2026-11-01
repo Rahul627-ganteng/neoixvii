@@ -28,10 +28,22 @@ function ajakanRakit(promo) {
     el('a', { class: 'tombol', href: '/rakit/' }, t('promo.rakitTombol'))));
 }
 
+// Promo Terkini dibagi per kelompok aplikasi
+const KELOMPOK = ['editing', 'ai', 'streaming', 'lainnya'];
+let kelompok = new URLSearchParams(location.search).get('k');
+
 function tampilkan(promo, apps, toko) {
-  const promos = promo?.promos ?? [];
-  const bundles = promo?.bundles ?? [];
-  const bagian = [];
+  const semuaPromo = promo?.promos ?? [];
+  const semuaBundle = promo?.bundles ?? [];
+  const jumlah = (k) => semuaPromo.filter((p) => (p.kelompok || 'lainnya') === k).length + semuaBundle.filter((b) => (b.kelompok || 'lainnya') === k).length;
+  const tampilKelompok = KELOMPOK.filter((k) => k !== 'lainnya' || jumlah(k) > 0);
+  if (!tampilKelompok.includes(kelompok)) kelompok = tampilKelompok.find((k) => jumlah(k) > 0) ?? 'editing';
+  const promos = semuaPromo.filter((p) => (p.kelompok || 'lainnya') === kelompok);
+  const bundles = semuaBundle.filter((b) => (b.kelompok || 'lainnya') === kelompok);
+  const bagian = [el('nav', { class: 'tab-kelompok', 'aria-label': t('promo.kelompok') }, tampilKelompok.map((k) => el('a', {
+    href: `?k=${k}`, class: 'chip', 'aria-current': k === kelompok ? 'page' : null,
+    onclick: (e) => { e.preventDefault(); kelompok = k; history.replaceState(null, '', `?k=${k}`); tampilkan(promo, apps, toko); },
+  }, t(`promo.k.${k}`), el('small', {}, jumlah(k)))))];
   if (promos.length) {
     bagian.push(el('section', { class: 'seksi' },
       el('div', { class: 'seksi-kepala' }, el('h2', {}, t('promo.promo'))),
@@ -78,7 +90,7 @@ function tampilkan(promo, apps, toko) {
         aside)));
   }
 
-  if (!promos.length && !bundles.length) bagian.push(el('div', { class: 'kosong kaca' }, el('p', {}, t('promo.kosong'))));
+  if (!promos.length && !bundles.length) bagian.push(el('div', { class: 'kosong kaca' }, el('p', {}, t('promo.kosongK', { k: t(`promo.k.${kelompok}`) }))));
   bagian.push(ajakanRakit(promo));
   isi.replaceChildren(...bagian.filter(Boolean));
 }
