@@ -14,14 +14,16 @@ const angka = (v) => { const d = String(v ?? '').replace(/[^\d]/g, ''); return d
 const salin = async (teks, pesan) => { try { await navigator.clipboard.writeText(teks); toast(pesan); } catch { prompt('Salin teks ini:', teks); } };
 
 export async function halamanAffiliate(supabase, halaman) {
-  let set, saldo, tarik, katalog;
+  let set, saldo, tarik, katalog, mitra;
   try {
-    [set, saldo, tarik, katalog] = await Promise.all([
+    [set, saldo, tarik, katalog, mitra] = await Promise.all([
       q(supabase.from('affiliate_settings').select('*').eq('id', 1).maybeSingle()),
       q(supabase.from('v_saldo_affiliate').select('*').order('tersedia', { ascending: false })),
       q(supabase.from('affiliate_withdrawals').select('*').order('requested_on', { ascending: false }).limit(300)),
       q(supabase.from('v_katalog_admin').select('code,kategori,aplikasi,tipe,varian,harga,hpp,tampil')
         .order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian')),
+      // pendaftar dari halaman /affiliate/ (kolom pendaftaran ada setelah migration membership)
+      q(supabase.from('partners').select('id,name,whatsapp,city,instagram,show_contact,referral_code,pendaftaran,daftar_at,is_active')).catch(() => []),
     ]);
   } catch {
     halaman.replaceChildren(el('div', { class: 'msg warn' }, 'Menu Affiliate butuh migration affiliate (20261109000000_affiliate.sql). Jalankan dulu di SQL Editor Supabase.'));
@@ -29,7 +31,10 @@ export async function halamanAffiliate(supabase, halaman) {
   }
   const segarkan = () => halamanAffiliate(supabase, halaman);
   const hari = hariIni();
-  const affiliate = saldo.filter((a) => a.kind === 'affiliator' || a.n > 0 || a.commission_pct != null);
+  const pendaftar = mitra.filter((m) => m.pendaftaran === 'baru').sort((a, b) => Date.parse(b.daftar_at) - Date.parse(a.daftar_at));
+  const ditolak = mitra.filter((m) => m.pendaftaran === 'ditolak');
+  const belumDiterima = new Set([...pendaftar, ...ditolak].map((m) => m.id));
+  const affiliate = saldo.filter((a) => !belumDiterima.has(a.partner_id) && (a.kind === 'affiliator' || a.n > 0 || a.commission_pct != null));
   const byId = new Map(saldo.map((a) => [a.partner_id, a]));
   const items = katalog.map((r) => ({ a: r.aplikasi, k: r.tipe, d: r.varian, p: r.harga, h: r.hpp, c: r.kategori, code: r.code }));
   const pembaca = buatPembaca(items);
@@ -392,8 +397,51 @@ export async function halamanAffiliate(supabase, halaman) {
       form, contoh, el('div', { class: 'row', style: 'margin-top:10px' }, simpan))];
   }
 
+  // ---------------------------------------------------------------- pendaftar dari website
+  function bagianPendaftar() {
+    const hasil = el('div');
+    const terima = async (m) => {
+      try {
+        await q(supabase.from('partners').update({ is_active: true, is_verified: true, pendaftaran: 'diterima', joined_on: hari }).eq('id', m.id));
+        let link = '';
+        try { const token = await q(supabase.rpc('buat_link_saldo', { p_partner: m.id })); link = token ? `\n\nCek saldo komisimu kapan saja di:\n${linkSaldo(token)}` : ''; } catch { /* link saldo opsional */ }
+        const pesan = `Halo ${m.name}! 🎉 Pendaftaran affiliate IXVII.CO kamu sudah DITERIMA.\n\nKode affiliate kamu: *${m.referral_code}*\nMasa percobaan 30 hari mulai hari ini (target minimal 3 penjualan). Bonus Rp10.000 menunggu di penjualan pertamamu!${link}\n\nSebentar lagi admin kirim akses folder daftar harga, poster & caption ya.`;
+        hasil.replaceChildren(el('div', { class: 'msg ok' }, `${m.name} diterima. `,
+          el('a', { class: 'btn kecil', href: tautanWa(m.whatsapp, pesan), target: '_blank', rel: 'noopener' }, 'Kirim kabar lewat WhatsApp')));
+        toast(`${m.name} jadi affiliate aktif`);
+        m.pendaftaran = 'diterima';
+        setTimeout(segarkan, 15000);
+        gambarDaftarP();
+      } catch (err) { toast('Gagal: ' + err.message, true); }
+    };
+    const tolak = async (m) => {
+      if (!confirm(`Tolak pendaftaran ${m.name}?`)) return;
+      try { await q(supabase.from('partners').update({ pendaftaran: 'ditolak', is_active: false }).eq('id', m.id)); m.pendaftaran = 'ditolak'; toast('Pendaftaran ditolak'); gambarDaftarP(); }
+      catch (err) { toast('Gagal: ' + err.message, true); }
+    };
+    const daftarP = el('div');
+    function gambarDaftarP() {
+      const baru = pendaftar.filter((m) => m.pendaftaran === 'baru');
+      daftarP.replaceChildren(baru.length ? tabel(['Pendaftar', 'WhatsApp', 'Daftar', 'Kode', ''], baru.map((m) => el('tr', {},
+        td(el('div', {}, el('b', {}, m.name), el('div', { class: 'muted' }, [m.city, m.instagram ? '@' + m.instagram : null].filter(Boolean).join(' · ') || '–'),
+          m.show_contact ? el('span', { class: 'tag' }, 'boleh tampil di daftar publik') : null)),
+        td(el('a', { href: tautanWa(m.whatsapp), target: '_blank', rel: 'noopener' }, '+' + m.whatsapp)),
+        td(m.daftar_at ? new Date(m.daftar_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '–'),
+        td(m.referral_code),
+        td(el('div', { class: 'row' }, el('button', { type: 'button', class: 'kecil', onclick: () => terima(m) }, 'Terima'),
+          el('button', { type: 'button', class: 'sec kecil', onclick: () => tolak(m) }, 'Tolak')))))) : el('p', { class: 'muted' }, 'Tidak ada pendaftar baru.'));
+    }
+    gambarDaftarP();
+    return [el('section', { class: 'card' },
+      el('h2', {}, 'Pendaftar affiliate'),
+      el('p', { class: 'sub' }, 'Masuk dari ', el('a', { href: '/affiliate/', target: '_blank', rel: 'noopener' }, 'halaman Daftar Affiliate ↗'),
+        '. Pendaftar langsung menerima aturan main & alur kerja (di layar, dan lewat WhatsApp kalau notifikasi tersambung). Setelah kamu klik Terima, ia jadi affiliate aktif dan masuk daftar saldo.'),
+      hasil, daftarP,
+      ditolak.length ? el('p', { class: 'muted', style: 'margin-top:10px' }, `${ditolak.length} pendaftar pernah ditolak.`) : null)];
+  }
+
   // ---------------------------------------------------------------- susun
-  const BAGIAN = [['saldo', 'Saldo', bagianSaldo], ['catat', 'Catat penjualan', bagianCatat], ['tarik', 'Penarikan', bagianTarik],
+  const BAGIAN = [['pendaftar', `Pendaftar${pendaftar.length ? ` (${pendaftar.length})` : ''}`, bagianPendaftar], ['saldo', 'Saldo', bagianSaldo], ['catat', 'Catat penjualan', bagianCatat], ['tarik', 'Penarikan', bagianTarik],
     ['harga', 'Daftar harga', bagianHarga], ['aturan', 'Aturan komisi', bagianAturan]];
   function gambar() {
     const menunggu = tarik.filter((w) => w.status === 'dijadwalkan').length;

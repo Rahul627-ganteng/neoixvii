@@ -208,3 +208,11 @@ details.item-form summary { cursor: pointer; padding: 4px 0; }
 .hpp-ubah { background: none; color: var(--quiet); border: 0; padding: 2px 0; font-weight: 500; font-size: 12.5px; min-height: 0 !important; }
 .hpp-ubah.kosong { color: var(--amber); }
 .hpp-ubah span { color: var(--quiet); }
+/* member, kupon, reseller, notifikasi */
+.kode-kupon { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em; font-size: 15px; }
+.pilihan-notif { display: grid; gap: 6px; margin-top: 12px; }
+.langkah-panduan { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+code.jawaban { font-size: 12px; word-break: break-all; white-space: pre-wrap; }
+.form-kupon .grid2 input, .form-kupon .grid2 select { width: 100%; }
+label.row { flex-wrap: nowrap; }
+label.row input[type=checkbox] { flex: none; margin-top: 2px; align-self: flex-start; }

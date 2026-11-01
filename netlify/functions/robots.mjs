@@ -9,6 +9,7 @@ export const isiRobots = (origin) => [
   'Disallow: /garansi/',
   'Disallow: /ulasan/',
   'Disallow: /mitra/saldo/',
+  'Disallow: /member/',
   '',
   `Sitemap: ${origin}/sitemap.xml`,
   '',

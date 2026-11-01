@@ -4,7 +4,7 @@ export const config = { path: '/sitemap.xml' };
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dokzzrrgdjyzxdhmjqkr.supabase.co';
 // kunci publishable memang publik (sama dengan public/js/config.js); data tetap dilindungi RLS
 const KUNCI_PUBLIK = process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_9YuRt-Jvik5OuP30a76xCg_NL0EM9EZ';
-const HALAMAN = ['/', '/katalog/', '/promo/', '/rakit/', '/film/', '/blog/', '/testimoni/', '/tentang/', '/mitra/', '/syarat/', '/privasi/', '/garansi-refund/'];
+const HALAMAN = ['/', '/katalog/', '/promo/', '/rakit/', '/film/', '/blog/', '/testimoni/', '/tentang/', '/mitra/', '/reseller/', '/affiliate/', '/syarat/', '/privasi/', '/garansi-refund/'];
 
 const xml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 

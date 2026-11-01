@@ -1,5 +1,6 @@
 // Rakit bundle sendiri: pembeli memilih satu paket dari beberapa aplikasi, diskon dihitung di server
 // (rpc bundle_quote) dan tidak pernah membuat harga turun di bawah batas aman.
+import { ambilBundle, simpanBundle } from './akun.js';
 import { ambilKatalog, ambilPromo, ambilToko, hitungRakit } from './api.js';
 import { harga, labelTipe, labelVarian, pasangKurs, persen, t, teksDurasi, teksGalat } from './i18n.js';
 import { panelPesan } from './pesan.js';
@@ -45,6 +46,7 @@ function simpanUrl() {
   const p = new URLSearchParams();
   if (pilihan.size) p.set('pilih', [...pilihan.values()].map((v) => v.id).join(','));
   history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
+  simpanBundle([...pilihan.values()].map((v) => v.id));   // ikut tersimpan untuk tombol "+ Bundle" di beranda
 }
 
 function kartuApp(app) {
@@ -168,7 +170,9 @@ async function muat() {
     bonusDurasi = (promo?.durasi ?? []).map((d) => ({ hari: Number(d.hari), pct: Number(d.pct) })).sort((a, b) => a.hari - b.hari);
 
     // pilihan awal dari URL (?pilih=V0004,V0171), misalnya dari halaman aplikasi
-    const kodeAwal = (new URLSearchParams(location.search).get('pilih') || '').split(',').filter(Boolean);
+    // …atau isi yang dikumpulkan lewat tombol "+ Bundle" di beranda
+    const dariUrl = (new URLSearchParams(location.search).get('pilih') || '').split(',').filter(Boolean);
+    const kodeAwal = dariUrl.length ? dariUrl : ambilBundle();
     for (const app of data.apps) {
       const v = app.varian.find((x) => kodeAwal.includes(x.id) && x.s !== 0);
       if (v && pilihan.size < MAKS) pilihan.set(app.slug, { ...v, app: app.nama, slug: app.slug });

@@ -89,12 +89,46 @@ async function rpc(nama, body) {
  * Buat pesanan lewat RPC. Harga, diskon rakitan, dan harga bundle dihitung ulang di database.
  * kode = daftar kode varian; bundle = id bundle harga tetap; rakit = true untuk diskon rakitan.
  */
-export function buatPesanan({ kode = [], bundle = null, rakit = false, nama, wa }) {
+export function buatPesanan({ kode = [], bundle = null, rakit = false, nama, wa, member = null, kupon = null }) {
   const p_items = bundle != null ? [{ bundle }] : kode.map((c) => ({ code: c }));
   const body = { p_items, p_nama: nama, p_wa: wa, p_bahasa: inggris() ? 'en' : 'id' };
   if (rakit) body.p_rakit = true;   // dikirim hanya kalau perlu, supaya tetap jalan di database lama
+  if (member) body.p_member = member;
+  if (kupon) body.p_kupon = kupon;
   return rpc('buat_pesanan', body);
 }
+
+/** Pratinjau diskon member & kupon. Null kalau migration membership belum dijalankan. */
+export async function cekDiskon({ kode = [], bundle = null, rakit = false, wa = null, member = null, kupon = null }) {
+  const p_items = bundle != null ? [{ bundle }] : kode.map((c) => ({ code: c }));
+  try { return await rpc('cek_diskon', { p_items, p_wa: wa || null, p_member: member || null, p_kupon: kupon || null, p_rakit: !!rakit }); }
+  catch (err) { if (/Could not find|404|function/i.test(err.message)) return null; throw err; }
+}
+
+/** Aturan diskon member (persen, minimal belanja, masa berlaku). Null kalau belum ada. */
+export async function ambilProgramMember() {
+  try { return (await ambilSimpan('ixvii-member-prog-v1', 'member_program?select=aktif,diskon_pct,diskon_besar_pct,min_besar,mulai,sampai&id=eq.1'))[0] ?? null; }
+  catch { return null; }
+}
+
+/** Program reseller (harga, periode, benefit). Null kalau belum ada. */
+export async function ambilProgramReseller() {
+  try {
+    return (await ambilSimpan('ixvii-reseller-v1', 'reseller_program?select=aktif,judul,subjudul,label_promo,periode_teks,harga_normal,harga_promo,mulai,sampai,slot_teks,benefit,cocok&id=eq.1'))[0] ?? null;
+  } catch { return null; }
+}
+
+/** Aplikasi terlaris bulan ini: [{ slug, kode }]. */
+export async function ambilTerlaris() {
+  try { return await ambilSimpan('ixvii-terlaris-v1', 'rpc/terlaris_json'); }
+  catch { return null; }
+}
+
+export const daftarMember = (nama, wa) => rpc('daftar_member', { p_nama: nama, p_wa: wa });
+export const akunMember = (token) => rpc('akun_member', { p_token: token });
+export const kirimLinkMember = (wa) => rpc('kirim_link_member', { p_wa: wa });
+export const daftarAffiliate = (d) => rpc('daftar_affiliate', { p_nama: d.nama, p_wa: d.wa, p_kota: d.kota || null, p_sosmed: d.sosmed || null, p_tampil: !!d.tampil, p_setuju: !!d.setuju });
+export const daftarReseller = (d) => rpc('daftar_reseller', { p_nama: d.nama, p_wa: d.wa, p_kota: d.kota || null, p_catatan: d.catatan || null });
 
 /** Promo, bundle yang berlaku, dan aturan diskon rakitan. Null kalau migration Tahap 7 belum dijalankan. */
 export async function ambilPromo() {

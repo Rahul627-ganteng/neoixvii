@@ -16,6 +16,9 @@ import { halamanStok } from './stok.js';
 import { halamanAffiliate } from './affiliate.js';
 import { halamanLaporan } from './laporan.js';
 import { halamanBlog } from './blog.js';
+import { halamanMember } from './member.js';
+import { halamanReseller } from './reseller.js';
+import { halamanNotifikasi } from './notifikasi.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
@@ -74,6 +77,9 @@ const RUTE = {
   affiliate: () => halamanAffiliate(supabase, halaman),
   laporan: () => halamanLaporan(supabase, halaman),
   blog: () => halamanBlog(supabase, halaman),
+  member: () => halamanMember(supabase, halaman),
+  reseller: () => halamanReseller(supabase, halaman),
+  notifikasi: () => halamanNotifikasi(supabase, halaman),
 };
 async function rute() {
   if (!siap) return;
