@@ -1,6 +1,6 @@
 # neoixvii
 
-Website ixvii.co. HTML/CSS/JS biasa tanpa build, diterbitkan Netlify dari folder `public/`.
+Website IXVII.CO (https://ixviico.shop). HTML/CSS/JS biasa tanpa build, diterbitkan Netlify dari folder `public/`.
 
 | Folder / file | Isi | Terbit di web? |
 |---|---|---|

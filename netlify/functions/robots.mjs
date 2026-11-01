@@ -1,4 +1,4 @@
-// /robots.txt — mengikuti domain yang sedang dipakai (neoixvii.netlify.app sekarang, ixvii.co nanti).
+// /robots.txt — mengikuti domain yang sedang dipakai (ixviico.shop, juga neoixvii.netlify.app).
 export const config = { path: '/robots.txt' };
 
 export const isiRobots = (origin) => [
