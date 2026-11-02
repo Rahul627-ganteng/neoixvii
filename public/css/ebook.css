@@ -1,0 +1,150 @@
+/* Ebook Panduan Reseller IXVII.CO — memakai token warna dari brand.css (gelap bawaan, terang lewat data-tema) */
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; min-height: 100vh; line-height: 1.6;
+  background: radial-gradient(1000px 520px at 85% -10%, var(--kilau1), transparent 60%), radial-gradient(700px 400px at -10% 30%, var(--kilau2), transparent 60%), var(--latar); }
+a { color: inherit; }
+button, input { font: inherit; }
+.eb-memuat { padding: 40px 16px; text-align: center; color: var(--teks-3); }
+.eb-logo img { height: 22px; width: auto; display: block; }
+.eb-label { display: inline-block; font: 700 11.5px var(--font-judul); text-transform: uppercase; letter-spacing: .12em; color: var(--maroon-terang); }
+
+/* tombol */
+.eb-tombol { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 20px; border-radius: 999px; border: 0;
+  background: var(--maroon); color: #fff; font-weight: 600; font-size: 15px; text-decoration: none; cursor: pointer; text-align: center; }
+.eb-tombol:hover { background: #9b1016; }
+.eb-tombol:disabled { opacity: .6; cursor: wait; }
+.eb-tombol.garis { background: transparent; color: var(--teks); border: 1px solid var(--garis-kuat); }
+.eb-tombol.garis:hover { border-color: var(--teks-3); }
+.eb-tombol.kecil { min-height: 38px; font-size: 14px; padding: 0 14px; }
+.eb-ikon-tombol { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 999px; border: 1px solid var(--garis);
+  background: transparent; color: var(--teks); cursor: pointer; font-size: 17px; }
+.eb-ikon-tombol:hover { background: var(--sorot); }
+
+/* ---------------- layar masuk ---------------- */
+.eb-masuk { max-width: 1040px; margin: 0 auto; padding: 18px 16px 48px; }
+.eb-masuk-atas { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.eb-masuk-kartu { display: grid; gap: 0; border-radius: 24px; overflow: hidden; border: 1px solid var(--garis); background: var(--permukaan-pekat); box-shadow: var(--bayang); }
+@media (min-width: 860px) { .eb-masuk-kartu { grid-template-columns: 1.05fr 1fr; } }
+.eb-masuk-sampul { position: relative; padding: 32px 26px; color: #fff; overflow: hidden;
+  background: linear-gradient(150deg, #4a0102 0%, #800203 45%, #1a0405 100%); }
+.eb-masuk-sampul::after { content: ""; position: absolute; right: -80px; bottom: -80px; width: 260px; height: 260px; border-radius: 50%;
+  border: 38px solid rgba(255, 255, 255, .07); }
+.eb-masuk-sampul .eb-label { color: #ffb3b6; }
+.eb-masuk-sampul h1 { margin: 10px 0 12px; font-size: clamp(30px, 7vw, 46px); line-height: 1; }
+.eb-masuk-sampul p { margin: 0 0 18px; color: rgba(255, 255, 255, .86); max-width: 44ch; }
+.eb-ciri { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; position: relative; z-index: 1; }
+.eb-ciri li { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: 14px; }
+.eb-ciri li::before { content: "✓"; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .16); font-size: 12px; }
+.eb-masuk-form { padding: 24px 22px 28px; }
+.eb-tab { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--sorot); margin-bottom: 18px; }
+.eb-tab button { min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--teks-2); font-weight: 600; cursor: pointer; }
+.eb-tab button[aria-selected="true"] { background: var(--permukaan-pekat); color: var(--teks); box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
+.eb-form { display: grid; gap: 12px; }
+.eb-form label { display: grid; gap: 5px; font-size: 13.5px; color: var(--teks-2); font-weight: 500; }
+.eb-form input[type=text], .eb-form input[type=email], .eb-form input[type=tel], .eb-form input[type=password] {
+  height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--garis-kuat); background: var(--isian); color: var(--teks); font-size: 15px; }
+.eb-form input:focus-visible { outline: 2px solid var(--maroon-terang); outline-offset: 1px; }
+.eb-dua { display: grid; gap: 12px; }
+@media (min-width: 520px) { .eb-dua { grid-template-columns: 1fr 1fr; } }
+.eb-setuju { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--teks-2); }
+.eb-setuju input { margin-top: 3px; accent-color: var(--maroon); width: 18px; height: 18px; flex: none; }
+.eb-setuju label { display: block; }
+.eb-kecil { margin: 0; font-size: 12.5px; color: var(--teks-3); }
+.eb-pesan { padding: 10px 12px; border-radius: 12px; background: var(--merah-latar); color: var(--merah-teks); font-size: 14px; }
+.eb-pesan.ok { background: var(--hijau-latar); color: var(--hijau-teks); }
+.eb-terkirim { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 10px 0; }
+.eb-terkirim-ikon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--hijau-latar); color: var(--hijau-teks); }
+.eb-terkirim h2 { margin: 0; font-size: 20px; }
+.eb-terkirim p { margin: 0 0 6px; color: var(--teks-2); max-width: 42ch; }
+
+/* ---------------- pembaca ---------------- */
+.eb-kepala { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 10px; padding: 10px 14px; height: 62px;
+  background: var(--kepala); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--garis); }
+.eb-kepala-judul { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; margin-right: auto; }
+.eb-kepala-judul span { font: 700 13px var(--font-judul); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; color: var(--teks-2); }
+@media (max-width: 420px) { .eb-kepala-judul span { display: none; } }
+.eb-progres { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--teks-3); white-space: nowrap; }
+.eb-bar { display: block; width: 72px; height: 6px; border-radius: 999px; background: var(--lencana); overflow: hidden; }
+.eb-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--maroon), var(--maroon-terang)); transition: width .4s; }
+@media (max-width: 520px) { .eb-progres .eb-bar { width: 44px; } }
+.eb-akun { position: relative; }
+.eb-akun summary { list-style: none; cursor: pointer; }
+.eb-akun summary::-webkit-details-marker { display: none; }
+.eb-avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--maroon); color: #fff; font-weight: 700; }
+.eb-akun-isi { position: absolute; right: 0; top: 46px; width: 240px; padding: 14px; display: grid; gap: 8px; border-radius: 16px;
+  background: var(--permukaan-pekat); border: 1px solid var(--garis); box-shadow: var(--bayang); z-index: 40; }
+.eb-akun-isi small { color: var(--teks-3); overflow-wrap: anywhere; margin-bottom: 4px; }
+
+.eb-tata { display: grid; }
+@media (min-width: 1000px) { .eb-tata { grid-template-columns: 300px 1fr; } }
+.eb-daftar { position: fixed; z-index: 45; inset: 0 auto 0 0; width: min(86vw, 320px); overflow-y: auto; padding: 14px 10px 30px;
+  background: var(--permukaan-pekat); border-right: 1px solid var(--garis); transform: translateX(-102%); transition: transform .25s ease; }
+.eb-daftar-buka .eb-daftar { transform: none; }
+.eb-latar { display: none; }
+.eb-daftar-buka .eb-latar { display: block; position: fixed; inset: 0; z-index: 44; background: rgba(0, 0, 0, .5); }
+@media (min-width: 1000px) {
+  .eb-daftar { position: sticky; top: 62px; height: calc(100vh - 62px); transform: none; width: auto; background: transparent; }
+  .eb-hp, .eb-kepala > .eb-ikon-tombol:first-child { display: none; }
+  .eb-daftar-buka .eb-latar { display: none; }
+}
+.eb-daftar-kepala { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 10px; }
+.eb-daftar-item { display: grid; grid-template-columns: 54px 1fr; gap: 8px; align-items: center; padding: 9px 8px; border-radius: 12px;
+  text-decoration: none; font-size: 14px; color: var(--teks-2); }
+.eb-daftar-item:hover { background: var(--sorot); color: var(--teks); }
+.eb-daftar-item.aktif { background: var(--merah-latar); color: var(--teks); font-weight: 600; }
+.eb-daftar-label { font: 700 12px var(--font-judul); color: var(--teks-3); text-transform: uppercase; letter-spacing: .04em; }
+.eb-daftar-item.selesai .eb-daftar-label::after { content: " ✓"; color: var(--hijau-teks); }
+
+.eb-utama { min-width: 0; padding: 22px 16px 80px; }
+.eb-isi { max-width: 760px; margin: 0 auto; outline: none; }
+.eb-terbuka .eb-isi { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.eb-isi img { pointer-events: none; -webkit-user-drag: none; }
+
+/* sampul & kartu bab */
+.eb-sampul { position: relative; overflow: hidden; padding: 34px 24px 28px; border-radius: 26px; color: #fff;
+  background: linear-gradient(155deg, #3d0102 0%, #800203 48%, #140304 100%); box-shadow: var(--bayang); }
+.eb-sampul::before { content: "XVII"; position: absolute; right: -10px; bottom: -36px; font: 800 140px/1 var(--font-judul); color: rgba(255, 255, 255, .06); letter-spacing: -.02em; }
+.eb-sampul .eb-label { color: #ffb3b6; }
+.eb-sampul h1 { margin: 10px 0 10px; font-size: clamp(30px, 7vw, 52px); line-height: 1.02; position: relative; }
+.eb-sampul-sub { margin: 0 0 22px; font-size: 17px; color: rgba(255, 255, 255, .88); max-width: 40ch; position: relative; }
+.eb-sampul-milik { position: relative; display: inline-block; font-size: 13px; padding: 7px 12px; border-radius: 999px; background: rgba(0, 0, 0, .28); border: 1px solid rgba(255, 255, 255, .18); }
+.eb-cara { margin: 22px 0; padding: 18px 20px; border-radius: 18px; border: 1px solid var(--garis); background: var(--permukaan); }
+.eb-cara h2 { margin: 0 0 8px; font-size: 15px; }
+.eb-cara ul { margin: 0; padding-left: 20px; color: var(--teks-2); }
+.eb-bab-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.eb-bab-kartu { position: relative; display: grid; gap: 4px; align-content: start; padding: 16px; border-radius: 18px; text-decoration: none;
+  border: 1px solid var(--garis); background: var(--permukaan); transition: transform .15s, border-color .15s; }
+.eb-bab-kartu:hover { transform: translateY(-2px); border-color: var(--maroon-terang); }
+.eb-bab-kartu b { font-size: 15px; line-height: 1.3; }
+.eb-bab-kartu small { color: var(--teks-3); font-size: 12.5px; line-height: 1.45; }
+.eb-bab-kartu.selesai::after { content: "✓"; position: absolute; top: 12px; right: 14px; color: var(--hijau-teks); font-weight: 700; }
+.eb-bab-ikon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #fff; margin-bottom: 6px;
+  background: linear-gradient(140deg, var(--maroon-terang), var(--maroon)); }
+.eb-bab-ikon.besar { width: 58px; height: 58px; border-radius: 16px; margin: 0; }
+.eb-bab-no { font: 700 12px var(--font-judul); color: var(--maroon-terang); letter-spacing: .08em; text-transform: uppercase; }
+
+/* kepala bab */
+.eb-bab-kepala { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 26px 0 22px;
+  border-bottom: 1px solid var(--garis); margin-bottom: 22px; overflow: hidden; }
+.eb-bab-no-besar { position: absolute; right: -4px; top: -14px; font: 800 clamp(84px, 22vw, 150px)/1 var(--font-judul); color: transparent;
+  -webkit-text-stroke: 1.5px var(--garis); letter-spacing: -.03em; pointer-events: none; opacity: .8; }
+.eb-bab-kepala h1 { margin: 4px 0 6px; font-size: clamp(24px, 5.6vw, 36px); position: relative; }
+.eb-bab-kepala p { margin: 0; color: var(--teks-2); position: relative; max-width: 52ch; }
+
+/* ---------------- perlindungan ---------------- */
+.eb-tanda-air { position: fixed; inset: 0; z-index: 25; pointer-events: none; background-repeat: repeat; }
+[data-tema="terang"] .eb-tanda-air { opacity: .9; }
+.eb-samar .eb-utama, .eb-samar .eb-daftar { filter: blur(16px); }
+.eb-samar::after { content: "Ketuk untuk lanjut membaca"; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 60;
+  padding: 10px 18px; border-radius: 999px; background: var(--permukaan-pekat); border: 1px solid var(--garis); font-weight: 600; }
+.eb-tegur { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 70; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 999px;
+  background: #16161a; color: #fff; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+.eb-cetak #ebook { display: none !important; }
+@media print {
+  body * { display: none !important; }
+  body::before { content: "Ebook ini tidak bisa dicetak. © IXVII.CO"; display: block; padding: 40px; font: 16px Arial, sans-serif; }
+}
+.eb-dialog { border: 1px solid var(--garis); border-radius: 20px; padding: 20px; width: min(92vw, 420px); background: var(--permukaan-pekat); color: var(--teks); }
+.eb-dialog::backdrop { background: rgba(0, 0, 0, .6); }
+.eb-dialog h2 { margin: 0 0 4px; font-size: 18px; }
