@@ -2,6 +2,7 @@
 import { el, q, rp, toast, waktu, hariIni, tautanWa } from './alat.js';
 import { pesanGaransiLink, pesanGaransiManual } from './garansi-baca.js';
 import { formPesananBaru, SUMBER } from './pesanan-baru.js';
+import { formGaransiManual } from './garansi-manual.js';
 
 export const STATUS = {
   menunggu_bayar: { label: 'Menunggu bayar', kelas: 'kuning' },
@@ -46,8 +47,9 @@ const usd = (n) => (n == null ? '' : ' · ' + new Intl.NumberFormat('en-US', { s
 export async function halamanPesanan(supabase, halaman) {
   const ambil = (kolom) => q(supabase.from('orders').select(kolom).order('created_at', { ascending: false }).limit(300));
   const dasar = '*,order_items(app_name,plan_label,variant_label,price,duration_days)';
-  // kolom ulasan & garansi baru ada setelah migration Tahap 8 / garansi
-  const pesanan = await ambil(dasar + ',reviews(rating,status),warranties(id,on_time,status)')
+  // kolom ulasan, garansi, dan HPP per item baru ada setelah migration Tahap 8 / garansi / pesanan_admin_laporan
+  const pesanan = await ambil('*,order_items(id,app_name,plan_label,variant_label,price,duration_days,hpp),reviews(rating,status),warranties(id,on_time,status)')
+    .catch(() => ambil(dasar + ',reviews(rating,status),warranties(id,on_time,status)'))
     .catch(() => ambil(dasar + ',reviews(rating,status)')).catch(() => ambil(dasar));
   // affiliate (setelah migration affiliate): pesanan bisa diatasnamakan affiliate → komisi otomatis saat Aktif
   const mitra = pesanan.some((o) => 'partner_id' in o)
@@ -85,7 +87,18 @@ export async function halamanPesanan(supabase, halaman) {
     }
     if (o.status !== 'aktif' && o.status !== 'selesai') return tag.length ? el('div', { class: 'row' }, tag) : null;
     const wadah = el('div', { class: 'row' }, tag);
-    if (g && o.reviews?.length) return wadah;
+    const slot = el('div');
+    const luar = el('div', {}, wadah, slot);
+    // admin mengaktifkan garansi sendiri (data dari pesanan, screenshot bisa ditempel)
+    if ('warranties' in o && (!g || g.status !== 'aktif')) {
+      wadah.append(el('button', { type: 'button', class: 'kecil', onclick: () => {
+        slot.replaceChildren(formGaransiManual(supabase, o, {
+          selesai: (h) => { o.warranties = [{ id: h.id, on_time: h.tepat_waktu, status: 'aktif' }]; gambarRingkas(); gambarDaftar(); },
+          tutup: () => slot.replaceChildren(),
+        }));
+      } }, 'Aktifkan garansi'));
+    }
+    if (g && o.reviews?.length) return luar;
     // tanpa migration garansi: tetap link ulasan seperti sebelumnya
     const ulasanSaja = !!g || !('warranties' in o);
     const buat = el('button', { type: 'button', class: 'sec kecil' }, ulasanSaja ? 'Buat link ulasan' : 'Buat link garansi & ulasan');
@@ -107,7 +120,39 @@ export async function halamanPesanan(supabase, halaman) {
     wadah.append(buat);
     if (!ulasanSaja) wadah.append(el('button', { type: 'button', class: 'sec kecil', title: 'Format balasan teks seperti biasa; balasan pembeli bisa ditempel di menu Garansi',
       onclick: () => salinTeks(pesanGaransiManual(o), 'Template garansi disalin') }, 'Salin template manual'));
-    return wadah;
+    return luar;
+  };
+
+  /** Ubah HPP item pesanan (misalnya modal promo). Komisi affiliate pesanan ikut dihitung ulang. */
+  const bagianHpp = (o) => {
+    const items = o.order_items ?? [];
+    if (!items.length || !items.every((i) => 'hpp' in i && i.id)) return null;
+    const total = Number(o.total) || 0;
+    const untung = () => total - items.reduce((s, i) => s + (Number(i.hpp) || 0), 0);
+    const ringkas = el('span', { class: 'muted' });
+    const tulis = () => { const kosong = items.filter((i) => i.hpp == null).length; ringkas.textContent = `HPP ${rp(items.reduce((s, i) => s + (Number(i.hpp) || 0), 0))} · untung ${rp(untung())}${kosong ? ` · ${kosong} item tanpa HPP` : ''}`; };
+    tulis();
+    const slot = el('div');
+    const tombol = el('button', { type: 'button', class: 'sec kecil' }, 'Ubah HPP');
+    tombol.addEventListener('click', () => {
+      const input = items.map((i) => el('input', { type: 'text', inputmode: 'numeric', value: i.hpp ?? '', placeholder: 'kosong', 'aria-label': `HPP ${i.app_name}` }));
+      const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan HPP');
+      simpan.addEventListener('click', async () => {
+        const baru = items.map((i, k) => ({ id: i.id, hpp: input[k].value.replace(/\D/g, '') === '' ? null : Number(input[k].value.replace(/\D/g, '')) }));
+        simpan.disabled = true;
+        try {
+          const h = await q(supabase.rpc('ubah_hpp_pesanan', { p_kode: o.code, p_items: baru }));
+          baru.forEach((b, k) => { items[k].hpp = b.hpp; });
+          tulis(); slot.replaceChildren();
+          toast(`HPP ${o.code} tersimpan${h.komisi ? ` · komisi affiliate jadi ${rp(h.komisi)}` : ''}`);
+        } catch (err) { toast('Gagal: ' + err.message, true); simpan.disabled = false; }
+      });
+      slot.replaceChildren(el('div', { class: 'item-form' },
+        el('p', { class: 'muted', style: 'margin:0 0 6px' }, 'HPP saat penjualan ini (misalnya modal promo). Laporan profit & komisi affiliate memakai angka ini.'),
+        ...items.map((i, k) => el('div', { class: 'row baris-hpp' }, el('span', { style: 'flex:1 1 160px' }, `${i.app_name} · ${i.variant_label}`, el('br'), el('span', { class: 'muted' }, `harga ${rp(i.price)}`)), input[k])),
+        el('div', { class: 'row', style: 'margin-top:8px' }, simpan, el('button', { type: 'button', class: 'sec kecil', onclick: () => slot.replaceChildren() }, 'Batal'))));
+    });
+    return el('div', { style: 'margin-top:6px' }, el('div', { class: 'row' }, ringkas, tombol), slot);
   };
 
   const kartu = (o) => {
@@ -141,7 +186,9 @@ export async function halamanPesanan(supabase, halaman) {
           en ? el('span', { class: 'tag' }, 'EN') : null,
           o.kind === 'bundle' ? el('span', { class: 'tag biru' }, 'Bundle: ' + (o.bundle_name || '–')) : null,
           o.kind === 'rakit' ? el('span', { class: 'tag biru' }, 'Rakitan') : null,
-          o.channel && o.channel !== 'web' ? el('span', { class: 'tag' }, SUMBER[o.channel] || o.channel) : null),
+          o.channel && o.channel !== 'web' ? el('span', { class: 'tag' }, SUMBER[o.channel] || o.channel) : null,
+          o.member_id ? el('span', { class: 'tag hijau' }, o.member_discount ? `Member -${rp(o.member_discount)}` : 'Member') : null,
+          o.coupon_code ? el('span', { class: 'tag kuning' }, `Kupon ${o.coupon_code} -${rp(o.coupon_discount)}`) : null),
         el('span', { class: 'muted' }, waktu(o.created_at))),
       el('div', { class: 'row', style: 'margin-top:6px' },
         el('span', {}, o.customer_name), el('span', { class: 'muted' }, '+' + o.customer_wa),
@@ -152,6 +199,7 @@ export async function halamanPesanan(supabase, halaman) {
         el('b', {}, 'Total ', rp(o.total), el('span', { class: 'muted' }, usd(o.total_usd)),
           o.discount ? el('span', { class: 'muted' }, ` · diskon ${rp(o.discount)}`) : null), masa),
       el('div', { class: 'row atur', style: 'margin-top:8px' }, pilihStatus, catatan, simpan),
+      bagianHpp(o),
       bagianAffiliate(o),
       el('div', { style: 'margin-top:8px' }, bagianUlasan(o)));
   };

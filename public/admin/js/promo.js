@@ -26,6 +26,10 @@ export async function halamanPromo(supabase, halaman) {
 }
 
 // ---------------------------------------------------------------- unggah banner
+// Kelompok di halaman Promo Terkini (kosong = otomatis dari kategori aplikasinya)
+const KELOMPOK = [['', 'Otomatis (dari kategori aplikasi)'], ['editing', 'Aplikasi Editing'], ['ai', 'Aplikasi AI'], ['streaming', 'Aplikasi Streaming'], ['lainnya', 'Lainnya']];
+const pilihKelompok = (nilai) => el('select', { 'aria-label': 'Kelompok promo' }, KELOMPOK.map(([k, l]) => el('option', { value: k, selected: (nilai || '') === k }, l)));
+
 function pilihBanner(supabase, awalan, saatBerubah, urlAwal) {
   let url = urlAwal || null;
   const pratinjau = el('div', { class: 'banner-pratinjau' });
@@ -214,6 +218,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
     let banner = b.banner_url || null;
     const nama = el('input', { type: 'text', value: b.name || '', placeholder: 'mis. Nonton Hemat' });
     const namaEn = el('input', { type: 'text', value: b.name_en || '', placeholder: 'mis. Binge Saver' });
+    const kelompokB = pilihKelompok(b.kelompok);
     const desk = el('textarea', { value: b.description || '' });
     const deskEn = el('textarea', { value: b.description_en || '' });
     const harga = el('input', { type: 'number', min: '1000', step: '500', value: b.price ?? '' });
@@ -266,7 +271,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
       if (terpilih.length < 2) return toast('Bundle butuh minimal 2 paket', true);
       if (hitungan.classList.contains('err') && !confirm('Harga ini di bawah batas untung, jadi website otomatis memakai harga terendah yang masih untung. Lanjut simpan?')) return;
       const isi = {
-        name: nama.value.trim(), name_en: namaEn.value.trim() || null, description: desk.value.trim() || null, description_en: deskEn.value.trim() || null,
+        name: nama.value.trim(), name_en: namaEn.value.trim() || null, kelompok: kelompokB.value || null, description: desk.value.trim() || null, description_en: deskEn.value.trim() || null,
         price: h, starts_on: mulai.value || null, ends_on: selesai.value || null, is_active: aktif.checked, banner_url: banner, updated_at: new Date().toISOString(),
       };
       simpan.disabled = true;
@@ -288,7 +293,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
 
     editor.replaceChildren(el('div', { class: 'item-form' },
       el('h3', { style: 'margin:0' }, b.id ? `Ubah: ${b.name}` : 'Bundle baru'),
-      el('div', { class: 'grid2' }, isian('Nama bundle', nama), isian('Nama bahasa Inggris (opsional)', namaEn)),
+      el('div', { class: 'grid2' }, isian('Nama bundle', nama), isian('Nama bahasa Inggris (opsional)', namaEn), isian('Tampil di kelompok', kelompokB)),
       el('div', { class: 'grid2' }, isian('Deskripsi', desk), isian('Deskripsi bahasa Inggris', deskEn)),
       el('label', { class: 'f' }, 'Isi bundle'), daftarIsi, el('div', { style: 'margin-top:8px' }, cari), datalist,
       el('div', { class: 'grid2' }, isian('Harga bundle (Rp)', harga), isian('Mulai tanggal (opsional)', mulai), isian('Sampai tanggal (opsional)', selesai)),
@@ -316,6 +321,7 @@ function kartuPromoList(ctx, promos) {
     let banner = p.banner_url || null;
     const judul = el('input', { type: 'text', value: p.title || '', placeholder: 'Judul promo' });
     const judulEn = el('input', { type: 'text', value: p.title_en || '', placeholder: 'Title (opsional)' });
+    const kelompokP = pilihKelompok(p.kelompok);
     const isi = el('textarea', { value: p.body || '', placeholder: 'Keterangan singkat' });
     const isiEn = el('textarea', { value: p.body_en || '', placeholder: 'Short description (opsional)' });
     const tautan = el('input', { type: 'text', value: p.link_url || '', placeholder: 'mis. /rakit/ atau /aplikasi/?app=netflix' });
@@ -326,7 +332,7 @@ function kartuPromoList(ctx, promos) {
     const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
     const hapus = el('button', { type: 'button', class: 'kecil bahaya' }, 'Hapus');
     const kotak = el('div', { class: 'item-form' },
-      el('div', { class: 'grid2' }, isian('Judul', judul), isian('Judul bahasa Inggris', judulEn)),
+      el('div', { class: 'grid2' }, isian('Judul', judul), isian('Judul bahasa Inggris', judulEn), isian('Tampil di kelompok', kelompokP)),
       el('div', { class: 'grid2' }, isian('Keterangan', isi), isian('Keterangan bahasa Inggris', isiEn)),
       el('div', { class: 'grid2' }, isian('Tautan tombol "Lihat" (opsional)', tautan, 'Awali dengan / untuk halaman di website ini, atau https://'),
         isian('Mulai tanggal (opsional)', mulai), isian('Sampai tanggal (opsional)', selesai)),
@@ -338,7 +344,7 @@ function kartuPromoList(ctx, promos) {
       if (link && !/^(\/|https:\/\/)/.test(link)) return toast('Tautan harus diawali / atau https://', true);
       if (mulai.value && selesai.value && selesai.value < mulai.value) return toast('Tanggal selesai sebelum tanggal mulai', true);
       const baris = {
-        title: judul.value.trim(), title_en: judulEn.value.trim() || null, body: isi.value.trim() || null, body_en: isiEn.value.trim() || null,
+        title: judul.value.trim(), title_en: judulEn.value.trim() || null, kelompok: kelompokP.value || null, body: isi.value.trim() || null, body_en: isiEn.value.trim() || null,
         link_url: link || null, starts_on: mulai.value || null, ends_on: selesai.value || null, is_active: aktif.checked, banner_url: banner,
         updated_at: new Date().toISOString(),
       };

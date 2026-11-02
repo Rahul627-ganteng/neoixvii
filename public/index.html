@@ -30,8 +30,8 @@
 <meta property="og:site_name" content="IXVII.CO">
 <meta property="og:title" content="IXVII.CO — Your App Solver">
 <meta property="og:description" content="Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat. Lihat paket, harga, dan stok terbaru.">
-<meta property="og:url" content="https://neoixvii.netlify.app/">
-<meta property="og:image" content="https://neoixvii.netlify.app/assets/brand/og.png">
+<meta property="og:url" content="https://ixviico.shop/">
+<meta property="og:image" content="https://ixviico.shop/assets/brand/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -59,16 +59,22 @@
     <div class="kaca"><h3 data-t="poin3.j">Sharing atau private</h3><p class="redup" data-t="poin3.t">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
   </section>
   <section class="wadah seksi" id="kategori">
-    <div class="seksi-kepala"><h2 data-t="seksi.kategori">Kategori</h2><a href="/katalog/" data-t="seksi.semuaApp">Semua aplikasi →</a></div>
-    <div class="chips" id="daftar-kategori"></div>
+    <div class="seksi-kepala"><h2 class="judul-besar" data-t="beranda.butuh">Kamu butuh aplikasi apa?</h2><a href="/katalog/" data-t="seksi.semuaApp">Semua aplikasi →</a></div>
+    <div class="kategori-besar" id="daftar-kategori" aria-live="polite"></div>
+  </section>
+  <section class="wadah seksi" id="member-beranda" hidden></section>
+  <section class="wadah seksi" id="terakhir-beranda" hidden>
+    <div class="seksi-kepala"><h2 data-t="beranda.terakhir">Terakhir kamu beli</h2><a href="/member/" id="terakhir-link" data-t="beranda.riwayat">Riwayat pembelian →</a></div>
+    <div class="grid" id="terakhir-isi"></div>
+  </section>
+  <section class="wadah seksi" id="terlaris-beranda">
+    <div class="seksi-kepala"><h2 data-t="beranda.topPicked">Top picked bulan ini</h2><a href="/rakit/" data-t="beranda.keBundle">Bikin Bundlemu →</a></div>
+    <p class="redup sub-seksi" id="terlaris-sub" data-t="beranda.topSub">Paling banyak dibeli bulan ini. Tambahkan ke bundle untuk diskon ekstra.</p>
+    <div class="grid" id="unggulan" aria-live="polite"></div>
   </section>
   <section class="wadah seksi" id="promo-beranda" hidden>
     <div class="seksi-kepala"><h2 data-t="seksi.promo">Promo &amp; bundle</h2><a href="/promo/" data-t="promo.lihat">Lihat →</a></div>
     <div class="promo-daftar" id="promo-isi"></div>
-  </section>
-  <section class="wadah seksi">
-    <div class="seksi-kepala"><h2 data-t="seksi.pilihan">Pilihan untukmu</h2><a href="/katalog/" data-t="seksi.lihatKatalog">Lihat katalog →</a></div>
-    <div class="grid" id="unggulan" aria-live="polite"></div>
   </section>
   <section class="wadah seksi" id="film-beranda" hidden>
     <div class="seksi-kepala"><h2 data-t="film.seksi">Baru tayang</h2><a href="/film/" data-t="film.lihat">Lihat semua →</a></div>
@@ -82,6 +88,11 @@
     <div class="seksi-kepala"><h2 data-t="seksi.faq">Pertanyaan umum</h2></div>
     <div class="kaca faq faq-beranda" id="faq-umum"></div>
     <p class="redup faq-wa" id="faq-wa" hidden></p>
+  </section>
+  <section class="wadah seksi" id="gabung" hidden>
+    <div class="seksi-kepala"><h2 class="judul-besar" data-t="gabung.judul">Mau cuan dari aplikasi premium?</h2></div>
+    <div class="gabung-dua" id="gabung-isi"></div>
+    <div id="banding-isi"></div>
   </section>
 </main>
 <footer id="kaki" class="kaki"></footer>

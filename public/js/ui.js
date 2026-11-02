@@ -1,4 +1,5 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
+import { ambilMember } from './akun.js';
 import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
@@ -32,7 +33,26 @@ function svg(d, { isi = false, ukuran = 24 } = {}) {
 const IKON = {
   bulan: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
   matahari: ['M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z', 'M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4'],
+  orang: ['M20 21v-1.5a4.5 4.5 0 0 0-4.5-4.5h-7A4.5 4.5 0 0 0 4 19.5V21', 'M12 11.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],
 };
+
+// Ikon besar kategori untuk beranda ("Kamu butuh aplikasi apa?"): gambar garis sederhana buatan sendiri.
+const IKON_KATEGORI = {
+  Nonton: ['M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 14.5z', 'M8 21h8M12 17v4', 'M10 7.2v5.6l4.6-2.8z'],
+  AI: ['M10 3.5l1.7 5.1 5.1 1.7-5.1 1.7L10 17.1l-1.7-5.1-5.1-1.7 5.1-1.7z', 'M18 3v4M16 5h4', 'M18.5 15.5v3M17 17h3'],
+  Editing: ['M14.5 4.5l5 5L9 20H4v-5z', 'M12.5 6.5l5 5', 'M4 4h4M4 4v4'],
+  Edukasi: ['M2 8.5L12 4l10 4.5L12 13z', 'M6 10.5v4.8c0 1.6 2.7 3.2 6 3.2s6-1.6 6-3.2v-4.8', 'M22 8.5v6'],
+  Musik: ['M4 15v-3a8 8 0 0 1 16 0v3', 'M4 15a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2zM20 15a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2z'],
+  Lainnya: ['M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z', 'M17 14v6M14 17h6'],
+};
+const NADA_KATEGORI = { Nonton: 'merah', AI: 'ungu', Editing: 'jingga', Edukasi: 'biru', Musik: 'hijau', Lainnya: 'abu' };
+/** Ikon besar sebuah kategori (kunci = label kategori dari database). */
+export function ikonKategori(kunci) {
+  const cocok = Object.keys(IKON_KATEGORI).find((k) => k.toLowerCase() === String(kunci).toLowerCase())
+    ?? (/nonton|film|stream|video/i.test(kunci) ? 'Nonton' : /edit|desain|foto/i.test(kunci) ? 'Editing' : /musik|lagu/i.test(kunci) ? 'Musik'
+      : /belajar|edukasi|kerja/i.test(kunci) ? 'Edukasi' : /\bai\b/i.test(kunci) ? 'AI' : 'Lainnya');
+  return el('span', { class: 'ikon-kategori nada-' + NADA_KATEGORI[cocok], 'aria-hidden': 'true' }, svg(IKON_KATEGORI[cocok], { ukuran: 24 }));
+}
 // simbol kategori di pojok ikon aplikasi (bentuk sederhana, bukan logo merek)
 const SIMBOL = {
   Nonton: { d: 'M8 5v14l11-7z', isi: true },
@@ -44,11 +64,14 @@ const SIMBOL = {
 };
 
 const HALAMAN = [
-  { href: '/', kunci: 'nav.beranda', kelas: 'nav-beranda' },   // di HP disembunyikan; logo juga menuju beranda
+  { href: '/', kunci: 'nav.beranda' },
   { href: '/katalog/', kunci: 'nav.katalog' },
-  { href: '/promo/', kunci: 'nav.promo' },
+  { href: '/promo/', kunci: 'nav.promo', kelas: 'nav-promo' },
   { href: '/rakit/', kunci: 'nav.rakit' },
-  { href: '/film/', kunci: 'nav.film', kelas: 'nav-film' },       // di HP sangat kecil disembunyikan (ada di footer)
+  { href: '/film/', kunci: 'nav.film' },
+  { href: '/blog/', kunci: 'nav.blog' },
+  { href: '/testimoni/', kunci: 'nav.testimoni' },
+  { href: '/mitra/', kunci: 'nav.affiliator' },
 ];
 
 /** Ganti teks statis di HTML sesuai bahasa: data-t (isi), data-t-placeholder, data-t-aria, data-t-content. */
@@ -80,10 +103,15 @@ export function pasangKerangka(aktif, vars) {
         el('img', { class: 'hanya-gelap', src: '/assets/brand/emblem-putih.png', alt: '', width: 274, height: 183 }),
         el('img', { class: 'hanya-terang', src: '/assets/brand/emblem-maroon.png', alt: '', width: 273, height: 183 }),
         el('span', {}, 'IXVII.CO')),
+      el('nav', { class: 'nav', 'aria-label': 'Menu' },
+        HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
       el('div', { class: 'kanan' },
-        el('nav', { class: 'nav', 'aria-label': 'Menu' },
-          HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
+        el('a', { class: 'alat member-alat', href: '/member/', 'aria-current': aktif === '/member/' ? 'page' : null,
+          title: ambilMember() ? t('nav.akun') : t('nav.member') },
+          svg(IKON.orang), el('span', {}, ambilMember() ? t('nav.akun') : t('nav.member'))),
         tombolBahasa, tombolTema)));
+    // di HP menu bisa digeser; menu halaman ini langsung terlihat
+    requestAnimationFrame(() => kepala.querySelector('.nav a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' }));
   }
   const kaki = document.getElementById('kaki');
   if (kaki) {
@@ -95,6 +123,10 @@ export function pasangKerangka(aktif, vars) {
         el('a', { href: '/tentang/' }, t('kaki.tentang')),
         el('a', { href: '/mitra/' }, t('kaki.mitra')),
         el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
+        el('a', { href: '/blog/' }, t('nav.blog')),
+        el('a', { href: '/member/' }, t('kaki.member')),
+        el('a', { href: '/reseller/' }, t('kaki.reseller')),
+        el('a', { href: '/affiliate/' }, t('kaki.affiliate')),
         el('a', { href: '/syarat/' }, t('kaki.syarat')),
         el('a', { href: '/privasi/' }, t('kaki.privasi')),
         el('a', { href: '/garansi-refund/' }, t('kaki.garansi'))),

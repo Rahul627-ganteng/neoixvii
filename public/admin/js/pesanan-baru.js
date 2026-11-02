@@ -37,7 +37,7 @@ export async function formPesananBaru(supabase, { selesai, tutup }) {
     const cocok = katalog.filter((r) => kata.every((k) => `${r.aplikasi} ${r.tipe} ${r.varian} ${r.code}`.toLowerCase().includes(k))).slice(0, 8);
     hasilCari.replaceChildren(...(cocok.length ? cocok.map((r) => el('button', {
       type: 'button', class: 'pilih-paket', onclick: () => {
-        items.push({ code: r.code, app: r.aplikasi, tipe: r.tipe, varian: r.varian, harga: r.harga, hpp: r.hpp, stok: r.stok, sisa: r.stok_jumlah });
+        items.push({ code: r.code, app: r.aplikasi, tipe: r.tipe, varian: r.varian, harga: r.harga, hpp: r.hpp, hppAsli: r.hpp, stok: r.stok, sisa: r.stok_jumlah });
         cari.value = ''; hasilCari.replaceChildren(); gambar(); cari.focus();
       },
     }, el('span', {}, el('b', {}, r.aplikasi), ` ${r.tipe} · ${r.varian}`,
@@ -61,6 +61,11 @@ export async function formPesananBaru(supabase, { selesai, tutup }) {
       el('div', {}, el('span', {}, 'Perkiraan untung'), el('b', {}, rp(total - hpp))),
       kosong ? el('div', { class: 'muted' }, `${kosong} item belum punya HPP, untungnya dihitung tanpa modal.`) : null].filter(Boolean));
   }
+  const hppKatalog = (it) => {
+    const i = el('input', { type: 'text', inputmode: 'numeric', value: it.hpp ?? '', placeholder: 'belum diisi', 'aria-label': 'HPP' });
+    i.addEventListener('input', () => { it.hpp = angka(i.value); hitung(); });
+    return i;
+  };
   function gambar() {
     daftar.replaceChildren(...items.map((it, i) => {
       const hapus = el('button', { type: 'button', class: 'sec kecil', 'aria-label': 'Hapus item', onclick: () => { items.splice(i, 1); gambar(); } }, 'Hapus');
@@ -70,7 +75,8 @@ export async function formPesananBaru(supabase, { selesai, tutup }) {
         return el('div', { class: 'item-pesanan' },
           el('div', { class: 'row', style: 'justify-content:space-between' }, el('span', {}, el('b', {}, it.app), ` ${it.tipe} · ${it.varian}`,
             it.stok === 'habis' ? el('span', { class: 'tag merah' }, 'stok habis') : null), hapus),
-          el('div', { class: 'grid2' }, isian('Harga jual (boleh diubah)', harga), el('div', { class: 'muted', style: 'align-self:end' }, it.hpp != null ? `HPP ${rp(it.hpp)}` : 'HPP belum diisi')));
+          el('div', { class: 'grid2' }, isian('Harga jual (boleh diubah)', harga),
+            isian('HPP / modal (boleh diubah)', hppKatalog(it), it.hppAsli != null && it.hpp !== it.hppAsli ? `HPP katalog ${rp(it.hppAsli)}` : 'Ubah kalau modalnya beda, mis. saat promo.')));
       }
       const app = el('input', { type: 'text', value: it.app, placeholder: 'Nama item, mis. Jasa setting TV', maxlength: 80 });
       const ket = el('input', { type: 'text', value: it.varian, placeholder: 'Keterangan (opsional)', maxlength: 60 });
@@ -98,7 +104,7 @@ export async function formPesananBaru(supabase, { selesai, tutup }) {
     const p = {
       nama: nama.value.trim(), wa: wa.value.trim(), channel: sumber.value, status: status.value, tanggal: tanggal.value || hariIni(),
       diskon: angka(diskon.value) || 0, catatan: catatan.value.trim(), partner: affiliate?.value ? Number(affiliate.value) : null,
-      items: items.map((i) => (i.luar ? { app: i.app.trim(), varian: i.varian.trim(), harga: i.harga, hpp: i.hpp, hari: i.hari } : { code: i.code, harga: i.harga })),
+      items: items.map((i) => (i.luar ? { app: i.app.trim(), varian: i.varian.trim(), harga: i.harga, hpp: i.hpp, hari: i.hari } : { code: i.code, harga: i.harga, hpp: i.hpp })),
     };
     simpan.disabled = true;
     try {

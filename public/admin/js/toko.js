@@ -14,7 +14,7 @@ export async function halamanToko(supabase, halaman) {
     q(supabase.from('plan_type_info').select('*').order('sort').order('id')),
     q(supabase.from('plan_groups').select('label,apps(name)')),
   ]);
-  halaman.replaceChildren(kartuToko(supabase, toko ?? { id: 1, orders_open: true }), await kartuKebijakan(supabase), kartuFaq(supabase, faqs), kartuTipe(supabase, tipe, grup));
+  halaman.replaceChildren(kartuToko(supabase, toko ?? { id: 1, orders_open: true }), kartuQris(supabase, toko ?? {}), await kartuKebijakan(supabase), kartuFaq(supabase, faqs), kartuTipe(supabase, tipe, grup));
 }
 
 // ---------------------------------------------------------------- pengaturan toko
@@ -200,4 +200,50 @@ function kartuTipe(supabase, tipe, grup) {
     el('p', { class: 'sub' }, 'Tampil di halaman aplikasi bagian "Tentang tipe paket", lengkap dengan kelebihan dan kekurangannya.'),
     el('label', { class: 'f' }, 'Tipe paket yang belum punya penjelasan (arahkan kursor untuk melihat aplikasinya)'), belum,
     daftar, el('div', { class: 'row', style: 'margin-top:10px' }, tambah));
+}
+
+// ---------------------------------------------------------------- QRIS untuk tombol "Bayar sekarang"
+const QRIS_BAWAAN = '/assets/bayar/qris-ixvii.jpg';
+function kartuQris(supabase, s) {
+  if (!('qris_aktif' in s)) {
+    return el('section', { class: 'card' }, el('h2', {}, 'Pembayaran QRIS'),
+      el('div', { class: 'msg warn' }, 'Butuh migration 20261112000000_revisi_blog_qris.sql. Sebelum itu, website memakai gambar QRIS bawaan.'));
+  }
+  let url = s.qris_url || null;
+  const aktif = el('input', { type: 'checkbox', id: 'qrisAktif' });
+  aktif.checked = s.qris_aktif !== false;
+  const gambar = el('img', { class: 'qris-pratinjau', alt: 'QRIS' });
+  const tampil = () => { gambar.src = url || QRIS_BAWAAN; };
+  tampil();
+  const file = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', 'aria-label': 'Ganti gambar QRIS' });
+  file.addEventListener('change', async () => {
+    const b = file.files[0];
+    if (!b) return;
+    try {
+      if (!/^image\/(png|jpeg|webp)$/.test(b.type)) throw new Error('Gambar harus JPG, PNG, atau WebP');
+      if (b.size > 3 * 1024 * 1024) throw new Error('Gambar maksimal 3 MB');
+      const path = `qris-${Date.now()}.${b.type.split('/')[1].replace('jpeg', 'jpg')}`;
+      await q(supabase.storage.from('banners').upload(path, b, { upsert: true, contentType: b.type, cacheControl: '3600' }));
+      url = supabase.storage.from('banners').getPublicUrl(path).data.publicUrl;
+      tampil(); toast('Gambar QRIS terunggah. Klik Simpan untuk memakainya.');
+    } catch (err) { toast(err.message, true); }
+    file.value = '';
+  });
+  const simpan = el('button', { type: 'button' }, 'Simpan QRIS');
+  simpan.addEventListener('click', async () => {
+    simpan.disabled = true;
+    try { await q(supabase.from('store_settings').update({ qris_url: url, qris_aktif: aktif.checked, updated_at: new Date().toISOString() }).eq('id', 1)); toast('Pengaturan QRIS tersimpan'); }
+    catch (err) { toast('Gagal: ' + err.message, true); }
+    finally { simpan.disabled = false; }
+  });
+  return el('section', { class: 'card' },
+    el('h2', {}, 'Pembayaran QRIS'),
+    el('p', { class: 'sub' }, 'Setelah membuat pesanan, pembeli bisa memilih "Bayar sekarang pakai QRIS" (QR tampil dan bisa diunduh, lalu kirim bukti lewat WhatsApp) atau "Tanya stok dulu".'),
+    el('div', { class: 'row', style: 'align-items:flex-start;gap:16px' }, gambar,
+      el('div', { style: 'flex:1 1 220px' },
+        el('div', { class: 'row' }, aktif, el('label', { for: 'qrisAktif' }, 'Tampilkan pilihan bayar QRIS')),
+        el('label', { class: 'f' }, 'Ganti gambar QRIS (opsional)'), file,
+        url ? el('button', { type: 'button', class: 'sec kecil', style: 'margin-top:8px', onclick: () => { url = null; tampil(); } }, 'Pakai QRIS bawaan') : null,
+        el('p', { class: 'muted' }, 'Bawaan: QRIS IXVII.CO (NMID ID1026469546422).'),
+        el('div', { class: 'row', style: 'margin-top:10px' }, simpan))));
 }
