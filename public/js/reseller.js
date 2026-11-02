@@ -93,6 +93,9 @@ async function muat() {
         el('p', { class: 'redup' }, t('reseller.formSub')),
         formBooking(pr, toko))),
     el('section', { class: 'seksi' }, bandingGabung(pr)),
+    el('section', { class: 'seksi' }, el('div', { class: 'ajakan kaca' },
+      el('div', {}, el('h3', {}, t('reseller.ebookJ')), el('p', {}, t('reseller.ebookT'))),
+      el('a', { class: 'tombol garis', href: '/reseller/ebook/' }, t('reseller.ebookTombol')))),
     inggris() ? el('p', { class: 'catatan' }, t('reseller.indo')) : '');
 }
 muat();

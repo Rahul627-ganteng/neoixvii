@@ -41,10 +41,27 @@ export async function halamanReseller(supabase, halaman) {
         td(el('a', { href: tautanWa(b.wa), target: '_blank', rel: 'noopener' }, '+' + b.wa)),
         td(b.harga ? rp(b.harga) : el('span', { class: 'muted' }, 'di luar promo')), td(waktu(b.created_at)),
         td(el('span', { class: 'tag ' + kelas }, label)),
-        td(el('div', { class: 'row' }, pilih, el('a', { class: 'btn sec kecil', href: tautanWa(b.wa, pesan), target: '_blank', rel: 'noopener' }, 'Chat'))));
+        td(el('div', { class: 'row' }, pilih, el('a', { class: 'btn sec kecil', href: tautanWa(b.wa, pesan), target: '_blank', rel: 'noopener' }, 'Chat'),
+          b.status === 'lunas' ? el('button', { type: 'button', class: 'sec kecil', onclick: (e) => beriEbook(b, e.currentTarget) }, 'Beri akses ebook') : null)));
     })) : el('p', { class: 'muted' }, booking.length ? 'Tidak ada booking di sini.' : 'Belum ada booking. Pendaftar dari halaman /reseller/ akan muncul di sini.'));
   }
   gambarBooking();
+
+  // pembeli yang sudah lunas langsung dibuatkan akses ebook (password dikirim ke WA/email-nya)
+  async function beriEbook(b, tombol) {
+    const email = prompt(`Email ${b.name} untuk masuk ebook:`);
+    if (!email) return;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) return toast('Email tidak valid', true);
+    tombol.disabled = true;
+    try {
+      const r = await q(supabase.rpc('ebook_beri_akses', { p: { nama: b.name, email: email.trim(), wa: b.wa, booking: b.id } }));
+      const terkirim = r.wa || r.email;
+      const pesanWa = `Halo ${b.name}! Akses Ebook Panduan Reseller IXVII.CO kamu sudah aktif.\n\nBuka: ${location.origin}/reseller/ebook/\nEmail: ${email.trim().toLowerCase()}\nPassword: ${r.sandi}\n\nEbook ini khusus untukmu, maksimal 2 perangkat, dan tidak boleh disebarkan atau dijual kembali.`;
+      toast(terkirim ? 'Akses ebook diberikan dan dikirim ke pembeli' : 'Akses ebook diberikan. Kirim password manual lewat WhatsApp.');
+      tombol.replaceWith(el('span', { class: 'row', style: 'gap:6px' }, el('span', { class: 'tag hijau' }, `Ebook: ${r.sandi}`),
+        el('a', { class: 'btn kecil wa', href: tautanWa(b.wa, pesanWa), target: '_blank', rel: 'noopener' }, 'Kirim WA')));
+    } catch (err) { toast(err.message.includes('ebook_beri_akses') ? 'Jalankan migration ebook dulu' : err.message, true); tombol.disabled = false; }
+  }
 
   // ---------------------------------------------------------------- pengaturan halaman
   const aktif = el('input', { type: 'checkbox', id: 'resAktif' }); aktif.checked = !!pr?.aktif;

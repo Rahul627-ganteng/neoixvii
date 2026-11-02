@@ -26,6 +26,7 @@ const IKON = {
   member: ['M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z', 'M9 12.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4zM5.5 16.5c.6-1.6 2-2.5 3.5-2.5s2.9.9 3.5 2.5M15 10h3M15 13.5h3'],
   affiliate: ['M8.5 12.5a3 3 0 1 0 0-.01', 'M18 6a3 3 0 1 0 0-.01M18 18a3 3 0 1 0 0-.01', 'M11.2 11l4.2-2.6M11.2 13.6l4.2 2.6'],
   reseller: ['M3 10l2-6h14l2 6', 'M3 10h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z', 'M5 14v6h14v-6', 'M9.5 20v-3.5h5V20'],
+  ebook: ['M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z', 'M4 19V5', 'M9 8.5h6M9 12h4'],
   mitra: ['M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', 'M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5', 'M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.8c1.8.9 3 2.7 3.5 5.2'],
   film: ['M3 5h18v14H3z', 'M7 5v14M17 5v14M3 9.5h4M17 9.5h4M3 14.5h4M17 14.5h4'],
   blog: ['M4 5h12v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z', 'M16 9h4v10a2 2 0 0 1-4 0', 'M7.5 9h5M7.5 12.5h5M7.5 16h3'],
@@ -42,7 +43,7 @@ const IKON = {
 const KELOMPOK = [
   ['Penjualan', ['ringkasan', 'pesanan', 'laporan', 'garansi', 'ulasan']],
   ['Produk & harga', ['stok', 'aplikasi', 'promo', 'margin', 'riwayat', 'impor']],
-  ['Pelanggan & mitra', ['member', 'affiliate', 'reseller', 'mitra']],
+  ['Pelanggan & mitra', ['member', 'affiliate', 'reseller', 'ebook', 'mitra']],
   ['Konten & pengaturan', ['toko', 'blog', 'film', 'notifikasi']],
 ];
 const kunciDari = (a) => (a.getAttribute('href').startsWith('#') ? a.getAttribute('href').slice(1) : 'impor');

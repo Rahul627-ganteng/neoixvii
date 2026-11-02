@@ -52,7 +52,7 @@ th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line
 th { background: var(--surface-2); font-weight: 600; white-space: nowrap; font-size: 12.5px; color: var(--quiet); }
 td.num, th.num { text-align: right; white-space: nowrap; }
 .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface-3); color: var(--quiet); white-space: nowrap; }
-.tag.merah { background: var(--red-soft); color: var(--red); } .tag.kuning { background: var(--amber-soft); color: var(--amber); } .tag.hijau { background: var(--green-soft); color: var(--green); }
+.tag.merah, .tag.rugi { background: var(--red-soft); color: var(--red); } .tag.kuning { background: var(--amber-soft); color: var(--amber); } .tag.hijau { background: var(--green-soft); color: var(--green); }
 .saklar { min-width: 96px; justify-content: center; }
 .saklar.ada { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-garis); }
 .saklar.habis { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-garis); }
@@ -286,3 +286,50 @@ body.papan-terbuka { overflow: hidden; }
 :root[data-tema="gelap"] input::placeholder, :root[data-tema="gelap"] textarea::placeholder { color: #75757d; }
 :root[data-tema="gelap"] .msg.err { border: 1px solid var(--red-garis); }
 :root[data-tema="gelap"] .toast { box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+/* generator promo dari poster */
+.gen-langkah { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 12px; }
+@media (min-width: 720px) { .gen-langkah { grid-template-columns: 180px 1fr; align-items: start; } }
+.gen-unggah { border: 1px dashed var(--line-kuat); border-radius: 12px; min-height: 120px; display: grid; place-items: center; overflow: hidden; background: var(--surface-2); }
+.gen-unggah img { width: 100%; max-height: 320px; object-fit: contain; display: block; }
+.gen-progres:empty { display: none; }
+.gen-editor { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 4px; }
+.gen-tata { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 10px; }
+@media (min-width: 860px) { .gen-tata { grid-template-columns: 200px 1fr; align-items: start; } .gen-poster { position: sticky; top: 72px; } }
+.gen-poster img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; max-height: 360px; object-fit: contain; background: var(--surface-2); }
+.gen-poster input[type=color] { width: 40px; height: 32px; padding: 2px; border: 1px solid var(--line-kuat); border-radius: 6px; background: var(--surface); }
+.gen-daftar { display: grid; gap: 12px; margin-top: 14px; }
+.gen-bundle { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--surface-2); }
+.gen-kepala { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.gen-kepala input { font-weight: 600; }
+.gen-no { width: 28px; height: 28px; border-radius: 50%; background: var(--maroon); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
+.gen-best { background: var(--surface); color: var(--quiet); border: 1px dashed var(--line-kuat); padding: 5px 10px; font-size: 12px; letter-spacing: .03em; }
+.gen-best[aria-pressed="true"] { background: #d0021b; color: #fff; border: 1px solid #d0021b; }
+.gen-isi { display: grid; gap: 6px; }
+.gen-paket { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.gen-paket-nama { flex: 1 1 200px; font-size: 14px; }
+.gen-qty { width: 60px !important; padding: 5px 6px !important; }
+.gen-info { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 13px; color: var(--quiet); }
+.gen-info b { color: var(--ink); }
+.gen-info .rugi, .gen-info .rugi b { color: var(--red); }
+.gen-aksi { margin-top: 14px; position: sticky; bottom: 0; background: var(--surface); padding: 10px 0; border-top: 1px solid var(--line); z-index: 2; }
+.gen-bundle .tag { white-space: normal; text-align: left; }
+.gen-bundle details summary { cursor: pointer; }
+/* ebook: editor & pratinjau (token brand.css dipetakan ke token panel) */
+.eb-adm-alat { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
+.eb-adm-dua { display: grid; gap: 12px; }
+@media (min-width: 980px) { .eb-adm-dua { grid-template-columns: 1fr 1fr; } }
+.eb-adm-teks { font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important; min-height: 62vh; }
+.eb-adm-ikon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--maroon); color: #fff; flex: none; }
+.eb-adm-ikon.besar { width: 40px; height: 40px; border-radius: 10px; }
+.eb-adm-daftar { display: grid; gap: 0; }
+code.sandi { font: 700 16px ui-monospace, Menlo, Consolas, monospace; padding: 2px 8px; border-radius: 6px; background: var(--surface); color: var(--ink); user-select: all; }
+.eb-pratinjau-wadah { border: 1px solid var(--line); border-radius: 12px; padding: 16px; max-height: 62vh; overflow: auto; background: var(--bg); }
+.eb-pratinjau { --permukaan: var(--surface); --permukaan-pekat: var(--surface); --garis: var(--line); --garis-kuat: var(--line-kuat); --teks: var(--ink);
+  --teks-2: var(--ink); --teks-3: var(--quiet); --sorot: var(--surface-3); --lencana: var(--surface-3); --isian: var(--surface);
+  --merah-latar: var(--red-soft); --merah-teks: var(--red); --hijau-latar: var(--green-soft); --hijau-teks: var(--green); --kuning-latar: var(--amber-soft);
+  --kuning-teks: var(--amber); --maroon: #800203; --maroon-terang: #c0262d; --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif; --bayang: 0 8px 24px rgba(0,0,0,.12);
+  font-size: 15px !important; }
+.eb-pratinjau h2, .eb-pratinjau h3 { font-family: var(--font-judul); text-transform: uppercase; letter-spacing: .04em; }
+.eb-pratinjau .e-rp input { border: 0 !important; padding: 0 !important; background: transparent !important; width: auto; min-width: 0; flex: 1; }
+.eb-pratinjau .e-centang input[type=checkbox] { width: 20px; }
+.eb-pratinjau .e-geser input { padding: 0; border: 0; }

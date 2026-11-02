@@ -10,6 +10,7 @@ export const isiRobots = (origin) => [
   'Disallow: /ulasan/',
   'Disallow: /mitra/saldo/',
   'Disallow: /member/',
+  'Disallow: /reseller/ebook/',
   '',
   `Sitemap: ${origin}/sitemap.xml`,
   '',
