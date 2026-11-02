@@ -53,7 +53,7 @@ export async function halamanAffiliate(supabase, halaman) {
     const peringatan = [
       telat.length ? el('div', { class: 'msg err' }, el('b', {}, `${telat.length} penarikan lewat jatuh tempo`), `, total ${rp(jml(telat, (w) => w.amount))}. Bayar hari ini supaya affiliate tidak menagih duluan.`) : null,
       segera.length ? el('div', { class: 'msg warn' }, el('b', {}, `${segera.length} penarikan jatuh tempo ≤ 3 hari`), `, total ${rp(jml(segera, (w) => w.amount))}.`) : null,
-      siap.length ? el('div', { class: 'msg' , style: 'background:#f2f2f4' }, `${siap.length} affiliate saldonya sudah lewat ${rp(set.min_withdraw)} tapi belum mengajukan: ${siap.map((a) => a.name).join(', ')}. Kirim pesan saldo supaya mereka memilih tarik atau kumpulkan dulu.`) : null,
+      siap.length ? el('div', { class: 'msg netral' }, `${siap.length} affiliate saldonya sudah lewat ${rp(set.min_withdraw)} tapi belum mengajukan: ${siap.map((a) => a.name).join(', ')}. Kirim pesan saldo supaya mereka memilih tarik atau kumpulkan dulu.`) : null,
     ];
     const stat = (n, l, kelas = '') => el('div', { class: 'stat ' + kelas }, el('b', {}, n), el('span', {}, l));
     const stats = el('div', { class: 'stats' },
@@ -256,9 +256,9 @@ export async function halamanAffiliate(supabase, halaman) {
             el('button', { type: 'button', class: 'sec kecil', onclick: () => { draft = draft.filter((x) => x !== d); gambarDraft(); } }, 'Hapus')),
           el('div', { class: 'grid-draft' }, isian('Aplikasi', inp('app')), isian('Tipe akun', inp('tipe')), isian('Varian', inp('varian')),
             isian('Harga jual', inp('harga', '0', 'numeric')), isian('HPP', inp('hpp', 'kosong', 'numeric'))),
-          el('div', { class: 'muted', style: 'margin-top:6px' }, 'Untung ', el('b', {}, rp(c.untung)), ' · komisi ', el('b', { style: 'color:var(--maroon)' }, rp(c.k)),
+          el('div', { class: 'muted', style: 'margin-top:6px' }, 'Untung ', el('b', {}, rp(c.untung)), ' · komisi ', el('b', { style: 'color:var(--aksen)' }, rp(c.k)),
             ' · sisa untukmu ', el('b', {}, rp(c.untung == null ? null : c.untung - c.k))),
-          c.potong ? el('div', { class: 'muted', style: 'color:var(--maroon)' }, `Komisi dipotong dari ${rp(c.penuh)} supaya untungmu tidak turun di bawah batas.`) : null,
+          c.potong ? el('div', { class: 'muted', style: 'color:var(--aksen)' }, `Komisi dipotong dari ${rp(c.penuh)} supaya untungmu tidak turun di bawah batas.`) : null,
           d.hpp == null ? el('div', { class: 'msg warn' }, 'HPP produk ini belum diisi, jadi komisinya 0. Isi HPP-nya dulu.') : null);
       });
       wadahDraft.replaceChildren(el('div', { class: 'item-form' },
@@ -379,7 +379,7 @@ export async function halamanAffiliate(supabase, halaman) {
       isian('Pembulatan komisi', bulat, 'Selalu dibulatkan ke bawah.'),
       f('min_withdraw', 'Minimum penarikan (Rp)', 'Saldo di bawah ini belum bisa ditarik.'),
       f('payday', 'Tanggal bayar tiap bulan', '1 sampai 28.'));
-    const contoh = el('div', { class: 'msg', style: 'background:#f2f2f4' });
+    const contoh = el('div', { class: 'msg netral' });
     const baca = () => Object.fromEntries([...form.querySelectorAll('[data-k]')].map((i) => [i.dataset.k, Number(String(i.value).replace(',', '.'))]));
     const isiContoh = () => { const s = baca(); const c = komisiDari(45000, 33000, s.rate_pct, s); contoh.textContent = `Contoh: jual Rp45.000, HPP Rp33.000 (untung Rp12.000) → komisi ${rp(c.k)}, untukmu ${rp(12000 - c.k)}.`; };
     form.addEventListener('input', isiContoh); form.addEventListener('change', isiContoh); isiContoh();
