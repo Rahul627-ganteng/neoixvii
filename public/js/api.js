@@ -132,7 +132,7 @@ export const daftarReseller = (d) => rpc('daftar_reseller', { p_nama: d.nama, p_
 
 /** Promo, bundle yang berlaku, dan aturan diskon rakitan. Null kalau migration Tahap 7 belum dijalankan. */
 export async function ambilPromo() {
-  try { return await ambilSimpan('ixvii-promo-v9', 'rpc/promo_json'); }
+  try { return await ambilSimpan('ixvii-promo-v10', 'rpc/promo_json'); }
   catch { return null; }
 }
 
