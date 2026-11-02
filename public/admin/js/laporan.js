@@ -3,7 +3,8 @@
 import { el, hariIni, isian, q, rp, tabel, td, toast } from './alat.js';
 import { SUMBER } from './pesanan-baru.js';
 
-const WARNA = { omzet: '#3d6fb4', profit: '#a3262d' };   // tervalidasi CVD (dataviz validate_palette)
+// warna dari admin.css (mode terang & gelap masing-masing tervalidasi CVD lewat dataviz validate_palette)
+const WARNA = { omzet: 'var(--grafik-omzet)', profit: 'var(--grafik-profit)', rugi: 'var(--grafik-rugi)' };
 const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 const SATUAN = { hari: ['Harian', 30], minggu: ['Mingguan', 12], bulan: ['Bulanan', 12] };
 let satuan = 'hari';
@@ -85,7 +86,7 @@ export async function halamanLaporan(supabase, halaman) {
     const stat = (n, l, kelas = '') => el('div', { class: 'stat ' + kelas }, el('b', {}, n), el('span', {}, l));
     const peringatan = [
       t.tanpa_hpp ? el('div', { class: 'msg warn' }, `${t.tanpa_hpp} item terjual belum punya HPP, jadi profitnya dihitung tanpa modal (terlihat lebih besar). Isi HPP-nya di menu Stok & harga.`) : null,
-      d.affiliate_luar?.n ? el('div', { class: 'msg', style: 'background:#f2f2f4' }, `Di luar laporan ini: ${d.affiliate_luar.n} penjualan affiliate yang dicatat lewat tempel teks (omzet ${rp(d.affiliate_luar.omzet)}, komisi ${rp(d.affiliate_luar.komisi)}). Supaya ikut terhitung, catat penjualan seperti itu lewat "+ Pesanan baru".`) : null,
+      d.affiliate_luar?.n ? el('div', { class: 'msg netral' }, `Di luar laporan ini: ${d.affiliate_luar.n} penjualan affiliate yang dicatat lewat tempel teks (omzet ${rp(d.affiliate_luar.omzet)}, komisi ${rp(d.affiliate_luar.komisi)}). Supaya ikut terhitung, catat penjualan seperti itu lewat "+ Pesanan baru".`) : null,
     ].filter(Boolean);
     const baris = d.periode.slice().reverse().filter((p) => p.pesanan > 0);   // periode kosong hanya tampil di grafik
     isi.replaceChildren(
@@ -149,10 +150,10 @@ function grafik(periode, s) {
     // garis bantu
     for (let i = 0; i <= 3; i++) {
       const v = min + ((maks - min) * i) / 3, y = skala(v);
-      s2.append(svg('line', { x1: kiri, x2: W, y1: y, y2: y, stroke: i === 0 && min === 0 ? '#c9c9ce' : '#ececef', 'stroke-width': 1 }));
-      const lbl = svg('text', { x: kiri - 6, y: y + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#6b6b70' }); lbl.textContent = pendek(v); s2.append(lbl);
+      s2.append(svg('line', { x1: kiri, x2: W, y1: y, y2: y, style: `stroke:${i === 0 && min === 0 ? 'var(--grafik-dasar)' : 'var(--grafik-garis)'}`, 'stroke-width': 1 }));
+      const lbl = svg('text', { x: kiri - 6, y: y + 4, 'text-anchor': 'end', 'font-size': 11, style: 'fill:var(--grafik-teks)' }); lbl.textContent = pendek(v); s2.append(lbl);
     }
-    if (min < 0) s2.append(svg('line', { x1: kiri, x2: W, y1: nol, y2: nol, stroke: '#c9c9ce', 'stroke-width': 1 }));
+    if (min < 0) s2.append(svg('line', { x1: kiri, x2: W, y1: nol, y2: nol, style: 'stroke:var(--grafik-dasar)', 'stroke-width': 1 }));
     const batang = (x, v, warna) => {
       const y = skala(v), h = Math.abs(nol - y), r = Math.min(4, h, lebarBatang / 2);
       if (h < 0.5) return null;
@@ -160,7 +161,7 @@ function grafik(periode, s) {
       // ujung data membulat 4px, menempel ke garis nol
       const d = naik ? `M${x},${y1} V${y0 + r} Q${x},${y0} ${x + r},${y0} H${x + lebarBatang - r} Q${x + lebarBatang},${y0} ${x + lebarBatang},${y0 + r} V${y1} Z`
         : `M${x},${y0} V${y1 - r} Q${x},${y1} ${x + r},${y1} H${x + lebarBatang - r} Q${x + lebarBatang},${y1} ${x + lebarBatang},${y1 - r} V${y0} Z`;
-      return svg('path', { d, fill: warna });
+      return svg('path', { d, style: `fill:${warna}` });
     };
     const tiap = Math.max(1, Math.ceil(48 / kolom));
     periode.forEach((p, i) => {
@@ -168,10 +169,10 @@ function grafik(periode, s) {
       const g = svg('g', { class: 'kolom-grafik' });
       const sorot = svg('rect', { x: x0, y: atas, width: kolom, height: H - atas - bawah, fill: 'transparent', class: 'sorot' });
       g.append(sorot);
-      const a = batang(tengah - lebarBatang - 1, p.omzet, WARNA.omzet), b = batang(tengah + 1, p.profit, p.profit < 0 ? '#b42318' : WARNA.profit);
+      const a = batang(tengah - lebarBatang - 1, p.omzet, WARNA.omzet), b = batang(tengah + 1, p.profit, p.profit < 0 ? WARNA.rugi : WARNA.profit);
       if (a) g.append(a); if (b) g.append(b);
       if (i % tiap === 0 || i === periode.length - 1) {
-        const lbl = svg('text', { x: tengah, y: H - 8, 'text-anchor': 'middle', 'font-size': 11, fill: '#6b6b70' });
+        const lbl = svg('text', { x: tengah, y: H - 8, 'text-anchor': 'middle', 'font-size': 11, style: 'fill:var(--grafik-teks)' });
         lbl.textContent = labelPeriode(p.periode, s); g.append(lbl);
       }
       const tampil = () => {
@@ -180,7 +181,7 @@ function grafik(periode, s) {
           el('div', { class: 'muted' }, `${p.pesanan} pesanan · HPP ${rp(p.hpp)}${p.komisi ? ` · komisi ${rp(p.komisi)}` : ''}`));
         const kiriTip = Math.min(Math.max(0, tengah - 90), W - 180);
         tip.style.left = `${kiriTip}px`;
-        sorot.setAttribute('fill', 'rgba(0,0,0,.04)');
+        sorot.setAttribute('fill', document.documentElement.dataset.tema === 'gelap' ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.04)');
       };
       const sembunyi = () => { tip.hidden = true; sorot.setAttribute('fill', 'transparent'); };
       g.addEventListener('pointerenter', tampil); g.addEventListener('pointerleave', sembunyi);

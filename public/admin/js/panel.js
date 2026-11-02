@@ -19,10 +19,12 @@ import { halamanBlog } from './blog.js';
 import { halamanMember } from './member.js';
 import { halamanReseller } from './reseller.js';
 import { halamanNotifikasi } from './notifikasi.js';
+import { pasangMenu, tandaiMenu } from './menu.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id) => document.getElementById(id);
 const halaman = $('halaman');
+pasangMenu();
 
 const urutKatalog = (x) => x.order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian').order('code');
 
@@ -51,6 +53,7 @@ function mulai(session) {
   $('kartuLogin').classList.toggle('hidden', masuk);
   $('akun').classList.toggle('hidden', !masuk);
   $('menu').classList.toggle('hidden', !admin);
+  $('tombolSemuaMenu').classList.toggle('hidden', !admin);
   if (!masuk) { siap = false; halaman.replaceChildren(); return; }
   $('namaAkun').textContent = session.user.email;
   if (!admin) {
@@ -81,11 +84,13 @@ const RUTE = {
   reseller: () => halamanReseller(supabase, halaman),
   notifikasi: () => halamanNotifikasi(supabase, halaman),
 };
+let ruteTerakhir = null;
 async function rute() {
   if (!siap) return;
   const nama = RUTE[location.hash.slice(1)] ? location.hash.slice(1) : 'ringkasan';
-  for (const a of document.querySelectorAll('nav.menu a')) a.setAttribute('aria-current', a.getAttribute('href') === '#' + nama ? 'page' : 'false');
-  document.querySelector('nav.menu a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (nama !== ruteTerakhir && ruteTerakhir) window.scrollTo({ top: 0 });   // pindah menu → mulai dari atas
+  ruteTerakhir = nama;
+  tandaiMenu(nama);
   halaman.replaceChildren(memuat());
   try { await RUTE[nama](); }
   catch (err) { halaman.replaceChildren(el('div', { class: 'msg err' }, 'Gagal memuat: ' + err.message)); }

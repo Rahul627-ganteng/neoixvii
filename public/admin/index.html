@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#800203">
+<script>
+/* Mode terang / gelap dipasang sebelum halaman tampil supaya tidak berkedip. Tanpa pilihan: ikut pengaturan HP/laptop. */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('ixvii-admin-tema'); } catch (e) {}
+  if (t !== 'gelap' && t !== 'terang') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'gelap' : 'terang';
+  document.documentElement.setAttribute('data-tema', t);
+  if (t === 'gelap') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0e0e10');
+})();
+</script>
 <title>Panel Admin — IXVII.CO</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -14,7 +25,11 @@
 <header class="atas">
   <div class="baris">
     <a class="merek" href="/admin/"><img src="/assets/brand/emblem-putih.png" alt="" width="274" height="183">PANEL ADMIN</a>
-    <div class="akun hidden" id="akun"><span id="namaAkun"></span><button type="button" id="tombolKeluar">Keluar</button></div>
+    <div class="alat-atas">
+      <button type="button" class="tombol-atas" id="tombolTema" aria-label="Ganti mode terang / gelap"></button>
+      <button type="button" class="tombol-atas hidden" id="tombolSemuaMenu" aria-haspopup="dialog" aria-controls="papanMenu" aria-expanded="false" aria-label="Semua menu">☰<span>Menu</span></button>
+      <div class="akun hidden" id="akun"><span id="namaAkun"></span><button type="button" id="tombolKeluar">Keluar</button></div>
+    </div>
   </div>
 </header>
 <nav class="menu hidden" id="menu" aria-label="Menu admin">

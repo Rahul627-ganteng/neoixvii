@@ -203,7 +203,7 @@ export async function halamanMember(supabase, halaman) {
     const min = el('input', { type: 'text', inputmode: 'numeric', value: prog?.min_besar ?? 100000 });
     const mulai = el('input', { type: 'date', value: prog?.mulai ?? '' });
     const sampai = el('input', { type: 'date', value: prog?.sampai ?? '' });
-    const contoh = el('div', { class: 'msg', style: 'background:#f6f6f8' });
+    const contoh = el('div', { class: 'msg netral' });
     const hitung = () => {
       const m = angka(min.value) ?? 0;
       const d = (x, p) => Math.floor((x * p) / 100 / 100) * 100;
