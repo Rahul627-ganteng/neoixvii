@@ -18,7 +18,10 @@ async function ambil(path) {
 async function ambilSimpan(kunci, path) {
   try {
     const s = JSON.parse(sessionStorage.getItem(kunci) || 'null');
-    if (s && Date.now() - s.t < CACHE_MS) return s.data;
+    // panel admin di browser yang sama menandai "ixvii-segar" setiap kali menyimpan perubahan,
+    // jadi website langsung mengambil data baru (tidak menunggu 2 menit)
+    const segar = Number(localStorage.getItem('ixvii-segar') || 0);
+    if (s && Date.now() - s.t < CACHE_MS && s.t > segar) return s.data;
   } catch { /* sessionStorage tidak tersedia */ }
   const data = await ambil(path);
   try { sessionStorage.setItem(kunci, JSON.stringify({ t: Date.now(), data })); } catch { /* abaikan */ }

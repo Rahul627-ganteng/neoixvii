@@ -17,15 +17,17 @@ const angka = (x) => Number(x).toLocaleString(inggris() ? 'en-US' : 'id-ID', { m
 function tampilkan() {
   const ulasan = data?.ulasan ?? [];
   const ringkasan = data?.ringkasan ?? [];
-  if (pilih && !ringkasan.some((r) => r.slug === pilih)) pilih = '';
+  // ulasan yang belum tersambung ke aplikasi (slug kosong) disaring dengan nama itemnya
+  const kunci = (r) => r.slug || r.app;
+  if (pilih && !ringkasan.some((r) => kunci(r) === pilih)) pilih = '';
   const semua = { slug: '', app: t('testi.semua'), jumlah: ulasan.length,
     rata: ulasan.length ? ulasan.reduce((s, u) => s + u.rating, 0) / ulasan.length : null };
   filter.replaceChildren(...(ulasan.length ? [semua, ...ringkasan] : []).map((r) => el('button', {
-    class: 'chip', type: 'button', 'aria-pressed': String((r.slug || '') === pilih),
-    onclick: () => { pilih = r.slug || ''; history.replaceState(null, '', location.pathname + (pilih ? `?app=${encodeURIComponent(pilih)}` : '')); tampilkan(); },
+    class: 'chip', type: 'button', 'aria-pressed': String((r === semua ? '' : kunci(r)) === pilih),
+    onclick: () => { pilih = r === semua ? '' : kunci(r); history.replaceState(null, '', location.pathname + (pilih ? `?app=${encodeURIComponent(pilih)}` : '')); tampilkan(); },
   }, r.app, r.rata != null ? el('small', {}, `★ ${angka(r.rata)} (${r.jumlah})`) : null)));
 
-  const cocok = pilih ? ulasan.filter((u) => u.slug === pilih) : ulasan;
+  const cocok = pilih ? ulasan.filter((u) => kunci(u) === pilih) : ulasan;
   if (!cocok.length) {
     info.textContent = '';
     isi.replaceChildren(el('div', { class: 'kosong kaca' }, el('p', {}, t('testi.kosong'))));

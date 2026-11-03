@@ -37,6 +37,8 @@ export function toast(teks, err = false) {
 export async function q(janji) {
   const { data, error } = await janji;
   if (error) throw new Error(error.message);
+  // perubahan dari panel langsung terlihat di tab website pada browser ini (lihat ambilSimpan di js/api.js)
+  try { localStorage.setItem('ixvii-segar', String(Date.now())); } catch { /* penyimpanan tidak tersedia */ }
   return data;
 }
 export const memuat = () => el('div', { class: 'card muted' }, 'Memuat…');
