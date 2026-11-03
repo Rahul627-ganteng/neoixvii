@@ -744,5 +744,5 @@ Cara baca | Dibuka di rak ebook IXVII.CO, maksimal 2 perangkat, progres tersimpa
 Ebook ini berisi materinya saja. Pendampingan face to face, daftar supplier, template poster, dan bonus Canva Head termasuk di **Program Reseller** ([lihat programnya](/reseller/)).
 :::$d$,
   E'18 bab panduan reseller dari nol\nKalkulator HPP & simulasi untung\nChecklist memulai jualan yang tersimpan\nSOP jualan 14 langkah\nContoh poster promo asli IXVII.CO\nAkses selamanya di rak ebook',
-  149000, 99000, '2026-11-30 23:59:59+07', 'Promo peluncuran', 'ebook', public._ebook_buku_utama(), 'tayang', true, 0
+  149000, 99000, '2026-11-30 23:59:59+07', 'Harga peluncuran', 'ebook', public._ebook_buku_utama(), 'tayang', true, 0
 where not exists (select 1 from public.produk where slug = 'panduan-reseller');
