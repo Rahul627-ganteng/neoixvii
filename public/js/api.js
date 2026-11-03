@@ -132,7 +132,7 @@ export const daftarReseller = (d) => rpc('daftar_reseller', { p_nama: d.nama, p_
 
 /** Promo, bundle yang berlaku, dan aturan diskon rakitan. Null kalau migration Tahap 7 belum dijalankan. */
 export async function ambilPromo() {
-  try { return await ambilSimpan('ixvii-promo-v10', 'rpc/promo_json'); }
+  try { return await ambilSimpan('ixvii-promo-v11', 'rpc/promo_json'); }
   catch { return null; }
 }
 
@@ -244,4 +244,24 @@ function olah(data) {
     }
   }
   return { kategori, apps, diperbarui: data?.updated ?? null };
+}
+
+// ---------------------------------------------------------------- produk digital
+/** Daftar produk digital (ebook, template, preset, iklan mitra). */
+export async function ambilProduk() {
+  try { return await ambilSimpan('ixvii-produk-v1', 'rpc/produk_json'); }
+  catch { return { produk: [], iklan: false }; }   // toko produk digital belum dipasang
+}
+export const ambilDetailProduk = (slug) => rpc('produk_detail', { p_slug: slug });
+export const pesanProduk = ({ slug, nama, wa, email }) =>
+  rpc('pesan_produk', { p_slug: slug, p_nama: nama, p_wa: wa, p_email: email || null, p_bahasa: inggris() ? 'en' : 'id' });
+export const ulasProduk = ({ slug, kode, wa, bintang, teks, nama }) =>
+  rpc('ulas_produk', { p_slug: slug, p_kode: kode, p_wa: wa, p_bintang: bintang, p_teks: teks || null, p_nama: nama || null });
+export const ajukanIklan = (data) => rpc('ajukan_iklan', { p: data });
+export async function ambilInfoIklan() {
+  const [paket, setelan] = await Promise.all([
+    ambil('iklan_paket?select=id,nama,hari,harga&aktif=eq.true&order=urut.asc,id.asc').catch(() => []),
+    ambil('iklan_setelan?select=aktif,syarat&id=eq.1').then((r) => r[0] ?? null).catch(() => null),
+  ]);
+  return { paket, setelan };
 }

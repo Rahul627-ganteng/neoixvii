@@ -51,6 +51,13 @@
     Cache-Control = "no-store"
 
 [[headers]]
+  for = "/ebook/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
+[[headers]]
   for = "/ulasan/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"

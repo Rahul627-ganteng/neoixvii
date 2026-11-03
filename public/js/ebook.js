@@ -4,6 +4,9 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { ikon, renderIsi } from './ebook-render.js';
 
 const akar = document.getElementById('ebook');
+// buku yang dibuka: ?b=slug di /ebook/, atau bawaan halaman (mis. /reseller/ebook/ → panduan-reseller)
+const BUKU_HALAMAN = document.body.dataset.buku || null;
+let buku = new URLSearchParams(location.search).get('b') || BUKU_HALAMAN;
 const K_SESI = 'ixvii-ebook-sesi';
 const K_PERANGKAT = 'ixvii-ebook-perangkat';
 const K_TEMA = 'ixvii-tema';
@@ -106,6 +109,7 @@ function layarMasuk(pesan) {
   const kotak = el('div', { class: 'eb-form-isi' });
   const tab = el('div', { class: 'eb-tab', role: 'tablist' });
   const gambar = () => {
+    tab.hidden = BUKU_HALAMAN !== 'panduan-reseller';
     tab.replaceChildren(...[['masuk', 'Masuk'], ['minta', 'Minta akses']].map(([k, l]) =>
       el('button', { type: 'button', role: 'tab', 'aria-selected': String(mode === k), onclick: () => { mode = k; gambar(); } }, l)));
     kotak.replaceChildren(mode === 'masuk' ? formMasuk() : formMinta());
@@ -119,7 +123,8 @@ function layarMasuk(pesan) {
     const kirim = el('button', { type: 'submit', class: 'eb-tombol' }, 'Masuk & baca');
     const f = el('form', { class: 'eb-form', novalidate: true },
       el('label', {}, 'Email', email), el('label', {}, 'Password', sandi), info, kirim,
-      el('p', { class: 'eb-kecil' }, 'Lupa password atau ganti HP? Hubungi admin IXVII.CO, nanti dibantu reset.'));
+      el('p', { class: 'eb-kecil' }, 'Password dikirim lewat WhatsApp/email setelah pembayaranmu dikonfirmasi. Lupa password atau ganti HP? Hubungi admin IXVII.CO, nanti dibantu reset.'),
+      BUKU_HALAMAN !== 'panduan-reseller' ? el('p', { class: 'eb-kecil' }, 'Belum punya ebook? ', el('a', { href: '/produk/?k=ebook' }, 'Lihat koleksi ebook IXVII.CO')) : null);
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!email.value.trim() || !sandi.value) return info.replaceChildren(galat('Isi email dan password.'));
@@ -173,11 +178,16 @@ function layarMasuk(pesan) {
   akar.replaceChildren(el('main', { class: 'eb-masuk' },
     el('div', { class: 'eb-masuk-atas' }, logo(), tombolTema()),
     el('section', { class: 'eb-masuk-kartu' },
-      el('div', { class: 'eb-masuk-sampul' },
+      BUKU_HALAMAN === 'panduan-reseller' ? el('div', { class: 'eb-masuk-sampul' },
         el('span', { class: 'eb-label' }, 'Khusus member program reseller'),
         el('h1', {}, 'Ebook Panduan Reseller'),
         el('p', {}, 'Mulai dari nol, bangun sistem jualan, dan dapatkan pembeli pertama. Lengkap dengan kalkulator HPP, simulasi untung, checklist, dan SOP jualan.'),
-        el('ul', { class: 'eb-ciri' }, ['18 bab bergambar & interaktif', 'Progres checklist tersimpan', 'Dibuka di maksimal 2 perangkat'].map((x) => el('li', {}, x)))),
+        el('ul', { class: 'eb-ciri' }, ['18 bab bergambar & interaktif', 'Progres checklist tersimpan', 'Dibuka di maksimal 2 perangkat'].map((x) => el('li', {}, x))))
+      : el('div', { class: 'eb-masuk-sampul' },
+        el('span', { class: 'eb-label' }, 'Rak ebook IXVII.CO'),
+        el('h1', {}, 'Masuk ke rak ebookmu'),
+        el('p', {}, 'Semua ebook yang kamu beli di IXVII.CO ada di satu rak. Interaktif, bergambar, dan progres bacamu tersimpan.'),
+        el('ul', { class: 'eb-ciri' }, ['Kalkulator, kuis, dan checklist di dalam bab', 'Bisa dibuka di HP dan laptop', 'Tidak bisa diunduh atau dibagikan'].map((x) => el('li', {}, x)))),
       el('div', { class: 'eb-masuk-form' }, tab, kotak))));
 }
 
@@ -188,7 +198,7 @@ let jedaSimpan;
 function simpanProgres() {
   clearTimeout(jedaSimpan);
   jedaSimpan = setTimeout(() => {
-    rpc('ebook_simpan_progres', { p_token: baca(K_SESI), p_perangkat: idPerangkat(), p_data: progres }).catch((err) => {
+    rpc('ebook_simpan_progres', { p_token: baca(K_SESI), p_perangkat: idPerangkat(), p_data: progres, p_buku: data?.info?.slug }).catch((err) => {
       if (/Sesi berakhir|tidak aktif/.test(err.message)) { tulis(K_SESI, null); layarMasuk(err.message); }
     });
   }, 1200);
@@ -199,17 +209,52 @@ async function buka() {
   if (!token) return layarMasuk();
   akar.replaceChildren(el('p', { class: 'eb-memuat' }, 'Membuka ebook…'));
   try {
-    data = await rpc('ebook_isi', { p_token: token, p_perangkat: idPerangkat() });
+    data = await rpc('ebook_isi', { p_token: token, p_perangkat: idPerangkat(), p_buku: buku });
   } catch (err) {
     if (/Sesi berakhir|tidak aktif/.test(err.message)) { tulis(K_SESI, null); return layarMasuk(err.message); }
+    if (/belum ada di rakmu/.test(err.message) && buku) { buku = null; history.replaceState(null, '', '/ebook/'); return buka().then(() => tegurRak(err.message)); }
     akar.replaceChildren(el('div', { class: 'eb-masuk' }, el('div', { class: 'eb-pesan' }, err.message),
       el('button', { type: 'button', class: 'eb-tombol', onclick: buka }, 'Coba lagi')));
     return;
   }
-  progres = { dibaca: [], cek: {}, ...(data.progres || {}) };
   pasangPerlindungan();
   document.body.classList.add('eb-terbuka');
+  if (!data.info) return gambarRak();
+  progres = { dibaca: [], cek: {}, ...(data.progres || {}) };
+  if (data.info.warna) document.documentElement.style.setProperty('--buku', data.info.warna);
   gambarPembaca();
+}
+const tegurRak = (teks) => { const t = el('div', { class: 'eb-tegur', role: 'status' }, teks); document.body.append(t); setTimeout(() => t.remove(), 3500); };
+
+// ---------------------------------------------------------------- rak ebook
+function gambarRak() {
+  const p = data.pembaca;
+  window.onhashchange = null;
+  const menuAkun = el('details', { class: 'eb-akun' },
+    el('summary', { 'aria-label': 'Akun' }, el('span', { class: 'eb-avatar' }, p.nama.trim().charAt(0).toUpperCase())),
+    el('div', { class: 'eb-akun-isi' }, el('b', {}, p.nama), el('small', {}, p.email),
+      el('button', { type: 'button', class: 'eb-tombol garis kecil', onclick: gantiSandi }, 'Ganti password'),
+      el('button', { type: 'button', class: 'eb-tombol garis kecil', onclick: keluar }, 'Keluar')));
+  const kartu = (b) => {
+    const pct = b.bab ? Math.round((Math.min(b.dibaca, b.bab) / b.bab) * 100) : 0;
+    return el('a', { class: 'eb-rak-buku', href: `/ebook/?b=${encodeURIComponent(b.slug)}`, style: b.warna ? `--buku:${b.warna}` : null },
+      b.sampul ? el('img', { src: b.sampul, alt: '', draggable: 'false', loading: 'lazy' }) : el('span', { class: 'eb-rak-sampul' }, b.judul),
+      el('div', { class: 'eb-rak-isi' },
+        el('b', {}, b.judul), b.subjudul ? el('small', {}, b.subjudul) : null,
+        el('span', { class: 'eb-bar lebar' }, el('i', { style: `width:${pct}%` })),
+        el('span', { class: 'eb-rak-progres' }, pct >= 100 ? 'Selesai dibaca ✓' : b.dibaca ? `${b.dibaca}/${b.bab} bab dibaca` : `${b.bab} bab · belum dibaca`),
+        el('span', { class: 'eb-tombol kecil' }, b.dibaca ? 'Lanjut baca' : 'Mulai baca')));
+  };
+  akar.replaceChildren(
+    el('header', { class: 'eb-kepala' }, el('a', { href: '/ebook/', class: 'eb-kepala-judul' }, logo(), el('span', {}, 'Rak ebook')), tombolTema(), menuAkun),
+    el('main', { class: 'eb-utama' }, el('div', { class: 'eb-isi' },
+      el('header', { class: 'eb-rak-kepala' }, el('span', { class: 'eb-label' }, `Halo, ${p.nama.split(' ')[0]}`), el('h1', {}, 'Rak ebookmu'),
+        el('p', {}, data.rak.length ? `${data.rak.length} ebook siap dibaca. Progres dan checklist tersimpan di akunmu.` : 'Belum ada ebook di rakmu.')),
+      data.rak.length ? el('div', { class: 'eb-rak' }, data.rak.map(kartu))
+        : el('div', { class: 'eb-pesan ok' }, 'Ebook yang kamu beli akan muncul di sini setelah pembayaran dikonfirmasi.'),
+      el('div', { class: 'eb-cara' }, el('h2', {}, 'Cari ebook lain'), el('p', { style: 'margin:0' }, 'Koleksi ebook tentang personal branding, freelance, desain, editing, AI, dan jualan online. ',
+        el('a', { href: '/produk/?k=ebook' }, 'Lihat semua di Produk Digital →'))))),
+    tandaAir(p));
 }
 
 function gambarPembaca() {
@@ -234,7 +279,8 @@ function gambarPembaca() {
   };
 
   const sampul = () => [
-    el('header', { class: 'eb-sampul' },
+    el('header', { class: 'eb-sampul' + (data.info.sampul ? ' bergambar' : ''), style: data.info.warna ? `--buku:${data.info.warna}` : null },
+      data.info.sampul ? el('img', { class: 'eb-sampul-gambar', src: data.info.sampul, alt: '', draggable: 'false' }) : null,
       el('span', { class: 'eb-label' }, data.info.label),
       el('h1', {}, data.info.judul),
       el('p', { class: 'eb-sampul-sub' }, data.info.subjudul),
@@ -302,7 +348,8 @@ function gambarPembaca() {
 
   akar.replaceChildren(
     el('header', { class: 'eb-kepala' },
-      tombolDaftar, el('a', { href: '#sampul', class: 'eb-kepala-judul' }, logo(), el('span', {}, 'Ebook Reseller')),
+      tombolDaftar, el('a', { href: '#sampul', class: 'eb-kepala-judul' }, logo(), el('span', {}, data.info.judul)),
+      data.rak?.length > 1 || !BUKU_HALAMAN ? el('a', { href: '/ebook/', class: 'eb-tombol garis kecil eb-ke-rak' }, 'Rak') : null,
       el('div', { class: 'eb-progres', title: 'Bab yang sudah dibaca' }, el('span', { class: 'eb-bar' }, bar), persenDibaca),
       tombolTema(), menuAkun),
     el('div', { class: 'eb-tata' }, daftar, latar, el('main', { class: 'eb-utama' }, isi)),
@@ -312,7 +359,7 @@ function gambarPembaca() {
   if (!panahTerpasang) {
     panahTerpasang = true;
     document.addEventListener('keydown', (e) => {
-      if (!data || (e.target instanceof Element && e.target.closest('input, textarea'))) return;
+      if (!data?.bab || (e.target instanceof Element && e.target.closest('input, textarea'))) return;
       const daftarBab = data.bab;
       const i = daftarBab.findIndex((b) => b.slug === location.hash.slice(1));
       if (e.key === 'ArrowRight' && daftarBab[i + 1]) location.hash = daftarBab[i + 1].slug;

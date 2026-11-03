@@ -241,6 +241,7 @@ export function kartuGenerator(ctx, statusAi) {
     const sampai = el('input', { type: 'date', value: draf.sampai });
     const warna = el('input', { type: 'color', value: draf.warna, 'aria-label': 'Warna tema' });
     const aktif = el('input', { type: 'checkbox', id: 'genAktif', checked: true });
+    const hitungM = el('input', { type: 'checkbox', id: 'genHitung', checked: true });
     const daftar = el('div', { class: 'gen-daftar' });
     const ringkas = el('div', { class: 'muted' });
 
@@ -351,6 +352,8 @@ export function kartuGenerator(ctx, statusAi) {
           bundles: draf.bundles.map((b) => ({ name: b.nama.trim(), name_en: b.nama_en.trim(), description: b.deskripsi.trim(), description_en: b.deskripsi_en.trim(),
             price: b.harga, harga_tetap: b.tetap, stock_qty: b.stok, best_deal: b.best, is_active: true, items: b.items })),
         } }));
+        // hitung mundur bisa dimatikan per kampanye (kolom ada sejak migration produk_digital)
+        if (!hitungM.checked) await q(supabase.from('promos').update({ hitung_mundur: false }).eq('id', hasil.promo)).catch(() => null);
         toast(tampilkan ? 'Promo tersimpan dan tampil di website' : 'Tersimpan sebagai draf');
         ctx.muatUlang?.({ kampanyeBaru: hasil.promo, kelompok: kel.value });
       } catch (err) { toast('Gagal menyimpan: ' + err.message, true); simpan.disabled = draf2.disabled = false; }
@@ -372,6 +375,7 @@ export function kartuGenerator(ctx, statusAi) {
       daftar,
       el('div', { class: 'row', style: 'margin-top:10px' }, tambah, ringkas),
       el('div', { class: 'row', style: 'margin-top:14px' }, aktif, el('label', { for: 'genAktif' }, 'Langsung aktif di website')),
+      el('div', { class: 'row', style: 'margin-top:6px' }, hitungM, el('label', { for: 'genHitung' }, 'Tampilkan hitung mundur sampai tanggal berakhir')),
       el('div', { class: 'row gen-aksi' }, simpan, draf2, batal)));
     editor.scrollIntoView({ behavior: 'auto', block: 'start' });
   }

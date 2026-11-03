@@ -1,4 +1,5 @@
 // Menu Promo & bundle: generator dari poster, bundle harga tetap, promo/kampanye, dan aturan diskon Rakit Bundle.
+import { kartuSaran, penilaian } from './promo-saran.js';
 import { el, isian, q, rp, tabel, td, toast } from './alat.js';
 import { kartuGenerator } from './promo-poster.js';
 
@@ -15,18 +16,21 @@ export async function halamanPromo(supabase, halaman, opsi = {}) {
     // kolom qty ada sejak migration poster_promo; panel lama tetap jalan tanpa itu
     q(supabase.from('bundle_items').select('bundle_id,variant_id,qty')).catch(() => q(supabase.from('bundle_items').select('bundle_id,variant_id'))),
     q(supabase.from('promos').select('*').order('sort').order('id')),
-    q(supabase.from('v_katalog_admin').select('code,aplikasi,tipe,varian,harga,hpp,harga_minimum,batas_bundle,batas_diskon_manual,stok,tampil,durasi_hari,stok_jumlah')
+    q(supabase.from('v_katalog_admin').select('code,kategori,aplikasi,tipe,varian,harga,hpp,harga_minimum,batas_bundle,batas_diskon_manual,stok,tampil,durasi_hari,stok_jumlah')
       .order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian')),
     q(supabase.rpc('status_ai')).catch(() => null),
   ]);
+  // kolom hitung_mundur ada sejak migration produk_digital; panel tetap jalan di database lama
+  const adaHitung = await q(supabase.from('promos').select('hitung_mundur').limit(1)).then(() => true).catch(() => false);
   const idVarian = await q(supabase.from('variants').select('id,code'));
-  const ctx = { supabase, halaman, setelan, varian, promos, kodeKeId: new Map(idVarian.map((v) => [v.code, v.id])), idKeKode: new Map(idVarian.map((v) => [v.id, v.code])) };
+  const ctx = { supabase, halaman, setelan, varian, promos, adaHitung, kodeKeId: new Map(idVarian.map((v) => [v.code, v.id])), idKeKode: new Map(idVarian.map((v) => [v.id, v.code])) };
   ctx.muatUlang = (o) => halamanPromo(supabase, halaman, o);
   const berhasil = opsi.kampanyeBaru ? el('div', { class: 'msg ok', style: 'margin:0 0 16px' },
     'Kampanye tersimpan. ', el('a', { href: `/promo/?k=${opsi.kelompok || ''}`, target: '_blank', rel: 'noopener' }, 'Lihat di halaman Promo ↗')) : null;
   halaman.replaceChildren(...[
     berhasil,
     kartuGenerator(ctx, statusAi),
+    kartuSaran(ctx, bundles),
     kartuBundle(ctx, bundles, ringkas, items),
     kartuPromoList(ctx, promos, bundles),
     kartuAturan(ctx, aturan, durasi),
@@ -247,6 +251,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
     const selesai = el('input', { type: 'date', value: b.ends_on || '' });
     const aktif = el('input', { type: 'checkbox', id: 'bundleAktif' });
     aktif.checked = !!b.is_active;
+    const hitungB = el('input', { type: 'checkbox', id: 'bundleHitung', checked: !!b.hitung_mundur });
     const daftarIsi = el('div');
     const hitungan = el('div', { class: 'msg', style: 'margin-top:8px' });
 
@@ -289,6 +294,14 @@ function kartuBundle(ctx, bundles, ringkas, items) {
       }
       hitungan.className = 'msg ' + kelas;
       hitungan.textContent = teks.join(' · ');
+      if (h > 0 && rows.length && modal != null) {
+        let atur = {};
+        try { atur = JSON.parse(localStorage.getItem('ixvii-admin-saran') || '{}'); } catch { /* abaikan */ }
+        const n = penilaian(rows.map((v) => ({ harga: v.harga, hpp: v.hpp, kategori: v.kategori, qty: v.t.qty })), tetap.checked ? h : Math.max(h, batas ?? 0),
+          { minM: Number(atur.minM ?? 20), minP: Number(atur.minP ?? 8000) });
+        hitungan.append(el('div', { style: 'margin-top:6px' }, el('span', { class: 'tag ' + n.kelas }, n.vonis), ' ', n.ringkas,
+          el('details', {}, el('summary', { class: 'muted' }, 'Alasan penilaian'), el('ul', { class: 'saran-poin' }, n.poin.map(([ya, t]) => el('li', { class: ya ? 'ya' : 'tidak' }, t))))));
+      }
     }
     harga.addEventListener('input', gambarIsi);
     tetap.addEventListener('change', gambarIsi);
@@ -306,6 +319,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
         stock_qty: stok.value === '' ? null : Math.max(0, Math.round(Number(stok.value))), best_deal: best.checked, harga_tetap: tetap.checked,
         promo_id: kampanye.value ? Number(kampanye.value) : null,
       };
+      if (ctx.adaHitung) isi.hitung_mundur = hitungB.checked;
       simpan.disabled = true;
       try {
         const baru = b.id ? await q(supabase.from('bundles').update(isi).eq('id', b.id).select().single())
@@ -332,6 +346,7 @@ function kartuBundle(ctx, bundles, ringkas, items) {
       el('div', { class: 'grid2' }, isian('Mulai tanggal (opsional)', mulai), isian('Sampai tanggal (opsional)', selesai)),
       el('div', { class: 'row', style: 'margin-top:10px' }, tetap, el('label', { for: 'bundleTetap' }, 'Pakai harga ini persis (boleh di bawah margin minimum)')),
       el('div', { class: 'row', style: 'margin-top:6px' }, best, el('label', { for: 'bundleBest' }, 'Tandai BEST DEAL')),
+      ctx.adaHitung ? el('div', { class: 'row', style: 'margin-top:6px' }, hitungB, el('label', { for: 'bundleHitung' }, 'Hitung mundur sampai tanggal selesai (bundle di luar kampanye; kampanye punya hitung mundurnya sendiri)')) : null,
       hitungan,
       pilihBanner(supabase, 'bundle', (u) => { banner = u; }, banner),
       el('div', { class: 'row', style: 'margin-top:12px' }, aktif, el('label', { for: 'bundleAktif' }, 'Aktif (tampil di halaman Promo)')),
@@ -367,6 +382,8 @@ function kartuPromoList(ctx, promos, bundles = []) {
     const selesai = el('input', { type: 'date', value: p.ends_on || '' });
     const aktif = el('input', { type: 'checkbox' });
     aktif.checked = p.is_active !== false;
+    const hitungP = el('input', { type: 'checkbox' });
+    hitungP.checked = p.hitung_mundur ?? true;
     const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
     const hapus = el('button', { type: 'button', class: 'kecil bahaya' }, 'Hapus');
     const kotak = el('div', { class: 'item-form' },
@@ -377,7 +394,8 @@ function kartuPromoList(ctx, promos, bundles = []) {
       el('div', { class: 'grid2' }, isian('Tautan tombol "Lihat" (opsional)', tautan, 'Awali dengan / untuk halaman di website ini, atau https://'),
         isian('Mulai tanggal (opsional)', mulai), isian('Sampai tanggal (opsional)', selesai)),
       pilihBanner(supabase, 'promo', (u) => { banner = u; }, banner),
-      el('div', { class: 'row', style: 'margin-top:10px' }, el('label', { class: 'row muted' }, aktif, 'Aktif'), simpan, hapus));
+      el('div', { class: 'row', style: 'margin-top:10px' }, el('label', { class: 'row muted' }, aktif, 'Aktif'),
+        ctx.adaHitung ? el('label', { class: 'row muted', title: 'Butuh tanggal selesai' }, hitungP, 'Hitung mundur') : null, simpan, hapus));
     simpan.addEventListener('click', async () => {
       const link = tautan.value.trim();
       if (!judul.value.trim()) return toast('Judul wajib diisi', true);
@@ -389,6 +407,7 @@ function kartuPromoList(ctx, promos, bundles = []) {
         updated_at: new Date().toISOString(),
       };
       if ('lencana' in p || isiKampanye.length || lencana.value.trim()) Object.assign(baris, { lencana: lencana.value.trim() || null, warna: warna.value });
+      if (ctx.adaHitung) baris.hitung_mundur = hitungP.checked;
       try {
         Object.assign(p, p.id ? await q(supabase.from('promos').update(baris).eq('id', p.id).select().single())
           : await q(supabase.from('promos').insert({ ...baris, sort: (promos.length + 1) * 10 }).select().single()));
@@ -408,7 +427,7 @@ function kartuPromoList(ctx, promos, bundles = []) {
   daftar.append(...promos.map(form));
   return el('section', { class: 'card' },
     el('h2', {}, 'Promo & kampanye'),
-    el('p', { class: 'sub' }, 'Pengumuman promo di halaman Promo. Kampanye dari generator poster tampil sebagai satu blok dengan hitung mundur dan bundlenya. Promo dengan tanggal selesai otomatis hilang setelah lewat tanggalnya.'),
+    el('p', { class: 'sub' }, 'Pengumuman promo di halaman Promo. Kampanye dari generator poster tampil sebagai satu blok dengan bundlenya. Centang "Hitung mundur" untuk menampilkan sisa waktu sampai tanggal selesai. Promo dengan tanggal selesai otomatis hilang setelah lewat tanggalnya.'),
     daftar, el('div', { class: 'row', style: 'margin-top:10px' },
       el('button', { type: 'button', class: 'sec kecil', onclick: () => { const p = {}; promos.push(p); daftar.append(form(p)); } }, '+ Tambah promo')));
 }

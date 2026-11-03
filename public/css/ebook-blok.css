@@ -139,3 +139,57 @@
 .e-tabel th { background: var(--maroon); color: #fff; font-family: var(--font-judul); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; }
 .e-tabel tr:last-child td { border-bottom: 0; }
 
+
+/* blok tambahan: banding, palet, chat, profil, kalender, kuis */
+.e-alat-catatan { color: var(--teks-3); font-size: 12.5px; line-height: 1.5; }
+.e-banding { border-radius: 18px; border: 1px solid var(--garis); overflow: hidden; background: var(--permukaan); }
+.e-banding-kepala, .e-banding-baris { display: grid; grid-template-columns: 1fr 1fr; }
+.e-banding-kepala span { padding: 10px 14px; font: 700 12.5px var(--font-judul); text-transform: uppercase; letter-spacing: .06em; }
+.e-banding-kepala .kiri { background: var(--merah-latar); color: var(--merah-teks); }
+.e-banding-kepala .kanan { background: var(--hijau-latar); color: var(--hijau-teks); }
+.e-banding-baris > div { padding: 10px 14px; font-size: 14.5px; line-height: 1.5; border-top: 1px solid var(--garis); }
+.e-banding-baris .kiri { color: var(--teks-2); border-right: 1px solid var(--garis); }
+.e-palet { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); }
+.e-palet-item { display: grid; gap: 2px; padding: 10px; border-radius: 16px; border: 1px solid var(--garis); background: var(--permukaan); font-size: 13px; }
+.e-palet-warna { height: 64px; border-radius: 12px; margin-bottom: 6px; border: 1px solid var(--garis); }
+.e-palet-item small { color: var(--teks-3); font-family: ui-monospace, Menlo, monospace; }
+.e-palet-item span:last-child { color: var(--teks-2); line-height: 1.4; }
+.e-chat { display: grid; gap: 8px; padding: 16px 14px; border-radius: 18px; background: linear-gradient(180deg, rgba(31, 143, 78, .10), rgba(31, 143, 78, .03)), var(--permukaan); border: 1px solid var(--garis); }
+.e-chat-baris { display: flex; }
+.e-chat-baris.kanan { justify-content: flex-end; }
+.e-chat-gelembung { max-width: 82%; padding: 8px 12px; border-radius: 14px 14px 14px 4px; background: var(--permukaan-pekat); border: 1px solid var(--garis); font-size: 14.5px; line-height: 1.5; display: grid; gap: 2px; }
+.e-chat-baris.kanan .e-chat-gelembung { border-radius: 14px 14px 4px 14px; background: #1f8f4e; color: #fff; border-color: transparent; }
+.e-chat-gelembung small { font-size: 11.5px; font-weight: 700; opacity: .75; }
+.e-profil { max-width: 360px; margin-inline: auto; padding: 16px; border-radius: 22px; border: 1px solid var(--garis); background: var(--permukaan-pekat); display: grid; gap: 6px; box-shadow: var(--bayang); }
+.e-profil-atas { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+.e-profil-foto { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 800 24px var(--font-judul); color: #fff;
+  background: linear-gradient(135deg, var(--maroon-terang), var(--maroon)); box-shadow: 0 0 0 3px var(--permukaan-pekat), 0 0 0 5px var(--maroon-terang); }
+.e-profil-angka { display: flex; gap: 14px; font-size: 12px; color: var(--teks-3); }
+.e-profil-angka span { display: grid; text-align: center; }
+.e-profil-angka b { font-size: 15px; color: var(--teks); }
+.e-profil-nama { font-size: 15px; }
+.e-profil small { color: var(--teks-3); }
+.e-profil-bio { display: grid; font-size: 14px; line-height: 1.5; }
+.e-profil-tautan { color: #3b82f6; font-size: 13.5px; font-weight: 600; }
+.e-profil-tombol { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+.e-profil-tombol span { text-align: center; padding: 7px; border-radius: 10px; background: var(--lencana); font-size: 13px; font-weight: 600; }
+.e-profil-tombol span:first-child { background: #3b82f6; color: #fff; }
+.e-profil-catatan { font-size: 11px !important; text-align: center; }
+.e-kalender { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.e-kalender-hari { display: grid; gap: 4px; align-content: start; padding: 12px; border-radius: 16px; border: 1px solid var(--garis); background: var(--permukaan); cursor: pointer; }
+.e-kalender-hari.selesai { border-color: color-mix(in srgb, var(--hijau-teks) 50%, transparent); background: var(--hijau-latar); }
+.e-kalender-atas { display: flex; justify-content: space-between; align-items: center; }
+.e-kalender-atas input { width: 18px; height: 18px; accent-color: var(--hijau-teks); }
+.e-kalender-pilar { justify-self: start; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--merah-latar); color: var(--merah-teks); }
+.e-kalender-ide { font-size: 13.5px; line-height: 1.45; color: var(--teks-2); }
+.e-kuis { border-radius: 20px; padding: 16px; border: 1px solid var(--garis); background: var(--permukaan); display: grid; gap: 14px; }
+.e-kuis .e-alat-judul { justify-content: flex-start; }
+.e-kuis-skor { margin-left: auto; font: 600 12.5px var(--font-isi); text-transform: none; letter-spacing: 0; color: var(--teks-3); }
+.e-kuis-soal p { margin: 0 0 8px; }
+.e-kuis-pilihan { display: grid; gap: 6px; }
+.e-kuis-opsi { text-align: left; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--garis-kuat); background: var(--permukaan-pekat); color: var(--teks); font: 500 14.5px var(--font-isi); cursor: pointer; }
+.e-kuis-opsi:hover:not(:disabled) { border-color: var(--maroon-terang); }
+.e-kuis-opsi:disabled { cursor: default; opacity: .8; }
+.e-kuis-opsi.benar { opacity: 1; border-color: var(--hijau-teks); background: var(--hijau-latar); color: var(--teks); }
+.e-kuis-opsi.salah { opacity: 1; border-color: var(--merah-teks); background: var(--merah-latar); }
+.e-kuis-jelas { margin: 8px 0 0 !important; font-size: 14px; color: var(--teks-2); }

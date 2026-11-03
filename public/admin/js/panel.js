@@ -19,6 +19,7 @@ import { halamanBlog } from './blog.js';
 import { halamanMember } from './member.js';
 import { halamanReseller } from './reseller.js';
 import { halamanEbook } from './ebook.js';
+import { halamanProduk } from './produk.js';
 import { halamanNotifikasi } from './notifikasi.js';
 import { pasangMenu, tandaiMenu } from './menu.js';
 
@@ -84,6 +85,7 @@ const RUTE = {
   member: () => halamanMember(supabase, halaman),
   reseller: () => halamanReseller(supabase, halaman),
   ebook: () => halamanEbook(supabase, halaman),
+  produk: () => halamanProduk(supabase, halaman),
   notifikasi: () => halamanNotifikasi(supabase, halaman),
 };
 let ruteTerakhir = null;

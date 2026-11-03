@@ -10,10 +10,18 @@
 //   :::strategi               Nama | HPP | Harga jual     → perbandingan margin
 //   :::simulasi margin=17000                              → simulasi untung per hari/minggu/bulan
 //   :::kartu                  Judul | teks                → kartu-kartu
-//   :::poster                 baris poster                → contoh tata letak poster
-//   :::form                   nama kolom                  → contoh formulir
+//   :::poster [keterangan="…"] baris poster               → contoh tata letak poster
+//   :::form [judul="…"]       nama kolom                  → contoh formulir
 //   :::garis-waktu            Tanggal | kejadian          → garis waktu
 //   :::catatan / :::tips / :::peringatan / :::kutipan     → kotak sorotan
+//   :::banding [kiri="Hindari" kanan="Lakukan"]  kiri | kanan   → perbandingan dua kolom
+//   :::palet                  #hex | nama | kegunaan       → contoh palet warna
+//   :::chat                   Nama: pesan                  → contoh percakapan WhatsApp ("Kamu:" di kanan; tanpa itu nama pertama = lawan bicara)
+//   :::profil                 nama | kategori | bio… | tautan → contoh profil Instagram/TikTok
+//   :::kalender id=…          Hari | pilar | ide konten    → jadwal yang bisa dicentang
+//   :::tarif target=… biaya=… jam=…                       → kalkulator tarif freelance
+//   :::komisi harga=… persen=… konversi=…                 → kalkulator komisi affiliate
+//   :::kuis                   ? tanya / - salah / + benar / > penjelasan (pisahkan soal dengan baris kosong)
 // Markdown: ## judul, ### subjudul, - daftar, 1. daftar, | tabel |, ![gambar](/…), > kutipan, **tebal**, [tautan](…)
 
 const buat = (tag, attrs = {}, ...anak) => {
@@ -69,6 +77,18 @@ const JALUR = {
   koin: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2',
   lampu: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z',
   bendera: 'M5 21V4M5 4h12l-2 4 2 4H5',
+  kamera: 'M3 8h4l2-3h6l2 3h4v11H3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  kuas: 'M14 4l6 6-8 8-6-6zM6 12l-2 2c-1 1-1 3 0 4l0 0c1 1 3 1 4 0l2-2M14 4l2-2 6 6-2 2',
+  video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3z',
+  pena: 'M4 20l4-1 11-11-3-3L5 16zM14 7l3 3M4 20h16',
+  kalender: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2',
+  grafik: 'M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6M20 7l-4 3-4-4-4 4',
+  bintang: 'M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z',
+  chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
+  orang: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 3.6-7 8-7s8 3 8 7',
+  layar: 'M3 4h18v12H3zM8 20h8M12 16v4',
+  kilau: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z',
+  target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h.01M12 12l7-7M16 5h3v3',
 };
 export const DAFTAR_IKON = Object.keys(JALUR);
 export function ikon(nama, ukuran = 24) {
@@ -202,7 +222,7 @@ const blokKartu = (baris) => buat('div', { class: 'e-kartu' }, baris.map((b) => 
     buat('b', {}, ...sebaris(no ? no[2] : judul)), teks ? buat('p', {}, ...sebaris(teks)) : null);
 }));
 
-function blokPoster(baris) {
+function blokPoster(baris, p = {}) {
   const [judul, sub, harga, ...sisa] = baris;
   const kontak = sisa.length > 1 ? sisa.pop() : null;
   const ajakan = sisa.length > 1 ? sisa.pop() : null;
@@ -215,11 +235,11 @@ function blokPoster(baris) {
       buat('ul', {}, sisa.map((s) => buat('li', {}, s.replace(/^[✓✔-]\s*/, '')))),
       ajakan ? buat('span', { class: 'e-poster-cta' }, ajakan) : null,
       kontak ? buat('span', { class: 'e-poster-kontak' }, kontak) : null),
-    buat('figcaption', {}, 'Struktur poster sederhana: judul, harga, 3 poin utama, ajakan, kontak.'));
+    buat('figcaption', {}, p.keterangan || 'Struktur poster sederhana: judul, harga, 3 poin utama, ajakan, kontak.'));
 }
 
-const blokForm = (baris) => buat('div', { class: 'e-form', 'aria-label': 'Contoh formulir' },
-  buat('div', { class: 'e-alat-judul' }, ikon('perisai', 18), 'Contoh form aktivasi garansi'),
+const blokForm = (baris, p = {}) => buat('div', { class: 'e-form', 'aria-label': 'Contoh formulir' },
+  buat('div', { class: 'e-alat-judul' }, ikon(p.ikon || 'perisai', 18), p.judul || 'Contoh form aktivasi garansi'),
   baris.map((b) => buat('div', { class: 'e-form-baris' + (/screenshot|bukti|foto/i.test(b) ? ' unggah' : '') }, buat('span', {}, b),
     buat('span', { class: 'e-form-isian' }, /screenshot|bukti|foto/i.test(b) ? 'Unggah gambar' : ''))));
 
@@ -234,6 +254,134 @@ function blokSorot(jenis, baris) {
   const [label, ik] = SOROT[jenis];
   return buat('aside', { class: `e-sorot ${jenis}` }, buat('span', { class: 'e-sorot-label' }, ikon(ik, 16), label),
     ...renderMarkdown(baris.join('\n')));
+}
+
+
+// ---------------------------------------------------------------- blok tambahan
+function blokBanding(baris, p) {
+  return buat('div', { class: 'e-banding' },
+    buat('div', { class: 'e-banding-kepala' }, buat('span', { class: 'kiri' }, '✕ ', p.kiri || 'Hindari'), buat('span', { class: 'kanan' }, '✓ ', p.kanan || 'Lakukan')),
+    baris.map((b) => { const [k, n] = kolom(b); return buat('div', { class: 'e-banding-baris' }, buat('div', { class: 'kiri' }, ...sebaris(k)), buat('div', { class: 'kanan' }, ...sebaris(n || ''))); }));
+}
+function blokPalet(baris) {
+  return buat('div', { class: 'e-palet' }, baris.map((b) => {
+    const [hex, nama, guna] = kolom(b);
+    const warna = /^#[0-9a-f]{6}$/i.test(hex) ? hex : '#888888';
+    return buat('div', { class: 'e-palet-item' }, buat('span', { class: 'e-palet-warna', style: `background:${warna}` }),
+      buat('b', {}, nama || warna), buat('small', {}, warna.toUpperCase()), guna ? buat('span', {}, ...sebaris(guna)) : null);
+  }));
+}
+function blokChat(baris) {
+  const lawan = (baris[0] || '').split(':')[0].trim();
+  // kalau ada pembicara "Kamu"/"Aku", dialah yang di kanan; selain itu pembicara pertama = lawan bicara (kiri)
+  const saya = baris.map((b) => b.split(':')[0].trim()).find((n) => /^(kamu|aku|saya)$/i.test(n));
+  return buat('div', { class: 'e-chat', 'aria-label': 'Contoh percakapan' }, baris.map((b) => {
+    const i = b.indexOf(':');
+    const nama = i > 0 ? b.slice(0, i).trim() : '';
+    const teks = i > 0 ? b.slice(i + 1).trim() : b;
+    const kanan = saya ? nama === saya : nama && nama !== lawan;
+    return buat('div', { class: 'e-chat-baris' + (kanan ? ' kanan' : '') }, buat('div', { class: 'e-chat-gelembung' },
+      nama ? buat('small', {}, nama) : null, buat('span', {}, ...sebaris(teks))));
+  }));
+}
+function blokProfil(baris) {
+  const [nama, kategori, ...sisa] = baris;
+  const tautan = sisa.length && /^(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,})/i.test(sisa.at(-1)) ? sisa.pop() : null;
+  return buat('div', { class: 'e-profil' },
+    buat('div', { class: 'e-profil-atas' }, buat('span', { class: 'e-profil-foto' }, (nama || '?').replace(/^@/, '').charAt(0).toUpperCase()),
+      buat('div', { class: 'e-profil-angka' }, ...[['48', 'postingan'], ['1.204', 'pengikut'], ['180', 'mengikuti']].map(([n, l]) => buat('span', {}, buat('b', {}, n), l)))),
+    buat('b', { class: 'e-profil-nama' }, nama), kategori ? buat('small', {}, kategori) : null,
+    buat('div', { class: 'e-profil-bio' }, sisa.map((x) => buat('span', {}, ...sebaris(x)))),
+    tautan ? buat('span', { class: 'e-profil-tautan' }, '🔗 ', tautan) : null,
+    buat('div', { class: 'e-profil-tombol' }, buat('span', {}, 'Ikuti'), buat('span', {}, 'Kirim pesan')),
+    buat('small', { class: 'e-profil-catatan' }, 'Contoh tampilan profil — angka hanya ilustrasi.'));
+}
+function blokKalender(baris, p, opsi) {
+  const kunci = p.id || 'kalender';
+  const terpilih = new Set(opsi.progres?.cek?.[kunci] ?? []);
+  return buat('div', { class: 'e-kalender' }, baris.map((b, i) => {
+    const [hari, pilar, ide] = kolom(b);
+    const c = buat('input', { type: 'checkbox', id: `${kunci}-${i}`, 'aria-label': `Tandai ${hari} selesai` });
+    c.checked = terpilih.has(i);
+    c.addEventListener('change', () => { if (c.checked) terpilih.add(i); else terpilih.delete(i); kartu.classList.toggle('selesai', c.checked); opsi.simpanCek?.(kunci, [...terpilih].sort((x, y) => x - y)); });
+    const kartu = buat('label', { class: 'e-kalender-hari' + (c.checked ? ' selesai' : ''), for: `${kunci}-${i}` },
+      buat('span', { class: 'e-kalender-atas' }, buat('b', {}, hari), c), pilar ? buat('span', { class: 'e-kalender-pilar' }, pilar) : null,
+      ide ? buat('span', { class: 'e-kalender-ide' }, ...sebaris(ide)) : null);
+    return kartu;
+  }));
+}
+function blokTarif(p) {
+  const target = kolomAngka('Target penghasilan bersih per bulan', angka(p.target, 5000000));
+  const biaya = kolomAngka('Biaya kerja per bulan (internet, alat, langganan)', angka(p.biaya, 500000));
+  const jam = buat('input', { type: 'range', min: '5', max: '60', value: String(angka(p.jam, 25)), 'aria-label': 'Jam kerja per minggu' });
+  const labelJam = buat('b');
+  const hasil = buat('div', { class: 'e-hasil tiga' });
+  const hitung = () => {
+    const t = angka(target.input.value), b = angka(biaya.input.value), j = Number(jam.value);
+    labelJam.textContent = `${j} jam/minggu`;
+    const jamBayar = j * 4 * 0.7;   // ±30% waktu habis untuk cari klien, revisi, admin
+    const perJam = Math.ceil(((t + b) / Math.max(1, jamBayar)) / 1000) * 1000;
+    hasil.replaceChildren(
+      buat('div', {}, buat('small', {}, 'Tarif minimal per jam'), buat('b', {}, rupiah(perJam))),
+      buat('div', {}, buat('small', {}, 'Proyek kecil (5 jam)'), buat('b', {}, rupiah(perJam * 5))),
+      buat('div', {}, buat('small', {}, 'Proyek sedang (15 jam)'), buat('b', {}, rupiah(perJam * 15))));
+  };
+  for (const x of [target.input, biaya.input, jam]) x.addEventListener('input', hitung);
+  hitung();
+  return buat('div', { class: 'e-alat' }, buat('div', { class: 'e-alat-judul' }, ikon('kalkulator', 18), 'Kalkulator tarif freelance'),
+    buat('div', { class: 'e-dua' }, target.el, biaya.el), buat('label', { class: 'e-geser' }, buat('span', {}, 'Waktu kerja ', labelJam), jam), hasil,
+    buat('small', { class: 'e-alat-catatan' }, 'Dihitung dengan asumsi 70% jam kerjamu benar-benar dibayar klien. Sisanya untuk cari klien, revisi, dan administrasi.'));
+}
+function blokKomisi(p) {
+  const harga = kolomAngka('Harga produk', angka(p.harga, 150000));
+  const persenIn = buat('input', { type: 'number', min: '0', max: '100', step: '0.5', value: String(angka(p.persen, 5)), 'aria-label': 'Komisi (%)' });
+  const konversiIn = buat('input', { type: 'number', min: '0', max: '100', step: '0.1', value: String(angka(p.konversi, 1)), 'aria-label': 'Konversi (%)' });
+  const views = buat('input', { type: 'range', min: '1000', max: '200000', step: '1000', value: '20000', 'aria-label': 'Penonton per bulan' });
+  const labelViews = buat('b');
+  const hasil = buat('div', { class: 'e-hasil tiga' });
+  const hitung = () => {
+    const h = angka(harga.input.value), k = Number(persenIn.value) / 100, c = Number(konversiIn.value) / 100, v = Number(views.value);
+    labelViews.textContent = `${v.toLocaleString('id-ID')} penonton/bulan`;
+    const terjual = Math.floor(v * c);
+    hasil.replaceChildren(
+      buat('div', {}, buat('small', {}, 'Komisi per produk'), buat('b', {}, rupiah(h * k))),
+      buat('div', {}, buat('small', {}, 'Perkiraan terjual'), buat('b', {}, `${terjual.toLocaleString('id-ID')}×`)),
+      buat('div', {}, buat('small', {}, 'Perkiraan komisi/bulan'), buat('b', {}, rupiah(terjual * h * k))));
+  };
+  for (const x of [harga.input, persenIn, konversiIn, views]) x.addEventListener('input', hitung);
+  hitung();
+  return buat('div', { class: 'e-alat' }, buat('div', { class: 'e-alat-judul' }, ikon('koin', 18), 'Simulasi komisi affiliate'),
+    buat('div', { class: 'e-dua' }, harga.el, buat('label', { class: 'e-isian' }, buat('span', {}, 'Komisi (%) dan konversi (%)'),
+      buat('span', { class: 'e-rp' }, persenIn, '%', konversiIn, '%'))),
+    buat('label', { class: 'e-geser' }, buat('span', {}, 'Penonton ', labelViews), views), hasil,
+    buat('small', { class: 'e-alat-catatan' }, 'Angka komisi dan konversi berbeda tiap produk dan platform. Cek angka aslinya di dashboard affiliate-mu.'));
+}
+function blokKuis(baris) {
+  const soal = [];
+  for (const b of baris) {
+    if (b.startsWith('?')) soal.push({ tanya: b.slice(1).trim(), opsi: [], jelas: '' });
+    else if (!soal.length) continue;
+    else if (b.startsWith('>')) soal.at(-1).jelas = b.slice(1).trim();
+    else if (/^[-+]/.test(b)) soal.at(-1).opsi.push({ teks: b.slice(1).trim(), benar: b.startsWith('+') });
+  }
+  let benar = 0, dijawab = 0;
+  const skor = buat('span', { class: 'e-kuis-skor' });
+  const segar = () => { skor.textContent = dijawab ? `${benar}/${soal.length} benar` : `${soal.length} soal`; };
+  segar();
+  return buat('div', { class: 'e-kuis' }, buat('div', { class: 'e-alat-judul' }, ikon('centang', 18), 'Kuis singkat', skor),
+    soal.map((q, i) => {
+      const hasil = buat('p', { class: 'e-kuis-jelas', hidden: true });
+      const tombol = q.opsi.map((o) => buat('button', { type: 'button', class: 'e-kuis-opsi' }, ...sebaris(o.teks)));
+      tombol.forEach((t, j) => t.addEventListener('click', () => {
+        if (tombol.some((x) => x.disabled)) return;
+        tombol.forEach((x, k) => { x.disabled = true; if (q.opsi[k].benar) x.classList.add('benar'); });
+        if (!q.opsi[j].benar) t.classList.add('salah'); else benar += 1;
+        dijawab += 1; segar();
+        hasil.hidden = false;
+        hasil.replaceChildren(buat('b', {}, q.opsi[j].benar ? 'Tepat! ' : 'Belum tepat. '), ...sebaris(q.jelas));
+      }));
+      return buat('div', { class: 'e-kuis-soal' }, buat('p', {}, buat('b', {}, `${i + 1}. `), ...sebaris(q.tanya)), buat('div', { class: 'e-kuis-pilihan' }, tombol), hasil);
+    }));
 }
 
 // ---------------------------------------------------------------- markdown
@@ -283,9 +431,11 @@ export function renderIsi(teks, opsi = {}) {
       const blok = {
         alur: () => blokAlur(isi, p), langkah: () => blokLangkah(isi), sop: () => blokCentang(isi, p, opsi, true),
         checklist: () => blokCentang(isi, p, opsi, false), 'hitung-hpp': () => blokHitungHpp(p), strategi: () => blokStrategi(isi),
-        simulasi: () => blokSimulasi(p), kartu: () => blokKartu(isi), poster: () => blokPoster(isi), form: () => blokForm(isi),
+        simulasi: () => blokSimulasi(p), kartu: () => blokKartu(isi), poster: () => blokPoster(isi, p), form: () => blokForm(isi, p),
         'garis-waktu': () => blokWaktu(isi), catatan: () => blokSorot('catatan', isi), tips: () => blokSorot('tips', isi),
         peringatan: () => blokSorot('peringatan', isi), kutipan: () => blokSorot('kutipan', isi),
+        banding: () => blokBanding(isi, p), palet: () => blokPalet(isi), chat: () => blokChat(isi), profil: () => blokProfil(isi),
+        kalender: () => blokKalender(isi, p, opsi), tarif: () => blokTarif(p), komisi: () => blokKomisi(p), kuis: () => blokKuis(isi),
       }[nama];
       hasil.push(blok ? blok() : buat('div', { class: 'e-sorot peringatan' }, `Blok ":::${nama}" tidak dikenal`));
     } catch (err) {

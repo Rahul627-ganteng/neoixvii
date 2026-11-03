@@ -27,6 +27,7 @@ const IKON = {
   affiliate: ['M8.5 12.5a3 3 0 1 0 0-.01', 'M18 6a3 3 0 1 0 0-.01M18 18a3 3 0 1 0 0-.01', 'M11.2 11l4.2-2.6M11.2 13.6l4.2 2.6'],
   reseller: ['M3 10l2-6h14l2 6', 'M3 10h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z', 'M5 14v6h14v-6', 'M9.5 20v-3.5h5V20'],
   ebook: ['M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z', 'M4 19V5', 'M9 8.5h6M9 12h4'],
+  produk: ['M7 3h7l5 5v13H7z', 'M14 3v5h5', 'M10 13h6M10 16.5h4', 'M4 7v14h11'],
   mitra: ['M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', 'M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5', 'M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.8c1.8.9 3 2.7 3.5 5.2'],
   film: ['M3 5h18v14H3z', 'M7 5v14M17 5v14M3 9.5h4M17 9.5h4M3 14.5h4M17 14.5h4'],
   blog: ['M4 5h12v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z', 'M16 9h4v10a2 2 0 0 1-4 0', 'M7.5 9h5M7.5 12.5h5M7.5 16h3'],
@@ -42,7 +43,7 @@ const IKON = {
 
 const KELOMPOK = [
   ['Penjualan', ['ringkasan', 'pesanan', 'laporan', 'garansi', 'ulasan']],
-  ['Produk & harga', ['stok', 'aplikasi', 'promo', 'margin', 'riwayat', 'impor']],
+  ['Produk & harga', ['stok', 'aplikasi', 'promo', 'produk', 'margin', 'riwayat', 'impor']],
   ['Pelanggan & mitra', ['member', 'affiliate', 'reseller', 'ebook', 'mitra']],
   ['Konten & pengaturan', ['toko', 'blog', 'film', 'notifikasi']],
 ];
