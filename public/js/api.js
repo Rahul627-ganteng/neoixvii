@@ -162,8 +162,12 @@ export async function ambilUlasan() {
 export async function ambilBerita({ app = null, batas = 30 } = {}) {
   const kolom = 'slug,title,title_en,excerpt,excerpt_en,cover_url,published_at,app_id,apps(name,slug,logo_url)';
   const saring = app ? `&app_id=eq.${encodeURIComponent(app)}` : '';
-  try { return await ambilSimpan(`ixvii-blog-v1-${app ?? 'semua'}-${batas}`, `posts?select=${kolom}&order=published_at.desc&limit=${batas}${saring}`); }
-  catch { return null; }
+  // kolom topik ada sejak migration konten_film_blog; database lama tetap bisa dibaca
+  try { return await ambilSimpan(`ixvii-blog-v2-${app ?? 'semua'}-${batas}`, `posts?select=${kolom},topik&order=published_at.desc&limit=${batas}${saring}`); }
+  catch {
+    try { return await ambilSimpan(`ixvii-blog-v1-${app ?? 'semua'}-${batas}`, `posts?select=${kolom}&order=published_at.desc&limit=${batas}${saring}`); }
+    catch { return null; }
+  }
 }
 /** Satu artikel blog. Null kalau tidak ada / belum terbit. */
 export async function ambilArtikel(slug) {

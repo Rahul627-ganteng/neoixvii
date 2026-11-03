@@ -22,6 +22,7 @@
 //   :::tarif target=… biaya=… jam=…                       → kalkulator tarif freelance
 //   :::komisi harga=… persen=… konversi=…                 → kalkulator komisi affiliate
 //   :::kuis                   ? tanya / - salah / + benar / > penjelasan (pisahkan soal dengan baris kosong)
+//   :::ayat                   teks Arab / terjemahan / sumber (tiga baris)       → kutipan ayat atau hadis
 // Markdown: ## judul, ### subjudul, - daftar, 1. daftar, | tabel |, ![gambar](/…), > kutipan, **tebal**, [tautan](…)
 
 const buat = (tag, attrs = {}, ...anak) => {
@@ -356,6 +357,13 @@ function blokKomisi(p) {
     buat('label', { class: 'e-geser' }, buat('span', {}, 'Penonton ', labelViews), views), hasil,
     buat('small', { class: 'e-alat-catatan' }, 'Angka komisi dan konversi berbeda tiap produk dan platform. Cek angka aslinya di dashboard affiliate-mu.'));
 }
+function blokAyat(baris) {
+  const [arab, arti, ...sumber] = baris;
+  return buat('figure', { class: 'e-ayat' },
+    arab ? buat('p', { class: 'e-ayat-arab', dir: 'rtl', lang: 'ar' }, arab) : null,
+    arti ? buat('blockquote', {}, ...sebaris(arti)) : null,
+    sumber.length ? buat('figcaption', {}, ...sebaris(sumber.join(' '))) : null);
+}
 function blokKuis(baris) {
   const soal = [];
   for (const b of baris) {
@@ -436,6 +444,7 @@ export function renderIsi(teks, opsi = {}) {
         peringatan: () => blokSorot('peringatan', isi), kutipan: () => blokSorot('kutipan', isi),
         banding: () => blokBanding(isi, p), palet: () => blokPalet(isi), chat: () => blokChat(isi), profil: () => blokProfil(isi),
         kalender: () => blokKalender(isi, p, opsi), tarif: () => blokTarif(p), komisi: () => blokKomisi(p), kuis: () => blokKuis(isi),
+        ayat: () => blokAyat(isi),
       }[nama];
       hasil.push(blok ? blok() : buat('div', { class: 'e-sorot peringatan' }, `Blok ":::${nama}" tidak dikenal`));
     } catch (err) {
