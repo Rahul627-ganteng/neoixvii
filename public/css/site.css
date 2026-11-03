@@ -390,6 +390,8 @@ html.terjemah [data-t] { visibility: hidden; }
 .sampul { aspect-ratio: 2 / 3; width: 100%; overflow: hidden; background: var(--sorot); }
 .sampul img { width: 100%; height: 100%; object-fit: cover; }
 .film-kartu .sampul { aspect-ratio: 16 / 10; }
+/* poster 2:3 dipotong ke 16:10: geser sedikit ke atas supaya judul di poster tidak tertutup label */
+.film-kartu .sampul img { object-position: center 38%; }
 .sampul.bawaan { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 16px;
   background: radial-gradient(120% 90% at 0% 0%, #b3161d 0%, #5c0102 45%, #120708 100%); color: #fff; }
 .sampul.bawaan::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 0 55%, rgba(255,255,255,.07) 55% 63%, transparent 63%); }
@@ -917,3 +919,10 @@ body:has(.bar-bundle:not([hidden])) .kaki { padding-bottom: 96px; }
 
 .pd-hm-mini { display: inline-flex; align-items: center; gap: 2px; justify-self: start; padding: 3px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
   font-variant-numeric: tabular-nums; background: var(--merah-latar); color: var(--merah-teks); }
+/* artikel blog berformat kaya (gambar, tabel, blok visual) */
+.isi-artikel > * { margin-top: 0; margin-bottom: 0; }
+.isi-artikel > * + * { margin-top: 14px; }
+.isi-artikel > h2 { margin-top: 30px; }
+.isi-artikel > h3 { margin-top: 22px; }
+.isi-artikel .e-galeri figure img { border-radius: 16px; }
+.isi-artikel .e-galeri figcaption { font-size: 13px; }

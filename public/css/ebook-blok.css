@@ -193,3 +193,11 @@
 .e-kuis-opsi.benar { opacity: 1; border-color: var(--hijau-teks); background: var(--hijau-latar); color: var(--teks); }
 .e-kuis-opsi.salah { opacity: 1; border-color: var(--merah-teks); background: var(--merah-latar); }
 .e-kuis-jelas { margin: 8px 0 0 !important; font-size: 14px; color: var(--teks-2); }
+
+/* kutipan ayat / hadis */
+.e-ayat { margin: 22px 0; padding: 22px 22px 18px; border-radius: 18px; border: 1px solid var(--garis); background: linear-gradient(160deg, var(--permukaan), var(--permukaan-pekat)); position: relative; overflow: hidden; }
+.e-ayat::before { content: ""; position: absolute; inset: 0; opacity: .06; pointer-events: none;
+  background: repeating-conic-gradient(from 22.5deg, currentColor 0 45deg, transparent 0 90deg) 0 0 / 28px 28px; }
+.e-ayat-arab { position: relative; margin: 0 0 14px; font: 400 clamp(22px, 4.6vw, 30px)/2 "Amiri", "Noto Naskh Arabic", "Scheherazade New", "Traditional Arabic", serif; text-align: right; color: var(--teks); }
+.e-ayat blockquote { position: relative; margin: 0; padding: 0; border: 0; font-size: 16px; line-height: 1.7; color: var(--teks-2); font-style: italic; }
+.e-ayat figcaption { position: relative; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--maroon-terang); }

@@ -1,6 +1,6 @@
 // Menu Blog: tulis berita aplikasi (judul, ringkasan, isi, sampul, aplikasi terkait), simpan sebagai draf atau terbitkan.
 import { el, isian, q, toast, waktu } from './alat.js';
-import { tampilkanTeks } from '/js/teks.js';
+import { renderIsi } from '/js/ebook-render.js';
 
 const MAKS_SAMPUL = 2 * 1024 * 1024;
 let saringan = 'semua';
@@ -47,7 +47,7 @@ export async function halamanBlog(supabase, halaman) {
       return el('article', { class: 'item-form baris-berita' },
         p.cover_url ? el('img', { class: 'sampul-kecil', src: p.cover_url, alt: '' }) : el('div', { class: 'sampul-kecil kosong' }, 'IX'),
         el('div', { style: 'min-width:0;flex:1' },
-          el('b', {}, p.title), el('div', { class: 'muted' }, `${namaApp.get(p.app_id) ?? 'Umum'} · ${waktu(p.published_at)}`),
+          el('b', {}, p.title), el('div', { class: 'muted' }, `${namaApp.get(p.app_id) ?? ({ islami: 'Islami', tips: 'Tips & panduan', berita: 'Berita' }[p.topik] || 'Umum')} · ${waktu(p.published_at)}`),
           el('div', { class: 'row', style: 'gap:4px;margin-top:4px' }, el('span', { class: 'tag ' + kelas }, label))),
         el('div', { class: 'row' },
           p.is_published ? el('a', { class: 'btn sec kecil', href: `/blog/baca/?p=${encodeURIComponent(p.slug)}`, target: '_blank', rel: 'noopener' }, 'Lihat ↗') : null,
@@ -66,8 +66,11 @@ export async function halamanBlog(supabase, halaman) {
       apps.map((a) => el('option', { value: a.id, selected: p.app_id === a.id }, a.name)));
     const ringkas = el('textarea', { rows: 2, maxlength: 300, value: p.excerpt || '', placeholder: '1–2 kalimat yang tampil di kartu berita' });
     const badan = el('textarea', { rows: 14, maxlength: 40000, value: p.body || '', placeholder: 'Tulis dengan kata-katamu sendiri.\n\n## Subjudul\n\nParagraf…\n\n- poin\n- poin' });
-    const pratinjau = el('article', { class: 'pratinjau-kebijakan' });
-    const segarPratinjau = () => pratinjau.replaceChildren(...tampilkanTeks(badan.value));
+    const pratinjau = el('article', { class: 'pratinjau-kebijakan eb-teks' });
+    const adaTopik = posts.some((x) => 'topik' in x) || !posts.length;
+    const topik = el('select', {}, [['aplikasi', 'Aplikasi'], ['tips', 'Tips & panduan'], ['islami', 'Islami'], ['berita', 'Berita']]
+      .map(([k, l]) => el('option', { value: k, selected: (p.topik || 'aplikasi') === k }, l)));
+    const segarPratinjau = () => pratinjau.replaceChildren(...renderIsi(badan.value, { progres: {} }));
     badan.addEventListener('input', segarPratinjau); segarPratinjau();
     const sumber = el('input', { type: 'url', value: p.source_url || '', placeholder: 'https://… (opsional)' });
     const judulEn = el('input', { type: 'text', value: p.title_en || '', maxlength: 140 });
@@ -107,6 +110,7 @@ export async function halamanBlog(supabase, halaman) {
         title_en: judulEn.value.trim() || null, excerpt_en: ringkasEn.value.trim() || null, body_en: badanEn.value.trim() || null,
         is_published: terbit.checked, published_at: new Date(tanggal.value || Date.now()).toISOString(), updated_at: new Date().toISOString(),
       };
+      if (adaTopik && posts.some((x) => 'topik' in x)) baris.topik = topik.value;
       simpan.disabled = true;
       try {
         if (p.id) await q(supabase.from('posts').update(baris).eq('id', p.id));
@@ -127,9 +131,10 @@ export async function halamanBlog(supabase, halaman) {
     editor.replaceChildren(el('div', { class: 'item-form' },
       el('h3', { style: 'margin:0' }, p.id ? `Ubah: ${p.title}` : 'Berita baru'),
       el('div', { class: 'grid2' }, isian('Judul', judul), isian('Alamat (slug)', slug, 'Muncul di link: /blog/baca/?p=…'),
-        isian('Aplikasi terkait', app, 'Berita tampil juga di halaman aplikasi ini.'), isian('Link sumber (opsional)', sumber)),
+        isian('Aplikasi terkait', app, 'Berita tampil juga di halaman aplikasi ini.'), isian('Link sumber (opsional)', sumber),
+        posts.some((x) => 'topik' in x) ? isian('Topik', topik, 'Islami dan Tips punya saringan sendiri di halaman Blog.') : null),
       isian('Ringkasan', ringkas),
-      isian('Isi berita', badan, 'Format: "## Subjudul", baris kosong untuk paragraf baru, "- " untuk daftar, **tebal**, [teks](https://…).'),
+      isian('Isi berita', badan, 'Format: "## Subjudul", baris kosong untuk paragraf baru, "- " untuk daftar, **tebal**, [teks](https://…), gambar ![keterangan](/…), tabel | a | b |, dan blok :::kartu, :::banding, :::tips, :::ayat (Arab / terjemahan / sumber), :::kuis seperti di editor ebook.'),
       el('details', { class: 'item-form' }, el('summary', {}, el('b', {}, 'Pratinjau')), pratinjau),
       el('label', { class: 'f' }, 'Gambar sampul (opsional, JPG/PNG/WebP maks. 2 MB; mendatar 16:9 paling pas)'), kotakSampul,
       el('div', { class: 'row', style: 'margin-top:6px' }, file, sampul ? el('button', { type: 'button', class: 'sec kecil', onclick: () => { sampul = null; gambarSampul(); } }, 'Pakai sampul bawaan') : null),

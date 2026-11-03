@@ -2,7 +2,7 @@
 import { ambilArtikel, ambilBerita, ambilToko } from './api.js';
 import { inggris, pasangKurs, t, tanggal } from './i18n.js';
 import { kartuBerita, pilihBahasa, sampulBerita } from './blog-kartu.js';
-import { tampilkanTeks } from './teks.js';
+import { renderIsi } from './ebook-render.js';
 import { el, ikonApp, pasangKerangka, urlApp } from './ui.js';
 
 pasangKerangka('/blog/');
@@ -28,12 +28,13 @@ async function muat() {
     el('nav', { class: 'remah', 'aria-label': 'Breadcrumb' }, el('a', { href: '/blog/' }, 'Blog'), ' / ', judul),
     el('article', { class: 'artikel' },
       el('header', {},
-        el('div', { class: 'meta-berita' }, a.apps?.name ? el('a', { class: 'lencana', href: `/blog/?app=${encodeURIComponent(a.apps.slug)}` }, a.apps.name) : null,
+        el('div', { class: 'meta-berita' }, a.apps?.name ? el('a', { class: 'lencana', href: `/blog/?app=${encodeURIComponent(a.apps.slug)}` }, a.apps.name)
+          : a.topik && a.topik !== 'aplikasi' ? el('a', { class: 'lencana', href: `/blog/?topik=${a.topik}` }, t('blog.topik.' + a.topik)) : null,
           el('time', { datetime: a.published_at }, tanggal(a.published_at))),
         el('h1', {}, judul),
         ringkas ? el('p', { class: 'lead redup' }, ringkas) : null),
       sampulBerita(a, 'sampul-artikel'),
-      el('div', { class: 'kebijakan isi-artikel kaca' }, tampilkanTeks(pilihBahasa(a.body, a.body_en) || a.body),
+      el('div', { class: 'kebijakan isi-artikel eb-teks kaca' }, renderIsi(pilihBahasa(a.body, a.body_en) || a.body),
         sumber ? el('p', { class: 'redup', style: 'font-size:13px' }, `${t('blog.sumber')}: `, el('a', { href: a.source_url, target: '_blank', rel: 'noopener' }, sumber)) : null),
       el('div', { class: 'row-lencana', style: 'margin:14px 0' }, el('a', { class: 'tombol garis wa', href: bagikan, target: '_blank', rel: 'noopener' }, t('blog.bagikan'))),
       a.apps?.slug ? el('aside', { class: 'ajakan kaca' },
