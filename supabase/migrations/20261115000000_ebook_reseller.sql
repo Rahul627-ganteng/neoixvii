@@ -508,7 +508,8 @@ revoke execute on function public.ebook_beri_akses(jsonb) from public, anon;
 grant execute on function public.ebook_beri_akses(jsonb) to authenticated;
 
 -- ---------------------------------------------------------------- isi awal ebook (tidak menimpa yang sudah diubah)
-insert into public.ebook_bab (slug, label, judul, ringkas, ikon, urut, isi) values
+insert into public.ebook_bab (slug, label, judul, ringkas, ikon, urut, isi)
+select v.* from (values
 ('selamat-datang', '01', 'Selamat Datang di Dunia Reseller', 'Apa itu bisnis reseller aplikasi digital dan apa yang jadi fokusmu.', 'roket', 10, $isi$
 Selamat datang.
 
@@ -1037,4 +1038,5 @@ Kemudian ulangi prosesnya
 Build the system. Find the customers. Make the sale. Keep improving.
 :::
 $isi$)
-on conflict (slug) do nothing;
+) v(slug, label, judul, ringkas, ikon, urut, isi)
+where not exists (select 1 from public.ebook_bab b where b.slug = v.slug);

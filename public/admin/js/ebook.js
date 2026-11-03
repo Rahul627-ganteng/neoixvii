@@ -1,4 +1,5 @@
-// Menu Ebook reseller: persetujuan akses pembaca, perangkat, reset password, dan editor isi ebook (dengan pratinjau langsung).
+// Menu Ebook & rak baca: persetujuan akses (panduan reseller), pembaca & ebook di raknya, perangkat, reset password,
+// dan editor isi setiap ebook (sampul, bab, pratinjau langsung). Ebook yang dibeli di Produk Digital masuk rak otomatis.
 import { el, isian, q, tabel, td, tautanWa, toast, waktu } from './alat.js';
 import { DAFTAR_IKON, ikon, renderIsi } from '/js/ebook-render.js';
 
@@ -18,7 +19,15 @@ const BLOK = [
   ['Simulasi untung', ':::simulasi margin=17000\n:::'],
   ['Kartu', ':::kartu\nJudul kartu | Penjelasan singkat.\nJudul kartu | Penjelasan singkat.\n:::'],
   ['Contoh poster', ':::poster\nNAMA APLIKASI\nPremium Access\n1 Bulan • RpXX.XXX\nFitur premium\nGaransi sesuai ketentuan\nORDER NOW\nContact: @username\n:::'],
-  ['Form', ':::form\nNama\nNo. HP Aktif\nScreenshot bukti\n:::'],
+  ['Form', ':::form judul="Contoh formulir"\nNama\nNo. HP Aktif\nScreenshot bukti\n:::'],
+  ['Banding', ':::banding kiri="Hindari" kanan="Lakukan"\nYang salah | Yang benar\n:::'],
+  ['Palet warna', ':::palet\n#800203 | Maroon | Warna utama\n#FFB84D | Kuning | Aksen\n:::'],
+  ['Chat WA', ':::chat\nPembeli: Halo kak, ini masih ada?\nKamu: Masih, Kak! Mau yang mana?\n:::'],
+  ['Profil IG', ':::profil\n@namaakun\nKategori\nBaris bio pertama\nBaris bio kedua\ncontoh.com\n:::'],
+  ['Kalender', ':::kalender id=kalender-baru\nSenin | Edukasi | Ide konten\nSelasa | Cerita | Ide konten\n:::'],
+  ['Kalkulator tarif', ':::tarif target=5000000 biaya=500000 jam=25\n:::'],
+  ['Simulasi komisi', ':::komisi harga=150000 persen=5 konversi=1\n:::'],
+  ['Kuis', ':::kuis\n? Pertanyaan?\n- Jawaban salah\n+ Jawaban benar\n> Penjelasan singkat.\n:::'],
   ['Garis waktu', ':::garis-waktu\n1 September | Kejadian\n1 Oktober | Kejadian\n:::'],
   ['Tips', ':::tips\nIsi tips.\n:::'],
   ['Peringatan', ':::peringatan\nIsi peringatan.\n:::'],
@@ -28,17 +37,18 @@ const BLOK = [
 const slugDari = (t) => String(t || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'bab';
 
 export async function halamanEbook(supabase, halaman) {
-  let daftar, bab, info, log;
+  let daftar, bab, info, log, buku;
   try {
-    [daftar, bab, info, log] = await Promise.all([
+    [daftar, bab, info, log, buku] = await Promise.all([
       q(supabase.rpc('ebook_daftar_akses')),
       q(supabase.from('ebook_bab').select('*').order('urut').order('id')),
       q(supabase.from('ebook_info').select('*').eq('id', 1).single()),
       q(supabase.from('ebook_log').select('id,akses_id,acara,detail,ua,created_at').order('created_at', { ascending: false }).limit(40)),
+      q(supabase.from('ebook_buku').select('*').order('urut').order('id')),
     ]);
   } catch (err) {
-    halaman.replaceChildren(el('div', { class: 'card' }, el('h2', {}, 'Ebook reseller'),
-      el('div', { class: 'msg warn' }, 'Jalankan migration 20261115000000_ebook_reseller.sql di Supabase SQL Editor dulu. (', err.message, ')')));
+    halaman.replaceChildren(el('div', { class: 'card' }, el('h2', {}, 'Ebook & rak baca'),
+      el('div', { class: 'msg warn' }, 'Jalankan migration 20261115000000_ebook_reseller.sql lalu 20261116000000_produk_digital.sql di Supabase SQL Editor dulu. (', err.message, ')')));
     return;
   }
   const muatUlang = () => halamanEbook(supabase, halaman);
@@ -55,8 +65,9 @@ export async function halamanEbook(supabase, halaman) {
     catch (err) { toast(err.message, true); tombol.disabled = false; }
   };
   const kabar = (r) => (r?.wa || r?.email ? ` (dikabari lewat ${[r.wa && 'WhatsApp', r.email && 'email'].filter(Boolean).join(' & ')})` : ' (notifikasi WA/email belum aktif, kabari manual)');
-  const tampilSandi = (a, sandi, wadah = hasilSandi) => {
-    const pesanWa = `Halo ${a.nama}! Akses Ebook Panduan Reseller IXVII.CO kamu sudah aktif.\n\nBuka: ${location.origin}/reseller/ebook/\nEmail: ${a.email}\nPassword: ${sandi}\n\nEbook ini khusus untukmu, maksimal 2 perangkat, dan tidak boleh disebarkan atau dijual kembali.`;
+  const tampilSandi = (a, sandi, wadah = hasilSandi, slugBuku = 'panduan-reseller') => {
+    const tautan = slugBuku === 'panduan-reseller' ? `${location.origin}/reseller/ebook/` : `${location.origin}/ebook/`;
+    const pesanWa = `Halo ${a.nama}! Akses ebook IXVII.CO kamu sudah aktif.\n\nBuka: ${tautan}\nEmail: ${a.email}\nPassword: ${sandi}\n\nEbook ini khusus untukmu, maksimal ${info.maks_perangkat} perangkat, dan tidak boleh disebarkan atau dijual kembali.`;
     wadah.replaceChildren(el('div', { class: 'msg ok' },
       el('b', {}, `Password untuk ${a.email}: `), el('code', { class: 'sandi' }, sandi), el('br'),
       'Password ini hanya ditampilkan sekali. ',
@@ -100,6 +111,11 @@ export async function halamanEbook(supabase, halaman) {
       if (a.status === 'aktif') { if (confirm(`Cabut akses ${a.nama}? Ia langsung keluar dari semua perangkat.`)) aksi(cabut, supabase.rpc('ebook_cabut', { p_id: a.id }), () => 'Akses dicabut'); }
       else aksi(cabut, supabase.rpc('ebook_setujui', { p_id: a.id }), (r) => `Akses diaktifkan${kabar(r)}`);
     });
+    const rakBuku = el('div', { class: 'row', style: 'gap:4px' }, (a.buku || []).map((k) => {
+      const x = el('button', { type: 'button', class: 'tag-x', 'aria-label': `Cabut ${k.judul} dari rak ${a.nama}`, title: 'Cabut ebook ini dari raknya' }, '×');
+      x.addEventListener('click', () => { if (confirm(`Cabut "${k.judul}" dari rak ${a.nama}?`)) aksi(x, supabase.rpc('ebook_cabut_buku', { p_akses: a.id, p_buku: k.slug }), () => 'Ebook dicabut dari rak'); });
+      return el('span', { class: 'tag', title: `Sumber: ${k.sumber}` }, k.judul.length > 28 ? k.judul.slice(0, 26) + '…' : k.judul, ' ', x);
+    }));
     const perangkat = a.perangkat.length
       ? el('span', { title: a.perangkat.map((p) => `${p.ua || 'perangkat'} · terakhir ${waktu(p.terakhir)}`).join('\n') }, `${a.perangkat.length}/${a.maks}`)
       : `0/${a.maks}`;
@@ -108,53 +124,108 @@ export async function halamanEbook(supabase, halaman) {
       td(el('div', { class: 'row', style: 'gap:4px' }, el('span', { class: 'tag ' + kelas }, label),
         Number(a.ditolak_7h) ? el('span', { class: 'tag merah', title: 'Ada percobaan masuk dari perangkat lain dalam 7 hari' }, `${a.ditolak_7h}× perangkat ke-${a.maks + 1}`) : null,
         a.terkunci ? el('span', { class: 'tag kuning' }, 'terkunci 15 menit') : null)),
-      td(perangkat, true), td(a.terakhir ? waktu(a.terakhir) : '–'),
+      td(rakBuku), td(perangkat, true), td(a.terakhir ? waktu(a.terakhir) : '–'),
       td(el('div', { class: 'row', style: 'gap:6px' }, reset, sandi, cabut)));
   };
+  const maks = el('input', { type: 'number', min: '1', max: '5', value: info.maks_perangkat, style: 'width:80px' });
+  const simpanMaks = el('button', { type: 'button', class: 'sec kecil' }, 'Simpan');
+  simpanMaks.addEventListener('click', async () => {
+    try {
+      info = await q(supabase.from('ebook_info').update({ maks_perangkat: Math.min(5, Math.max(1, Number(maks.value) || 2)), updated_at: new Date().toISOString() }).eq('id', 1).select().single());
+      toast('Batas perangkat tersimpan');
+    } catch (err) { toast(err.message, true); }
+  });
   const kartuPembaca = el('section', { class: 'card' }, el('h2', {}, `Pembaca (${aktif.length} aktif)`),
-    el('p', { class: 'sub' }, `Satu akun bisa dibuka di ${daftar.maks_perangkat} perangkat. Kalau pembeli ganti HP atau browser, klik Reset perangkat. Kamu dapat notifikasi setiap ada percobaan masuk dari perangkat lebih dari batas.`),
+    el('p', { class: 'sub' }, `Satu akun bisa dibuka di ${daftar.maks_perangkat} perangkat. Kalau pembeli ganti HP atau browser, klik Reset perangkat. Kamu dapat notifikasi setiap ada percobaan masuk dari perangkat lebih dari batas. Ebook yang dibeli di halaman Produk Digital otomatis masuk ke rak pembeli setelah pesanan ditandai dibayar.`),
+    el('div', { class: 'row', style: 'margin-bottom:12px' }, el('span', { class: 'muted' }, 'Maksimal perangkat per pembaca'), maks, simpanMaks),
     hasilSandi,
-    aktif.length || lain.length ? tabel(['Pembaca', 'Status', '>Perangkat', 'Terakhir masuk', ''], [...aktif, ...lain].map(barisAkses)) : el('p', { class: 'muted' }, 'Belum ada pembaca.'));
+    aktif.length || lain.length ? tabel(['Pembaca', 'Status', 'Ebook di rak', '>Perangkat', 'Terakhir masuk', ''], [...aktif, ...lain].map(barisAkses)) : el('p', { class: 'muted' }, 'Belum ada pembaca.'));
 
   // ---- beri akses langsung
   const fNama = el('input', { type: 'text', placeholder: 'Nama pembeli' });
   const fEmail = el('input', { type: 'email', placeholder: 'email@pembeli.com' });
   const fWa = el('input', { type: 'tel', placeholder: '08…' });
   const fCatatan = el('input', { type: 'text', placeholder: 'mis. bayar reseller 2 Nov' });
+  const fBuku = el('select', {}, buku.map((k) => el('option', { value: k.slug }, k.judul)));
   const beri = el('button', { type: 'button' }, 'Beri akses & buat password');
   beri.addEventListener('click', async () => {
     if (fNama.value.trim().length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fEmail.value.trim())) return toast('Isi nama dan email yang benar', true);
     beri.disabled = true;
     try {
-      const r = await q(supabase.rpc('ebook_beri_akses', { p: { nama: fNama.value.trim(), email: fEmail.value.trim(), wa: fWa.value, catatan: fCatatan.value } }));
-      toast(`Akses diberikan${kabar(r)}`);
+      const r = await q(supabase.rpc('ebook_beri_akses', { p: { nama: fNama.value.trim(), email: fEmail.value.trim(), wa: fWa.value, catatan: fCatatan.value, buku: fBuku.value } }));
+      toast(`"${r.buku}" masuk rak ${fNama.value.trim()}${kabar(r)}`);
       const a = { nama: fNama.value.trim(), email: fEmail.value.trim().toLowerCase(), wa: fWa.value.replace(/\D/g, '').replace(/^0/, '62') };
-      tampilSandi(a, r.sandi, tampilSandiBaru);
+      if (r.sandi) tampilSandi(a, r.sandi, tampilSandiBaru, fBuku.value);
+      else tampilSandiBaru.replaceChildren(el('div', { class: 'msg ok' }, `Akun ${a.email} sudah ada, jadi password tidak berubah. "${r.buku}" sudah ditambahkan ke raknya.`,
+        el('div', { class: 'row', style: 'margin-top:8px' }, el('button', { type: 'button', class: 'sec kecil', onclick: muatUlang }, 'Muat ulang daftar'))));
     } catch (err) { toast(err.message, true); }
     beri.disabled = false;
   });
   const tampilSandiBaru = el('div');
-  const kartuBeri = el('section', { class: 'card' }, el('h2', {}, 'Beri akses langsung'),
-    el('p', { class: 'sub' }, 'Untuk pembeli yang sudah bayar tanpa mengisi permintaan. Password dibuat otomatis, dikirim ke WA/email pembeli, dan ditampilkan sekali di sini.'),
-    el('div', { class: 'grid2' }, isian('Nama', fNama), isian('Email (dipakai untuk masuk)', fEmail), isian('WhatsApp', fWa), isian('Catatan (opsional)', fCatatan)),
+  const kartuBeri = el('section', { class: 'card' }, el('h2', {}, 'Tambahkan ebook ke rak pembeli'),
+    el('p', { class: 'sub' }, 'Untuk pembeli yang bayar di luar website atau belum mengisi permintaan. Kalau emailnya belum terdaftar, password dibuat otomatis, dikirim ke WA/email pembeli, dan ditampilkan sekali di sini. Kalau sudah terdaftar, ebook langsung ditambahkan ke raknya.'),
+    el('div', { class: 'grid2' }, isian('Ebook', fBuku), isian('Nama', fNama), isian('Email (dipakai untuk masuk)', fEmail), isian('WhatsApp', fWa), isian('Catatan (opsional)', fCatatan)),
     el('div', { class: 'row', style: 'margin-top:12px' }, beri), tampilSandiBaru);
 
   // ---- editor isi
   const kartuIsi = el('section', { class: 'card', id: 'isiEbook' });
   const editor = el('div');
+  let bukuAktif = buku.find((k) => k.slug === sessionStorage.getItem('ixvii-admin-buku')) ?? buku[0];
+  const babBuku = () => bab.filter((b) => b.buku_id === bukuAktif?.id).sort((x, y) => x.urut - y.urut || x.id - y.id);
   function gambarIsi() {
-    const judul = el('input', { type: 'text', value: info.judul });
-    const sub = el('input', { type: 'text', value: info.subjudul });
-    const label = el('input', { type: 'text', value: info.label });
-    const maks = el('input', { type: 'number', min: '1', max: '5', value: info.maks_perangkat });
-    const simpanInfo = el('button', { type: 'button', class: 'kecil' }, 'Simpan sampul');
-    simpanInfo.addEventListener('click', async () => {
+    if (!bukuAktif) { kartuIsi.replaceChildren(el('h2', {}, 'Isi ebook'), el('p', { class: 'muted' }, 'Belum ada ebook.')); return; }
+    const pilihBuku = el('select', {}, buku.map((k) => el('option', { value: k.slug, selected: k.id === bukuAktif.id }, `${k.judul}${k.tampil ? '' : ' (disembunyikan)'}`)));
+    pilihBuku.addEventListener('change', () => {
+      bukuAktif = buku.find((k) => k.slug === pilihBuku.value);
+      try { sessionStorage.setItem('ixvii-admin-buku', bukuAktif.slug); } catch { /* abaikan */ }
+      editor.replaceChildren(); gambarIsi();
+    });
+    const bukuBaru = el('button', { type: 'button', class: 'sec kecil' }, '+ Ebook baru');
+    bukuBaru.addEventListener('click', async () => {
+      const j = prompt('Judul ebook baru:');
+      if (!j || j.trim().length < 2) return;
+      let slug = slugDari(j);
+      if (buku.some((k) => k.slug === slug)) slug += '-' + Date.now().toString(36).slice(-4);
       try {
-        info = await q(supabase.from('ebook_info').update({ judul: judul.value.trim(), subjudul: sub.value.trim(), label: label.value.trim(),
-          maks_perangkat: Math.min(5, Math.max(1, Number(maks.value) || 2)), updated_at: new Date().toISOString() }).eq('id', 1).select().single());
-        toast('Sampul ebook tersimpan');
+        const k = await q(supabase.from('ebook_buku').insert({ slug, judul: j.trim(), label: 'Ebook interaktif', warna: '#800203', tampil: true, urut: (buku.at(-1)?.urut ?? 0) + 1 }).select().single());
+        buku.push(k); bukuAktif = k; gambarIsi();
+        toast('Ebook dibuat. Tambahkan bab, lalu jual lewat menu Produk digital (tipe kirim: ebook).');
       } catch (err) { toast(err.message, true); }
     });
+    const judul = el('input', { type: 'text', value: bukuAktif.judul || '' });
+    const sub = el('input', { type: 'text', value: bukuAktif.subjudul || '' });
+    const label = el('input', { type: 'text', value: bukuAktif.label || '' });
+    const warna = el('input', { type: 'color', value: bukuAktif.warna || '#800203' });
+    const sampulUrl = el('input', { type: 'text', value: bukuAktif.sampul_url || '', placeholder: '/assets/produk/… atau https://…' });
+    const tampilBuku = el('input', { type: 'checkbox', checked: bukuAktif.tampil });
+    const sampulFile = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', class: 'hidden' });
+    const contohSampul = el('div', { class: 'adm-sampul' }, bukuAktif.sampul_url ? el('img', { src: bukuAktif.sampul_url, alt: '' }) : el('span', {}, 'Belum ada sampul'));
+    sampulFile.addEventListener('change', async () => {
+      const f = sampulFile.files[0];
+      if (!f) return;
+      if (f.size > 3 * 1024 * 1024) { sampulFile.value = ''; return toast('Gambar maksimal 3 MB', true); }
+      try {
+        const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const path = `sampul-${bukuAktif.slug}-${Date.now()}.${ext}`;
+        await q(supabase.storage.from('produk').upload(path, f, { contentType: f.type, cacheControl: '31536000' }));
+        sampulUrl.value = supabase.storage.from('produk').getPublicUrl(path).data.publicUrl;
+        contohSampul.replaceChildren(el('img', { src: sampulUrl.value, alt: '' }));
+        toast('Sampul diunggah. Klik Simpan info ebook.');
+      } catch (err) { toast('Gagal mengunggah: ' + err.message, true); }
+      sampulFile.value = '';
+    });
+    const simpanInfo = el('button', { type: 'button', class: 'kecil' }, 'Simpan info ebook');
+    simpanInfo.addEventListener('click', async () => {
+      try {
+        Object.assign(bukuAktif, await q(supabase.from('ebook_buku').update({ judul: judul.value.trim(), subjudul: sub.value.trim() || null, label: label.value.trim() || null,
+          warna: warna.value, sampul_url: sampulUrl.value.trim() || null, tampil: tampilBuku.checked, updated_at: new Date().toISOString() }).eq('id', bukuAktif.id).select().single()));
+        if (bukuAktif.slug === 'panduan-reseller') {
+          info = await q(supabase.from('ebook_info').update({ judul: bukuAktif.judul, subjudul: bukuAktif.subjudul || '', label: bukuAktif.label || '', updated_at: new Date().toISOString() }).eq('id', 1).select().single());
+        }
+        toast('Info ebook tersimpan'); gambarIsi();
+      } catch (err) { toast(err.message, true); }
+    });
+    const bab = babBuku();
     const baris = bab.map((b, i) => {
       const tampil = el('input', { type: 'checkbox', checked: b.tampil, 'aria-label': `Tampilkan ${b.judul}` });
       tampil.addEventListener('change', async () => {
@@ -169,7 +240,6 @@ export async function halamanEbook(supabase, halaman) {
           await q(supabase.from('ebook_bab').update({ urut: y.urut }).eq('id', x.id));
           await q(supabase.from('ebook_bab').update({ urut: x.urut }).eq('id', y.id));
           [x.urut, y.urut] = [y.urut, x.urut];
-          bab.sort((p, r) => p.urut - r.urut || p.id - r.id);
           gambarIsi();
         } catch (err) { toast(err.message, true); }
       };
@@ -184,11 +254,15 @@ export async function halamanEbook(supabase, halaman) {
     });
     kartuIsi.replaceChildren(
       el('h2', {}, 'Isi ebook (bisa diedit)'),
-      el('p', { class: 'sub' }, 'Semua bab tersimpan di database dan langsung tampil di ebook pembaca setelah disimpan. Teks memakai format sederhana: ## judul, - daftar, **tebal**, plus blok interaktif (:::alur, :::checklist, :::hitung-hpp, dan lainnya) yang bisa disisipkan dari tombol di editor.'),
-      el('div', { class: 'grid2' }, isian('Judul ebook', judul), isian('Subjudul', sub), isian('Label sampul', label), isian('Maksimal perangkat per pembaca', maks)),
-      el('div', { class: 'row', style: 'margin:10px 0 14px' }, simpanInfo),
+      el('p', { class: 'sub' }, 'Semua bab tersimpan di database dan langsung tampil di ebook pembaca setelah disimpan. Teks memakai format sederhana: ## judul, - daftar, **tebal**, plus blok interaktif (:::alur, :::checklist, :::kuis, :::chat, dan lainnya) yang bisa disisipkan dari tombol di editor.'),
+      el('div', { class: 'row', style: 'margin-bottom:12px' }, el('label', { class: 'f', style: 'margin:0' }, 'Ebook'), el('div', { style: 'flex:1;min-width:220px' }, pilihBuku), bukuBaru),
+      el('div', { class: 'adm-buku' }, el('div', {}, contohSampul, el('button', { type: 'button', class: 'sec kecil', style: 'margin-top:8px', onclick: () => sampulFile.click() }, 'Ganti sampul…'), sampulFile),
+        el('div', { class: 'grid2' }, isian('Judul ebook', judul), isian('Subjudul', sub), isian('Label di sampul', label),
+          isian('Gambar sampul (3:4)', sampulUrl), isian('Warna ebook', warna), el('label', { class: 'row muted', style: 'align-self:end' }, tampilBuku, 'Tampil di rak pembaca'))),
+      el('div', { class: 'row', style: 'margin:10px 0 14px' }, simpanInfo,
+        el('a', { class: 'btn sec kecil', href: bukuAktif.slug === 'panduan-reseller' ? '/reseller/ebook/' : `/ebook/?b=${bukuAktif.slug}`, target: '_blank', rel: 'noopener' }, 'Buka di pembaca ↗')),
       tabel(['Bab', 'Judul', 'Tampil', ''], baris),
-      el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { type: 'button', class: 'sec kecil', onclick: () => bukaBab({ label: String(bab.length + 1).padStart(2, '0'), judul: '', isi: '', ikon: 'buku', tampil: true }) }, '+ Bab baru')),
+      el('div', { class: 'row', style: 'margin-top:10px' }, el('button', { type: 'button', class: 'sec kecil', onclick: () => bukaBab({ label: String(babBuku().length + 1).padStart(2, '0'), judul: '', isi: '', ikon: 'buku', tampil: true }) }, '+ Bab baru')),
       editor);
   }
 
@@ -243,8 +317,9 @@ export async function halamanEbook(supabase, halaman) {
         if (b.id) Object.assign(b, await q(supabase.from('ebook_bab').update(isi).eq('id', b.id).select().single()));
         else {
           let slug = slugDari(isi.judul);
-          if (bab.some((x) => x.slug === slug)) slug += '-' + Date.now().toString(36).slice(-4);
-          const baru = await q(supabase.from('ebook_bab').insert({ ...isi, slug, tampil: true, urut: (bab.at(-1)?.urut ?? 0) + 10 }).select().single());
+          const diBuku = babBuku();
+          if (diBuku.some((x) => x.slug === slug)) slug += '-' + Date.now().toString(36).slice(-4);
+          const baru = await q(supabase.from('ebook_bab').insert({ ...isi, slug, buku_id: bukuAktif.id, tampil: true, urut: (diBuku.at(-1)?.urut ?? 0) + 10 }).select().single());
           bab.push(baru);
         }
         toast('Bab tersimpan dan langsung tampil di ebook');
@@ -283,9 +358,10 @@ export async function halamanEbook(supabase, halaman) {
       el('div', { class: 'stat' + (menunggu.length ? ' kuning' : '') }, el('b', {}, menunggu.length), el('span', {}, 'Menunggu persetujuan')),
       el('div', { class: 'stat' }, el('b', {}, aktif.length), el('span', {}, 'Pembaca aktif')),
       el('div', { class: 'stat' + (ditolak ? ' merah' : '') }, el('b', {}, ditolak), el('span', {}, 'Percobaan perangkat berlebih (7 hari)')),
-      el('div', { class: 'stat' }, el('b', {}, bab.filter((b) => b.tampil).length), el('span', {}, 'Bab tampil'))),
+      el('div', { class: 'stat' }, el('b', {}, buku.length), el('span', {}, 'Ebook'))),
     el('div', { class: 'msg', style: 'margin:0 0 16px;background:var(--surface);border:1px solid var(--line)' },
-      'Halaman pembaca: ', el('a', { href: '/reseller/ebook/', target: '_blank', rel: 'noopener' }, `${location.origin}/reseller/ebook/`),
-      '. Bagikan tautan ini ke pembeli program reseller.'),
+      'Rak ebook pembeli: ', el('a', { href: '/ebook/', target: '_blank', rel: 'noopener' }, `${location.origin}/ebook/`),
+      ' · Panduan reseller: ', el('a', { href: '/reseller/ebook/', target: '_blank', rel: 'noopener' }, `${location.origin}/reseller/ebook/`),
+      '. Ebook dijual lewat menu Produk digital.'),
     kartuMinta, kartuPembaca, kartuBeri, kartuIsi, kartuLog);
 }

@@ -68,6 +68,7 @@ const HALAMAN = [
   { href: '/katalog/', kunci: 'nav.katalog' },
   { href: '/promo/', kunci: 'nav.promo', kelas: 'nav-promo' },
   { href: '/rakit/', kunci: 'nav.rakit' },
+  { href: '/produk/', kunci: 'nav.produk' },
   { href: '/film/', kunci: 'nav.film' },
   { href: '/blog/', kunci: 'nav.blog' },
   { href: '/testimoni/', kunci: 'nav.testimoni' },

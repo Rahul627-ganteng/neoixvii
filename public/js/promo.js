@@ -22,7 +22,8 @@ function kartuPromo(p) {
       p.lencana ? el('span', { class: 'lencana-kampanye' }, p.lencana) : null,
       el('h3', {}, pilihBahasa(p.title, p.title_en)),
       pilihBahasa(p.body, p.body_en) ? el('p', {}, pilihBahasa(p.body, p.body_en)) : null,
-      p.ends ? el('span', { class: 'sampai' }, t('promo.sampai', { tgl: tanggal(p.ends + 'T00:00:00') })) : null,
+      p.ends && p.hitung ? el('div', { class: 'promo-hm' }, el('small', {}, t('promo.berakhir')), hitungMundur(akhirHari(p.ends), { kecil: true }))
+        : p.ends ? el('span', { class: 'sampai' }, t('promo.sampai', { tgl: tanggal(p.ends + 'T00:00:00') })) : null,
       p.link ? el('a', { class: 'lihat', href: p.link }, t('promo.lihat')) : null));
 }
 
@@ -101,7 +102,8 @@ function tampilkan(promo, apps, toko) {
             el('a', { href: urlApp(i.slug) }, el('b', {}, i.app), ' · ', labelTipe(i.tipe), ' · ', labelVarian(i.d)),
             i.q > 1 ? el('span', { class: 'kali', title: t('promo.kaliT', { n: i.q }) }, `×${i.q}`) : null);
         })),
-        !b.kampanye && b.ends ? el('span', { class: 'redup', style: 'font-size:12.5px' }, t('promo.sampai', { tgl: tanggal(b.ends + 'T00:00:00') })) : null,
+        !b.kampanye && b.ends && b.hitung ? el('div', { class: 'promo-hm' }, el('small', {}, t('promo.berakhir')), hitungMundur(akhirHari(b.ends), { kecil: true }))
+          : !b.kampanye && b.ends ? el('span', { class: 'redup', style: 'font-size:12.5px' }, t('promo.sampai', { tgl: tanggal(b.ends + 'T00:00:00') })) : null,
         stokBundle(b),
         el('div', { class: 'harga-bundle' },
           el('b', {}, harga(b.price)),
@@ -138,7 +140,8 @@ function tampilkan(promo, apps, toko) {
             el('span', {}, t('promo.nBundle', { n: isiK.length })),
             isiK.some((b) => b.best) ? el('span', {}, t('promo.nBest', { n: isiK.filter((b) => b.best).length })) : null,
             sisaTotal ? el('span', {}, t('promo.sisaTotal', { n: sisaTotal })) : null)),
-        p.ends ? el('div', { class: 'kampanye-akhir' },
+        p.ends && p.hitung === false ? el('div', { class: 'kampanye-akhir' }, el('small', {}, t('promo.sampai', { tgl: tanggal(p.ends + 'T00:00:00') })))
+        : p.ends ? el('div', { class: 'kampanye-akhir' },
           el('small', {}, t('promo.berakhir')),
           hitungMundur(akhirHari(p.ends), { kecil: true, selesai: () => setTimeout(muat, 1500) }),
           el('small', { class: 'normal-lagi' }, t('promo.normalLagi', { tgl: tanggal(besokDari(p.ends) + 'T00:00:00') }))) : null,

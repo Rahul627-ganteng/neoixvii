@@ -333,3 +333,37 @@ code.sandi { font: 700 16px ui-monospace, Menlo, Consolas, monospace; padding: 2
 .eb-pratinjau .e-rp input { border: 0 !important; padding: 0 !important; background: transparent !important; width: auto; min-width: 0; flex: 1; }
 .eb-pratinjau .e-centang input[type=checkbox] { width: 20px; }
 .eb-pratinjau .e-geser input { padding: 0; border: 0; }
+
+/* produk digital & ebook */
+.adm-buku { display: grid; gap: 16px; grid-template-columns: 1fr; margin-bottom: 8px; }
+@media (min-width: 720px) { .adm-buku { grid-template-columns: 150px 1fr; align-items: start; } }
+.adm-sampul { width: 150px; aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden; background: var(--surface-3); display: grid; place-items: center; border: 1px solid var(--line); }
+.adm-sampul img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm-sampul span { color: var(--quiet); font-size: 12.5px; padding: 8px; text-align: center; }
+.adm-sampul.kecil { width: 42px; border-radius: 6px; flex: none; }
+.tag-x { all: unset; cursor: pointer; padding: 0 2px; margin-left: 2px; font-weight: 700; color: var(--red); }
+.tag-x:hover { text-decoration: underline; }
+.tag-x:focus-visible { outline: 2px solid var(--aksen); border-radius: 4px; }
+
+/* saran bundle */
+.saran-daftar { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); margin-top: 12px; }
+.saran-kartu { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--surface-2); display: grid; gap: 10px; align-content: start; }
+.saran-atas { display: grid; gap: 10px; }
+.saran-nama input { font-weight: 700; font-size: 15px; flex: 1; min-width: 160px; }
+.saran-harga { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.hijau-teks { color: var(--green); }
+.saran-item { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; }
+.saran-item li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.saran-item li > span:first-of-type { margin-left: auto; color: var(--quiet); }
+.saran-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--surface-3); }
+.saran-bar i { display: block; height: 100%; }
+.saran-bar .h { background: #c9c5c2; } .saran-bar .u { background: var(--maroon); } .saran-bar .d { background: var(--line-kuat); }
+.saran-angka { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--quiet); }
+.saran-angka b { color: var(--ink); }
+.saran-nilai summary { cursor: pointer; font-size: 13px; }
+.saran-nilai ul, .saran-poin { margin: 8px 0 0; padding-left: 18px; font-size: 13px; display: grid; gap: 4px; }
+.saran-nilai li.ya::marker, .saran-poin li.ya::marker { color: var(--green); }
+.saran-nilai li.tidak::marker, .saran-poin li.tidak::marker { color: var(--red); }
+.saran-teks { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.saran-aksi { gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.saran-aksi select { width: auto; flex: 1 1 200px; }
