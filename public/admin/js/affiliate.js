@@ -5,12 +5,15 @@ import { buatPembaca, komisiDari, pesanSaldo, tanggalBayar } from './affiliate-b
 
 let bagian = 'saldo';
 let buka = null;          // affiliate yang rinciannya terbuka
+let fokusSaldo = false;   // langsung lompat ke form "Ubah saldo" setelah rincian dimuat
 let draft = [];           // hasil baca penjualan yang belum disimpan
 let isiTempel = '';
 
 const tgl = (d) => (d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '–');
 const selisih = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 864e5);
 const angka = (v) => { const d = String(v ?? '').replace(/[^\d]/g, ''); return d === '' ? null : Number(d); };
+/** +Rp5.000 / −Rp1.500 */
+const rpTanda = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + rp(Math.abs(Number(n) || 0));
 const salin = async (teks, pesan) => { try { await navigator.clipboard.writeText(teks); toast(pesan); } catch { prompt('Salin teks ini:', teks); } };
 
 export async function halamanAffiliate(supabase, halaman) {
@@ -105,6 +108,7 @@ export async function halamanAffiliate(supabase, halaman) {
       });
       aksi.append(...[kirimWa, link,
         cukup ? el('button', { type: 'button', class: 'kecil', onclick: () => { bagian = 'tarik'; ajukanUntuk = a.partner_id; gambar(); } }, 'Ajukan tarik') : null,
+        el('button', { type: 'button', class: 'sec kecil', onclick: () => { buka = a.partner_id; fokusSaldo = true; gambar(); } }, 'Ubah saldo'),
         el('button', { type: 'button', class: 'sec kecil', onclick: () => { buka = buka === a.partner_id ? null : a.partner_id; gambar(); } }, buka === a.partner_id ? 'Tutup rincian' : 'Rincian & atur')].filter(Boolean));
       if (buka === a.partner_id) muatRincian(a, rinci);
       const angkaBaris = (l, v, kuat) => el('div', { class: 'angka-aff' + (kuat ? ' kuat' : '') }, el('span', {}, l), el('b', {}, v));
@@ -116,7 +120,8 @@ export async function halamanAffiliate(supabase, halaman) {
         el('div', { class: 'grid-aff' },
           angkaBaris('Penjualan', a.n), angkaBaris('Komisi total', rp(a.komisi)), angkaBaris('Sudah dibayar', rp(a.dibayar)),
           angkaBaris('Diproses', rp(a.ditahan)), angkaBaris(cukup ? 'Saldo · bisa ditarik' : `Saldo · min ${rp(set.min_withdraw)}`, rp(a.tersedia), cukup),
-          angkaBaris('Untung kamu', rp(a.untung_owner))),
+          angkaBaris('Untung kamu', rp(a.untung_owner)),
+          a.penyesuaian ? angkaBaris('Penyesuaian manual', rpTanda(a.penyesuaian)) : null),
         aksi, rinci);
     };
     return [el('section', { class: 'card' },
@@ -129,9 +134,14 @@ export async function halamanAffiliate(supabase, halaman) {
 
   async function muatRincian(a, wadah) {
     wadah.replaceChildren(el('p', { class: 'muted' }, 'Memuat…'));
-    let jual;
-    try { jual = await q(supabase.from('affiliate_sales').select('*').eq('partner_id', a.partner_id).order('sold_on', { ascending: false }).limit(200)); }
-    catch (err) { wadah.replaceChildren(el('div', { class: 'msg err' }, err.message)); return; }
+    let jual, ubah;
+    try {
+      [jual, ubah] = await Promise.all([
+        q(supabase.from('affiliate_sales').select('*').eq('partner_id', a.partner_id).order('sold_on', { ascending: false }).limit(200)),
+        // tabel penyesuaian ada setelah migration 20261120; sebelum itu form ubah saldo diganti pesan
+        q(supabase.from('affiliate_adjustments').select('*').eq('partner_id', a.partner_id).order('adj_on', { ascending: false }).order('id', { ascending: false }).limit(100)).catch(() => null),
+      ]);
+    } catch (err) { wadah.replaceChildren(el('div', { class: 'msg err' }, err.message)); return; }
     // atur komisi & tujuan bayar
     const rate = el('input', { type: 'text', inputmode: 'decimal', value: a.commission_pct ?? '', placeholder: `${Number(set.rate_pct)} (bawaan)` });
     const bayar = el('input', { type: 'text', value: a.payout_to ?? '', maxlength: 120, placeholder: 'Dana 0812…, BCA 123…' });
@@ -155,7 +165,9 @@ export async function halamanAffiliate(supabase, halaman) {
       try { await q(supabase.from('affiliate_sales').delete().eq('id', s.id)); toast('Penjualan dihapus'); segarkan(); }
       catch (err) { toast('Gagal: ' + err.message, true); }
     };
+    const formSaldo = bagianUbahSaldo(a, ubah);
     wadah.replaceChildren(
+      formSaldo,
       el('div', { class: 'grid2', style: 'margin-top:10px' }, isian('Komisi (% dari untung)', rate, 'Kosongkan untuk komisi bawaan.'), isian('Tujuan bayar', bayar)),
       el('div', { class: 'row', style: 'margin-top:8px' }, lama, el('label', { for: `lama-${a.partner_id}` }, 'Terapkan juga ke penjualan yang sudah tercatat'), simpan),
       el('h3', { class: 'judul-kecil' }, `Penjualan oleh ${a.name} (${jual.length})`),
@@ -165,6 +177,79 @@ export async function halamanAffiliate(supabase, halaman) {
         td(rp(s.commission), true), td(rp(s.price - (s.hpp ?? s.price) - s.commission), true),
         td(el('button', { type: 'button', class: 'kecil bahaya', onclick: () => hapus(s) }, 'Hapus')))))
         : el('p', { class: 'muted' }, 'Belum ada penjualan.'));
+    if (fokusSaldo) {
+      fokusSaldo = false;
+      formSaldo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      formSaldo.querySelector('input')?.focus({ preventScroll: true });
+    }
+  }
+
+  /** Ubah saldo manual (bonus, koreksi, potongan) dengan keterangan + riwayatnya. */
+  function bagianUbahSaldo(a, riwayat) {
+    if (riwayat == null) {
+      return el('div', { class: 'msg warn', style: 'margin-top:10px' },
+        'Untuk mengubah saldo secara manual, jalankan dulu migration 20261120000000_penyesuaian_saldo_affiliate.sql di SQL Editor Supabase.');
+    }
+    const cara = el('select', { 'aria-label': 'Cara mengubah saldo' },
+      el('option', { value: 'tambah' }, 'Tambah saldo'), el('option', { value: 'kurang' }, 'Kurangi saldo'), el('option', { value: 'jadi' }, 'Jadikan saldo'));
+    const jumlah = el('input', { type: 'text', inputmode: 'numeric', placeholder: 'Jumlah, mis. 5000', 'aria-label': 'Jumlah rupiah' });
+    const ket = el('input', { type: 'text', maxlength: 200, placeholder: 'mis. Bonus target Oktober, koreksi komisi Netflix 3 Nov', 'aria-label': 'Keterangan penyesuaian' });
+    const tampil = el('input', { type: 'checkbox', id: `tampil-ket-${a.partner_id}`, checked: true });
+    const pratinjau = el('p', { class: 'muted', style: 'margin:8px 0 0' });
+    const simpan = el('button', { type: 'button', class: 'kecil' }, 'Simpan saldo');
+    const isiJumlah = isian('Jumlah (Rp)', jumlah);
+    const tujuan = () => {
+      const n = angka(jumlah.value);
+      if (n == null) return null;
+      return cara.value === 'jadi' ? n : a.tersedia + (cara.value === 'kurang' ? -n : n);
+    };
+    const tulis = () => {
+      const b = tujuan();
+      pratinjau.replaceChildren(b == null ? `Saldo sekarang ${rp(a.tersedia)}.`
+        : el('span', {}, `Saldo ${rp(a.tersedia)} → `, el('b', {}, rp(b)), ` (${rpTanda(b - a.tersedia)})`,
+          b < 0 ? el('span', { class: 'tag merah' }, 'tidak boleh minus') : null));
+      jumlah.placeholder = cara.value === 'jadi' ? 'Saldo baru, mis. 50000' : 'Jumlah, mis. 5000';
+      isiJumlah.firstChild.textContent = cara.value === 'jadi' ? 'Saldo baru (Rp)' : 'Jumlah (Rp)';
+    };
+    cara.addEventListener('change', tulis);
+    jumlah.addEventListener('input', tulis);
+    tulis();
+    simpan.addEventListener('click', async () => {
+      const n = angka(jumlah.value);
+      const b = tujuan();
+      if (n == null || (cara.value !== 'jadi' && n === 0)) return toast('Isi jumlahnya', true);
+      if (b === a.tersedia) return toast(`Saldo sudah ${rp(a.tersedia)}`, true);
+      if (b < 0) return toast('Saldo tidak boleh minus', true);
+      if (ket.value.trim().length < 3) { ket.focus(); return toast('Tulis keterangannya', true); }
+      simpan.disabled = true;
+      try {
+        const h = await q(supabase.rpc('sesuaikan_saldo_affiliate', {
+          p_partner: a.partner_id, p_jumlah: cara.value === 'jadi' ? null : (cara.value === 'kurang' ? -n : n),
+          p_catatan: ket.value.trim(), p_jadi: cara.value === 'jadi' ? n : null, p_tampil: tampil.checked }));
+        toast(`Saldo ${a.name} ${rpTanda(h.jumlah)} jadi ${rp(h.saldo)}`);
+        segarkan();
+      } catch (err) { toast('Gagal: ' + err.message, true); simpan.disabled = false; }
+    });
+    const hapus = async (j) => {
+      if (!confirm(`Batalkan penyesuaian ${rpTanda(j.amount)} "${j.note}"? Saldo ${a.name} ikut berubah.`)) return;
+      try { const h = await q(supabase.rpc('hapus_penyesuaian_affiliate', { p_id: j.id })); toast(`Penyesuaian dibatalkan, saldo jadi ${rp(h.saldo)}`); segarkan(); }
+      catch (err) { toast('Gagal: ' + err.message, true); }
+    };
+    return el('div', { class: 'item-form ubah-saldo', style: 'margin-top:10px' },
+      el('h3', { class: 'judul-kecil', style: 'margin-top:0' }, 'Ubah saldo manual'),
+      el('p', { class: 'muted', style: 'margin:0 0 8px' }, 'Untuk bonus, koreksi salah catat, atau potongan. Setiap perubahan tercatat bersama keterangannya.'),
+      el('div', { class: 'grid2' }, isian('Cara', cara), isiJumlah),
+      isian('Keterangan', ket),
+      el('div', { class: 'row', style: 'margin-top:8px' }, tampil, el('label', { for: tampil.id }, 'Tampilkan keterangan ke affiliate di halaman saldonya')),
+      pratinjau,
+      el('div', { class: 'row', style: 'margin-top:8px' }, simpan),
+      riwayat.length ? el('div', { style: 'margin-top:12px' },
+        el('b', {}, `Riwayat penyesuaian (${riwayat.length})`),
+        tabel(['Tanggal', '>Jumlah', 'Keterangan', ''], riwayat.map((j) => el('tr', {},
+          td(tgl(j.adj_on)), td(el('b', { class: j.amount < 0 ? 'minus' : 'plus' }, rpTanda(j.amount)), true),
+          td(el('span', {}, j.note, j.show_note ? null : el('span', { class: 'tag', title: 'Keterangan tidak terlihat oleh affiliate' }, 'hanya admin'))),
+          td(el('button', { type: 'button', class: 'kecil bahaya', onclick: () => hapus(j) }, 'Batalkan'))))))
+        : null);
   }
 
   async function unduhCsv() {

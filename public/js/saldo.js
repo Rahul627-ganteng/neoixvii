@@ -27,10 +27,13 @@ function tampilkan(d, toko) {
     ? el('a', { class: 'tombol' + (bisa ? '' : ' garis'), target: '_blank', rel: 'noopener',
       href: tautanWa(toko.whatsapp_number, bisa ? t('saldo.waTarik', { nama: d.nama, kode: d.kode, rp: rp(d.saldo) }) : t('saldo.waTanya', { nama: d.nama, kode: d.kode })) },
     bisa ? t('saldo.tarik') : t('saldo.tanya')) : null;
+  const tanda = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + rp(Math.abs(n));
+  const sesuai = d.daftar_penyesuaian ?? [];   // ada setelah migration penyesuaian saldo
   const kotak = (label, nilai) => el('div', { class: 'saldo-angka kaca' }, el('span', {}, label), el('b', {}, nilai));
 
   document.title = `${t('saldo.judul')} · ${d.nama} — IXVII.CO`;
-  isi.replaceChildren(
+  // replaceChildren menulis null sebagai teks "null", jadi bagian kosong disaring dulu
+  isi.replaceChildren(...[
     el('div', { class: 'saldo-kepala' },
       el('p', { class: 'saldo-halo' }, t('saldo.halo', { nama: d.nama })),
       el('div', { class: 'row-lencana' }, d.kode ? el('span', { class: 'lencana' }, t('saldo.kode', { kode: d.kode })) : null,
@@ -45,13 +48,19 @@ function tampilkan(d, toko) {
       wa),
     el('div', { class: 'saldo-grid' },
       kotak(t('saldo.total'), rp(d.komisi)), kotak(t('saldo.bulanIni'), rp(d.bulan_ini)), kotak(t('saldo.dibayar'), rp(d.dibayar)),
-      kotak(t('saldo.diproses'), rp(d.diproses)), kotak(t('saldo.penjualan'), d.n)),
+      kotak(t('saldo.diproses'), rp(d.diproses)), kotak(t('saldo.penjualan'), d.n),
+      d.penyesuaian ? kotak(t('saldo.penyesuaian'), tanda(d.penyesuaian)) : null),
     el('section', { class: 'grup kaca' },
       el('h2', {}, t('saldo.riwayat')),
       d.penjualan.length ? el('ul', { class: 'saldo-daftar' }, d.penjualan.map((s) => el('li', {},
         el('div', {}, el('b', {}, s.app), el('div', { class: 'redup' }, [s.tipe, s.varian && labelVarian(s.varian)].filter(Boolean).join(' · '), ' · ', tgl(s.tgl))),
         el('b', { class: 'plus' }, '+' + rp(s.komisi)))))
         : el('p', { class: 'redup' }, t('saldo.kosong'))),
+    sesuai.length ? el('section', { class: 'grup kaca' },
+      el('h2', {}, t('saldo.riwayatSesuai')),
+      el('ul', { class: 'saldo-daftar' }, sesuai.map((j) => el('li', {},
+        el('div', {}, el('b', {}, j.ket || t('saldo.sesuaiUmum')), el('div', { class: 'redup' }, tgl(j.tgl))),
+        el('b', { class: j.jumlah < 0 ? 'minus' : 'plus' }, tanda(j.jumlah)))))) : null,
     d.penarikan.length ? el('section', { class: 'grup kaca' },
       el('h2', {}, t('saldo.riwayatTarik')),
       el('ul', { class: 'saldo-daftar' }, d.penarikan.map((w) => el('li', {},
@@ -59,7 +68,7 @@ function tampilkan(d, toko) {
         el('span', { class: 'lencana ' + (w.status === 'dibayar' ? 'ada' : 'sedikit') },
           w.status === 'dibayar' ? t('saldo.st.dibayar', { tgl: tgl(w.dibayar) }) : t('saldo.st.dijadwalkan', { tgl: tgl(w.jadwal) })))))) : null,
     el('p', { class: 'redup saldo-catatan' }, t('saldo.cara', { tgl: d.tanggal_bayar })),
-    el('p', { class: 'redup saldo-catatan' }, t('saldo.pribadi')));
+    el('p', { class: 'redup saldo-catatan' }, t('saldo.pribadi'))].filter(Boolean));
 }
 
 async function muat() {

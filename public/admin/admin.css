@@ -367,3 +367,23 @@ code.sandi { font: 700 16px ui-monospace, Menlo, Consolas, monospace; padding: 2
 .saran-teks { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .saran-aksi { gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
 .saran-aksi select { width: auto; flex: 1 1 200px; }
+
+/* affiliate: ubah saldo manual */
+.ubah-saldo b.plus { color: var(--green); }
+.ubah-saldo b.minus { color: var(--red); }
+.ubah-saldo .tag { margin-left: 6px; }
+
+/* pesanan: saring aplikasi / kategori / tanggal / urutan */
+.saring-pesanan { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px 10px; margin-top: 10px; align-items: end; }
+.saring-pesanan-isi { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--quiet); margin: 0; }
+.saring-pesanan .tgl-pesanan { grid-column: 1 / -1; flex-wrap: nowrap; }
+.saring-pesanan .tgl-pesanan input { flex: 1 1 0; min-width: 0; }
+.info-hasil { margin: 12px 0 4px; font-size: 13.5px; }
+.info-hasil .tag { margin-left: 6px; white-space: normal; }
+.grup-pesanan h3 { font-size: 15px; margin: 18px 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--maroon-soft); }
+.grup-pesanan h3 .muted { font-weight: 500; font-size: 13px; }
+@media (max-width: 640px) {
+  .saring-pesanan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .saring-pesanan select { padding: 8px; font-size: 14px; }
+  .saring-pesanan > .row { grid-column: 1 / -1; }
+}
