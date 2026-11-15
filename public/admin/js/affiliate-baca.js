@@ -154,6 +154,7 @@ export function pesanSaldo(a, set, hariIni, link) {
     + `Penjualan tercatat: ${a.n}\nSaldo komisi kamu: ${rpTeks(a.tersedia)}\n`
     + (a.ditahan ? `Sedang diproses: ${rpTeks(a.ditahan)}\n` : '')
     + (a.dibayar ? `Sudah dibayar sebelumnya: ${rpTeks(a.dibayar)}\n` : '')
+    + (a.penyesuaian ? `Penyesuaian saldo oleh admin: ${a.penyesuaian > 0 ? '+' : '-'}${rpTeks(Math.abs(a.penyesuaian))}\n` : '')
     + `\nMinimum penarikan ${rpTeks(set.min_withdraw)}. `
     + (bisa ? 'Saldo kamu sudah cukup untuk ditarik.' : `Kurang ${rpTeks((set.min_withdraw || 0) - a.tersedia)} lagi supaya bisa ditarik.`)
     + `\n\nJadwal pembayaran tiap tanggal ${set.payday}. Berikutnya ${tglTeks(bayar)}, ${sisa === 0 ? 'hari ini' : `tinggal ${sisa} hari lagi`}.\n\n`
