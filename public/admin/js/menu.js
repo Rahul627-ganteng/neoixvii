@@ -15,6 +15,8 @@ function ikon(d) {
 // gambar garis sederhana buatan sendiri
 const IKON = {
   ringkasan: ['M4 13h6V4H4zM14 20h6v-9h-6zM14 4h6v4h-6zM4 20h6v-3H4z'],
+  langganan: ['M7 3h10M7 21h10', 'M8 3v3.5a4 4 0 0 0 1.6 3.2L12 11.5l2.4-1.8A4 4 0 0 0 16 6.5V3', 'M8 21v-3.5a4 4 0 0 1 1.6-3.2L12 12.5l2.4 1.8a4 4 0 0 1 1.6 3.2V21'],
+  sorotan: ['M4 9.5l13-5.5v16L4 14.5z', 'M4 9.5v5', 'M7.5 15.5l1.5 4.5h2.5l-1-4', 'M20 9.5v5'],
   pesanan: ['M6 3h12l1 4H5z', 'M5 7h14l-1.2 12.1a2 2 0 0 1-2 1.9H8.2a2 2 0 0 1-2-1.9z', 'M9 11a3 3 0 0 0 6 0'],
   laporan: ['M4 20V10M10 20V4M16 20v-7M22 20H2'],
   stok: ['M3 7.5L12 3l9 4.5-9 4.5z', 'M3 7.5v9L12 21l9-4.5v-9', 'M12 12v9'],
@@ -42,10 +44,10 @@ const IKON = {
 };
 
 const KELOMPOK = [
-  ['Penjualan', ['ringkasan', 'pesanan', 'laporan', 'garansi', 'ulasan']],
+  ['Penjualan', ['ringkasan', 'pesanan', 'langganan', 'laporan', 'garansi', 'ulasan']],
   ['Produk & harga', ['stok', 'aplikasi', 'promo', 'produk', 'margin', 'riwayat', 'impor']],
   ['Pelanggan & mitra', ['member', 'affiliate', 'reseller', 'ebook', 'mitra']],
-  ['Konten & pengaturan', ['toko', 'blog', 'film', 'notifikasi']],
+  ['Konten & pengaturan', ['toko', 'sorotan', 'blog', 'film', 'notifikasi']],
 ];
 const kunciDari = (a) => (a.getAttribute('href').startsWith('#') ? a.getAttribute('href').slice(1) : 'impor');
 

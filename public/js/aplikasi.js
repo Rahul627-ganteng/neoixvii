@@ -1,6 +1,7 @@
 import { ambilBerita, ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { barisFilm } from './film-kartu.js';
 import { tombolBagikan } from './bagikan-app.js';
+import { bukaKabari } from './kabari.js';
 import { kartuBerita } from './blog-kartu.js';
 import { angkaRating, harga, inggris, labelTipe, labelVarian, pasangKurs, persen, relatif, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
@@ -10,7 +11,10 @@ pasangKerangka('/katalog/');
 pasangTilt();
 
 const isi = document.getElementById('isi');
-const slug = new URLSearchParams(location.search).get('app') || '';
+const params = new URLSearchParams(location.search);
+const slug = params.get('app') || '';
+const kodePilih = params.get('pilih') || '';          // dari link perpanjang / kabar stok tersedia
+const perpanjang = params.get('perpanjang') === '1';
 
 const pilihBahasa = (id, en) => (inggris() && en ? en : id);
 const baris = (s) => String(s ?? '').split('\n').map((x) => x.trim()).filter(Boolean);
@@ -42,6 +46,15 @@ function bagianGrup(app, infoTipe, pilih) {
         g.items.map((v) => {
           const habis = v.s === 0;
           const data = { ...v, tipe: g.label };
+          if (habis) {
+            // paket habis: tidak bisa dipilih, tapi bisa minta dikabari lewat WhatsApp
+            const habisSemua = app.varian.filter((x) => x.s === 0);
+            return el('div', { class: 'opsi habis', id: `paket-${v.id}` },
+              el('span', {}, el('span', { class: 'lbl' }, labelVarian(v.d)), el('br'), el('span', { class: 'lencana habis' }, t('app.habis'))),
+              el('span', { class: 'kanan-habis' }, el('span', { class: 'hrg' }, harga(v.p)),
+                el('button', { class: 'tombol-kabari', type: 'button', 'aria-label': t('kabari.tombolAria', { paket: `${labelTipe(g.label)} ${labelVarian(v.d)}` }),
+                  onclick: () => bukaKabari({ app: app.nama, varian: habisSemua, pilih: v.id }) }, t('kabari.tombol'))));
+          }
           return el('label', { class: 'opsi' + (habis ? ' habis' : '') },
             el('input', { type: 'radio', name: 'paket', value: v.id, disabled: habis, onchange: () => pilih(data) }),
             el('span', {}, el('span', { class: 'lbl' }, labelVarian(v.d)), el('br'),
@@ -188,7 +201,15 @@ function bagianPesan(app, toko, promo) {
   // ajakan rakit bundle (kalau aturan diskon rakitan sudah ada)
   const tertinggi = diskonTertinggi(promo);
   const ajak = tertinggi ? el('a', { class: 'ajak-rakit', href: '/rakit/' }, t('rakit.ajak', { pct: persen(tertinggi.pct) })) : null;
-  const { aside, atur } = panelPesan({ toko, tanya: t('wa.tanya', { app: app.nama }), sisipan: ajak ? [ajak] : [] });
+  const sisipan = [];
+  if (perpanjang) sisipan.push(el('p', { class: 'info-perpanjang', role: 'status' }, el('b', {}, t('perpanjang.judul', { app: app.nama })), ' ', t('perpanjang.teks')));
+  const habis = app.varian.filter((v) => v.s === 0);
+  if (habis.length && habis.length === app.varian.length) {
+        sisipan.push(el('div', { class: 'semua-habis' }, el('p', { style: 'margin:0' }, t('kabari.semuaHabis', { app: app.nama })),
+      el('button', { class: 'tombol', type: 'button', onclick: () => bukaKabari({ app: app.nama, varian: habis }) }, t('kabari.tombolBesar'))));
+  }
+  if (ajak) sisipan.push(ajak);
+  const { aside, atur } = panelPesan({ toko, tanya: t('wa.tanya', { app: app.nama }), sisipan });
   const pilih = (v) => {
     atur({ baris: [`${labelTipe(v.tipe)} · ${labelVarian(v.d)}`], total: v.p, kirim: { kode: [v.id] } });
     if (ajak) ajak.href = `/rakit/?pilih=${encodeURIComponent(v.id)}`;
@@ -235,11 +256,13 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film, beri
         el('a', { href: urlKategori(app.kunciKategori) }, t('app.lihatSemua'))),
       el('div', { class: 'grid' }, lain.map(kartuApp))) : null].filter(Boolean));
 
-  // pilih otomatis paket tersedia termurah
-  const termurah = app.varian.filter((v) => v.s !== 0).sort((a, b) => a.p - b.p)[0];
+  // pilih otomatis: paket dari link (perpanjang / kabar stok) kalau tersedia, kalau tidak paket tersedia termurah
+  const dariLink = kodePilih ? app.varian.find((v) => v.id === kodePilih && v.s !== 0) : null;
+  const termurah = dariLink ?? app.varian.filter((v) => v.s !== 0).sort((a, b) => a.p - b.p)[0];
   if (termurah) {
     const r = isi.querySelector(`input[value="${CSS.escape(termurah.id)}"]`);
     if (r) { r.checked = true; pilih(termurah); }
+    if (dariLink) requestAnimationFrame(() => r?.closest('.opsi')?.scrollIntoView({ block: 'center' }));
   }
   if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }

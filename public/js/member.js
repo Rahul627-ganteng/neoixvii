@@ -1,6 +1,6 @@
 // Halaman member: daftar (nama + nomor WA), akun (benefit, riwayat pembelian, status garansi), minta ulang link akun.
 // Link akun /member/?k=… bersifat pribadi: disimpan di perangkat lalu dihapus dari alamat halaman.
-import { akunMember, ambilProgramMember, ambilToko, daftarMember, kirimLinkMember } from './api.js';
+import { ajakMember, akunMember, ambilProgramMember, ambilToko, daftarMember, kirimLinkMember } from './api.js';
 import { ambilMember, simpanMember } from './akun.js';
 import { harga, labelTipe, labelVarian, persen, rupiah, t, tanggal, teksGalat } from './i18n.js';
 import { el, ikonApp, pasangKerangka, tautanWa, urlApp } from './ui.js';
@@ -136,6 +136,11 @@ async function tampilAkun(baru = false) {
     return;
   }
   if (a.nama !== m.nama) simpanMember({ token: m.token, nama: a.nama });
+  const wadahAjak = el('div');
+  ajakMember(m.token).then((x) => {
+    if (x?.kode) simpanMember({ token: m.token, nama: a.nama, kode: x.kode });
+    if (x?.aktif && x.kode) wadahAjak.replaceChildren(bagianAjak(x));
+  }).catch(() => { /* migration ajak teman belum dijalankan */ });
   const p = teksProgram(a.program);
   const salin = el('button', { class: 'tombol garis kecil', type: 'button' }, t('member.salinLink'));
   salin.addEventListener('click', async () => {
@@ -154,7 +159,8 @@ async function tampilAkun(baru = false) {
           el('h2', {}, t('member.halo', { nama: a.nama })),
           el('div', { class: 'redup' }, el('span', { class: 'lencana ada' }, '✓ ', t('member.aktif')), ' ', a.wa),
           el('div', { class: 'redup', style: 'font-size:13px;margin-top:4px' }, t('member.sejak', { tgl: tanggal(a.sejak + 'T00:00:00') }))),
-        el('div', { class: 'hemat-total' }, el('small', {}, t('member.totalHemat')), el('b', {}, harga(a.hemat)))),
+        el('div', { class: 'hemat-total' }, el('small', {}, t('member.totalHemat')), el('b', {}, harga(a.hemat)),
+          el('a', { class: 'tautan-langganan', href: '/langganan/' }, t('member.keLangganan')))),
       el('section', { class: 'kaca benefit-member' },
         el('h3', {}, t('member.benefitJudul')),
         p ? el('ul', { class: 'gabung-poin gelap' },
@@ -163,11 +169,52 @@ async function tampilAkun(baru = false) {
         p?.masa ? el('p', { class: 'redup', style: 'margin:0 0 8px' }, p.masa) : null,
         el('p', { class: 'catatan' }, t('member.caraPakai')),
         el('a', { class: 'tombol', href: '/katalog/' }, t('member.belanja')))),
+    wadahAjak,
     el('section', { class: 'seksi' },
       el('div', { class: 'seksi-kepala' }, el('h2', {}, t('member.riwayat'))),
       a.pesanan.length ? el('div', { class: 'daftar-pesanan-member' }, a.pesanan.map(kartuPesanan))
         : el('div', { class: 'kosong kaca' }, el('p', { style: 'margin:0' }, t('member.belumPesan')))),
     el('div', { class: 'aksi-akun' }, salin, keluar, el('p', { class: 'catatan', style: 'margin:0;flex-basis:100%' }, t('member.linkPribadi'))));
+}
+
+// ---------------------------------------------------------------- ajak teman
+const teksPotongan = (jenis, nilai, maks) => (jenis === 'persen'
+  ? `${Number(nilai)}%${maks ? ` (${t('lg.maks', { rp: rupiah(maks) })})` : ''}` : rupiah(nilai));
+
+function bagianAjak(x) {
+  const link = `${location.origin}/?ajak=${x.kode}`;
+  const potongan = teksPotongan(x.teman.jenis, x.teman.nilai, x.teman.maks);
+  const hadiah = teksPotongan(x.hadiah.jenis, x.hadiah.nilai, x.hadiah.maks);
+  const teks = t('ajak.teksBagikan', { potongan, kode: x.kode, link });
+  const info = el('p', { class: 'info-bagikan', role: 'status' });
+  const kabar = (s) => { info.textContent = s; clearTimeout(kabar.j); kabar.j = setTimeout(() => { info.textContent = ''; }, 3000); };
+  const salin = (isi, pesan) => async () => { try { await navigator.clipboard.writeText(isi); kabar(pesan); } catch { kabar(t('bagi.gagalSalin')); } };
+  const bagikan = navigator.share ? el('button', { class: 'tombol garis', type: 'button', onclick: () => navigator.share({ text: teks }).catch(() => {}) }, t('bagi.lain')) : null;
+  const STATUS = { diberikan: t('ajak.stDiberikan'), batas: t('ajak.stBatas'), dibatalkan: t('ajak.stBatal') };
+  return el('section', { class: 'kaca ajak-teman' },
+    el('div', { class: 'ajak-teman-kepala' },
+      el('div', {}, el('span', { class: 'gabung-label merah' }, t('ajak.label')),
+        el('h2', {}, t('ajak.judul', { hadiah })),
+        el('p', { class: 'redup', style: 'margin:4px 0 0' }, t('ajak.sub', { potongan, hadiah, hari: x.hadiah.hari }))),
+      el('div', { class: 'angka-ajak' }, el('b', {}, x.berhasil), el('small', {}, t('ajak.berhasil')))),
+    el('div', { class: 'kode-ajak' },
+      el('div', {}, el('small', { class: 'redup' }, t('ajak.kodeKamu')), el('b', { class: 'kode-kupon-besar' }, x.kode)),
+      el('button', { class: 'tombol garis kecil', type: 'button', onclick: salin(x.kode, t('ajak.kodeDisalin')) }, t('lg.salinKode'))),
+    el('div', { class: 'baris-tombol' },
+      el('a', { class: 'tombol wa', href: `https://wa.me/?text=${encodeURIComponent(teks)}`, target: '_blank', rel: 'noopener' }, t('bagi.wa')),
+      bagikan,
+      el('button', { class: 'tombol garis', type: 'button', onclick: salin(link, t('ajak.linkDisalin')) }, t('ajak.salinLink'))),
+    info,
+    x.menunggu ? el('p', { class: 'catatan', style: 'margin:6px 0 0' }, t('ajak.menunggu', { n: x.menunggu })) : null,
+    x.riwayat?.length ? el('div', { class: 'hadiah-ajak' },
+      el('h3', {}, t('ajak.hadiahmu')),
+      el('ul', {}, x.riwayat.map((r) => el('li', {},
+        el('span', {}, el('b', {}, r.teman || t('ajak.teman')), el('small', { class: 'redup' }, ` · ${tanggal(r.tgl)}`)),
+        r.kupon ? el('span', {}, el('b', { class: 'kode-kupon' }, r.kupon), ' ',
+          el('small', { class: 'redup' }, teksPotongan(r.jenis, r.nilai, r.maks), ' · ',
+            r.dipakai ? t('ajak.dipakai') : !r.aktif ? t('ajak.tidakBerlaku') : r.sampai && Date.parse(r.sampai) < Date.now() ? t('ajak.kedaluwarsa') : t('lg.kuponSampai', { tgl: tanggal(r.sampai) })))
+          : el('small', { class: 'redup' }, STATUS[r.status] ?? r.status))))) : null,
+    el('p', { class: 'catatan', style: 'margin:10px 0 0' }, t('ajak.catatan', { n: x.batas_bulan })));
 }
 
 // ---------------------------------------------------------------- mulai

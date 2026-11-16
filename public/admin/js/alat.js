@@ -43,8 +43,13 @@ export async function q(janji) {
 }
 export const memuat = () => el('div', { class: 'card muted' }, 'Memuat…');
 
-/** Kotak isian dengan label di atasnya. */
-export const isian = (label, input, catatan) => el('div', {}, el('label', { class: 'f' }, label), input, catatan ? el('div', { class: 'muted' }, catatan) : null);
+/** Kotak isian dengan label di atasnya (label tersambung ke isiannya untuk pembaca layar). */
+let nIsian = 0;
+export function isian(label, input, catatan) {
+  const bisa = input instanceof HTMLElement && /^(INPUT|SELECT|TEXTAREA)$/.test(input.tagName);
+  if (bisa && !input.id) input.id = `isian-${++nIsian}`;
+  return el('div', {}, el('label', { class: 'f', for: bisa ? input.id : null }, label), input, catatan ? el('div', { class: 'muted' }, catatan) : null);
+}
 /** Nomor WhatsApp → format internasional tanpa + (0812… → 62812…). */
 export function rapikanWa(n) {
   let d = String(n ?? '').replace(/\D/g, '');

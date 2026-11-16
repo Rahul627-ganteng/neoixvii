@@ -272,3 +272,29 @@ export async function ambilInfoIklan() {
   ]);
   return { paket, setelan };
 }
+
+// ---------------------------------------------------------------- Langganan saya, kabari stok, ajak teman, headline
+export const langgananSaya = (token) => rpc('langganan_saya', { p_token: token });
+export const statusPesanan = (tokens) => rpc('status_pesanan', { p_tokens: tokens });
+/** Token status pesanan (hanya sesaat setelah pesanan dibuat). Null kalau database lama. */
+export async function tokenPesanan(kode, wa) {
+  try { return await rpc('token_pesanan', { p_kode: kode, p_wa: wa }); } catch { return null; }
+}
+export const kirimLinkLangganan = (wa) => rpc('kirim_link_langganan', { p_wa: wa });
+export const kabariTersedia = ({ kode, wa, nama }) =>
+  rpc('kabari_tersedia', { p_kode: kode, p_wa: wa, p_nama: nama || null, p_bahasa: inggris() ? 'en' : 'id' });
+/** Info kode ajak teman ({ nama, jenis, nilai, maks, min }) atau null. */
+export async function infoAjak(kode) {
+  try { return await rpc('info_ajak', { p_kode: kode }); } catch { return null; }
+}
+export const ajakMember = (token) => rpc('ajak_member', { p_token: token });
+/** Headline beranda + kupon publik + ringkasan program ajak teman & affiliate. Null kalau migration-nya belum ada. */
+export async function ambilSorotan() {
+  try { return await ambilSimpan('ixvii-sorotan-v1', 'rpc/sorotan_json'); }
+  catch { return null; }
+}
+/** Aturan ajak teman (publik). Null kalau migration-nya belum ada. */
+export async function ambilProgramAjak() {
+  try { return (await ambilSimpan('ixvii-ajak-prog-v1', 'ajak_program?select=aktif,teman_jenis,teman_nilai,teman_maks,teman_min&id=eq.1'))[0] ?? null; }
+  catch { return null; }
+}

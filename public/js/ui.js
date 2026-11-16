@@ -1,5 +1,5 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
-import { ambilMember } from './akun.js';
+import { ambilMember, simpanAjak } from './akun.js';
 import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
@@ -87,6 +87,16 @@ export function terjemahkanHalaman(vars = {}) {
 /** Pasang header & footer ke elemen #kepala dan #kaki, lalu terjemahkan teks statis halaman. */
 export function pasangKerangka(aktif, vars) {
   terjemahkanHalaman(vars);
+  // link ajak teman (?ajak=KODE): kodenya disimpan, lalu dipasang otomatis di kolom kupon saat memesan
+  try {
+    const u = new URL(location.href);
+    const kode = (u.searchParams.get('ajak') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (kode.length >= 3 && kode.length <= 20) {
+      simpanAjak(kode);
+      u.searchParams.delete('ajak');
+      history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+    }
+  } catch { /* abaikan */ }
   const kepala = document.getElementById('kepala');
   if (kepala) {
     const tombolTema = el('button', { class: 'alat', type: 'button' });
@@ -126,6 +136,7 @@ export function pasangKerangka(aktif, vars) {
         el('a', { href: '/testimoni/' }, t('kaki.ulasan')),
         el('a', { href: '/blog/' }, t('nav.blog')),
         el('a', { href: '/member/' }, t('kaki.member')),
+        el('a', { href: '/langganan/' }, t('kaki.langganan')),
         el('a', { href: '/reseller/' }, t('kaki.reseller')),
         el('a', { href: '/affiliate/' }, t('kaki.affiliate')),
         el('a', { href: '/syarat/' }, t('kaki.syarat')),

@@ -7,6 +7,9 @@ const NAMA_ACARA = {
   pesanan_baru: 'Pesanan baru', member_baru: 'Member baru', affiliate_baru: 'Pendaftar affiliate', reseller_baru: 'Booking reseller',
   affiliate_aturan: 'Ke affiliate: aturan main', affiliate_alur: 'Ke affiliate: alur kerja', member_selamat: 'Ke member: sambutan',
   member_link: 'Ke member: link akun', reseller_sambutan: 'Ke reseller: sambutan', tes: 'Tes',
+  pengingat_sebelum: 'Pengingat: sebelum berakhir', pengingat_hari_h: 'Pengingat: hari terakhir', pengingat_kembali: 'Kupon ajakan kembali',
+  pengingat_manual: 'Pengingat manual', langganan_link: 'Ke pembeli: link Langganan saya', stok_tersedia: 'Kabar stok tersedia',
+  ajak_hadiah: 'Ke member: hadiah ajak teman',
 };
 
 export async function halamanNotifikasi(supabase, halaman) {
@@ -107,8 +110,11 @@ export async function halamanNotifikasi(supabase, halaman) {
     el('h2', {}, 'Isi pesan otomatis'),
     el('p', { class: 'sub' }, 'Dikirim ke pendaftar lewat WhatsApp, dan pesan affiliate juga tampil di layar setelah mereka daftar. Kata dalam kurung kurawal diganti otomatis: ',
       el('code', {}, '{salam}'), ' (Selamat pagi/siang/sore/malam), ', el('code', {}, '{nama}'), ', ', el('code', {}, '{kode}'), ' (kode affiliate), ',
-      el('code', {}, '{link}'), ' (link akun member), ', el('code', {}, '{harga}'), ', ', el('code', {}, '{pct}'), ', ', el('code', {}, '{pct_besar}'), ', ', el('code', {}, '{min}'),
-      '. Format WhatsApp: *tebal*, _miring_.'),
+      el('code', {}, '{link}'), ' (link akun member / Langganan saya / halaman aplikasi), ', el('code', {}, '{harga}'), ', ', el('code', {}, '{pct}'), ', ', el('code', {}, '{pct_besar}'), ', ', el('code', {}, '{min}'),
+      '. Pengingat langganan: ', el('code', {}, '{app}'), ', ', el('code', {}, '{tgl}'), ', ', el('code', {}, '{sisa}'), ' (hari), ', el('code', {}, '{kapan}'), ', ',
+      el('code', {}, '{lama}'), ' (hari sejak berakhir), ', el('code', {}, '{kupon}'), ', ', el('code', {}, '{potongan}'), ', ', el('code', {}, '{berlaku}'),
+      '. Kabar stok: ', el('code', {}, '{paket}'), ', ', el('code', {}, '{catatan}'), '. Hadiah ajak teman: ', el('code', {}, '{teman}'), ', ', el('code', {}, '{kode_ajak}'),
+      '. Template berakhiran "(English)" dipakai untuk pembeli yang memesan dalam bahasa Inggris. Format WhatsApp: *tebal*, _miring_.'),
     templat.map((tp) => {
       const isi = el('textarea', { rows: Math.min(18, Math.max(5, tp.isi.split('\n').length + 1)), maxlength: 6000, value: tp.isi });
       const simpanT = el('button', { type: 'button', class: 'kecil' }, 'Simpan');
