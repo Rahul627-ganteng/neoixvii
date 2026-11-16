@@ -1,6 +1,6 @@
 // Panel ringkasan + formulir pesanan WhatsApp, dipakai halaman aplikasi, promo, dan rakit bundle.
-import { buatPesanan, cekDiskon } from './api.js';
-import { ambilMember, catatRiwayat, simpanBundle } from './akun.js';
+import { buatPesanan, cekDiskon, tokenPesanan } from './api.js';
+import { ambilAjak, ambilMember, catatRiwayat, simpanAjak, simpanBundle } from './akun.js';
 import { catatanKurs, formatUsd, harga, inggris, labelTipe, labelVarian, pakaiUsd, persen, rupiah, t, teksGalat } from './i18n.js';
 import { el, tautanWa } from './ui.js';
 
@@ -87,11 +87,12 @@ export function panelPesan({ toko, tanya, judul: teksJudul = t('app.pilihanmu'),
     if (kuponAktif) {
       if (d.kupon_galat) {
         statusKupon.textContent = teksGalat(d.kupon_galat); statusKupon.className = 'status-kupon galat-kecil';
-        kuponAktif = null;
+        if (kuponAktif === ambilAjak()?.kode && /pembelian pertama|dipakai sendiri|tidak ditemukan|tidak berjalan/i.test(d.kupon_galat)) simpanAjak(null);
+        kuponAktif = null; inputKupon.disabled = false; tombolKupon.textContent = t('pesan.kuponPakai');
       } else if (d.kupon) {
         inputKupon.value = d.kupon.kode; inputKupon.disabled = true; tombolKupon.textContent = t('pesan.kuponHapus');
         statusKupon.className = 'status-kupon ok';
-        statusKupon.textContent = Number(d.kupon.rp) > 0 ? t('pesan.kuponOk', { kode: d.kupon.kode, rp: rupiah(d.kupon.rp) })
+        statusKupon.textContent = Number(d.kupon.rp) > 0 ? t(d.kupon.kode === ambilAjak()?.kode ? 'pesan.kuponAjakOk' : 'pesan.kuponOk', { kode: d.kupon.kode, rp: rupiah(d.kupon.rp) })
           : d.catatan === 'member_lebih_besar' ? t('pesan.memberLebih') : t('pesan.kuponNol');
         if (Number(d.kupon.rp) > 0 && d.catatan === 'kupon_menggantikan_member') statusKupon.textContent += ' ' + t('pesan.memberGanti');
       }
@@ -134,7 +135,12 @@ export function panelPesan({ toko, tanya, judul: teksJudul = t('app.pilihanmu'),
     form.hidden = mode !== 'form';
     sukses.hidden = mode !== 'sukses';
     catatan.hidden = mode === 'sukses';
-    if (mode === 'form') { galat.hidden = true; (inputNama.value ? inputWa : inputNama).focus(); perbaruiDiskon(); }
+    if (mode === 'form') {
+      galat.hidden = true; (inputNama.value ? inputWa : inputNama).focus();
+      const ajak = ambilAjak();
+      if (ajak && !kuponAktif && !inputKupon.disabled) { kuponAktif = ajak.kode; inputKupon.value = ajak.kode; kotakKupon.open = true; perbaruiDiskon(true); }
+      else perbaruiDiskon();
+    }
     if (mode === 'sukses') sukses.focus();
   }
   const segarkanTombol = () => { tombol.disabled = !bisaPesan || !pilihan || menunggu; kirim.disabled = menunggu || !pilihan; };
@@ -151,7 +157,10 @@ export function panelPesan({ toko, tanya, judul: teksJudul = t('app.pilihanmu'),
     try {
       const hasil = await buatPesanan({ ...pilihan.kirim, nama, wa, member: member?.token, kupon: kuponAktif });
       try { localStorage.setItem(SIMPAN_KONTAK, JSON.stringify({ nama, wa })); } catch { /* abaikan */ }
-      catatRiwayat(hasil);
+      const cek = await tokenPesanan(hasil.kode, wa);
+      catatRiwayat(hasil, cek);
+      if (hasil.kupon && hasil.kupon === ambilAjak()?.kode) simpanAjak(null);   // kode ajak hanya untuk pembelian pertama
+      hasil.cek = cek;
       if (pilihan.kirim.rakit) simpanBundle([]);   // bundle rakitan sudah dipesan
       if (kuponAktif) { kuponAktif = null; inputKupon.value = ''; inputKupon.disabled = false; tombolKupon.textContent = t('pesan.kuponPakai'); statusKupon.textContent = ''; }
       tulisSukses(hasil, nama);
@@ -185,7 +194,8 @@ export function panelPesan({ toko, tanya, judul: teksJudul = t('app.pilihanmu'),
     const nomorWa = hasil.whatsapp || toko.whatsapp_number;
     const kepala = [
       el('h2', {}, t('pesan.berhasil')),
-      el('div', {}, el('div', { class: 'redup', style: 'font-size:12px' }, t('pesan.kodeLabel')), el('div', { class: 'kode' }, hasil.kode))];
+      el('div', {}, el('div', { class: 'redup', style: 'font-size:12px' }, t('pesan.kodeLabel')), el('div', { class: 'kode' }, hasil.kode),
+        hasil.cek ? el('a', { class: 'tautan-status', href: `/langganan/?p=${encodeURIComponent(hasil.cek)}` }, t('pesan.cekStatus')) : null)];
     const caraLain = hasil.pembayaran ? el('details', { class: 'cara-lain' }, el('summary', {}, t('pesan.caraLain')), el('pre', {}, hasil.pembayaran)) : null;
     const lagi = el('button', { class: 'tombol garis', type: 'button', onclick: () => tampil('pilih') }, t('pesan.lagi'));
     const qris = toko?.qris_aktif === false ? null : (toko?.qris_url || '/assets/bayar/qris-ixvii.jpg');

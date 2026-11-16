@@ -1,6 +1,6 @@
 // Menu Stok & harga: jumlah stok (+/−), Tersedia/Habis, harga satuan, tambah & ubah varian.
 // Dibuat untuk dipakai di HP: satu varian satu baris kartu, tombol besar.
-import { el, isian, q, rp, toast, waktu } from './alat.js';
+import { el, isian, q, rp, tautanWa, toast, waktu } from './alat.js';
 
 let saringan = 'semua';
 let kataCari = '';
@@ -27,7 +27,7 @@ export async function halamanStok(supabase, halaman) {
       q(supabase.from('v_katalog_admin')
         .select('code,aplikasi,app_id,tipe,varian,harga,hpp,stok,tampil,stok_jumlah,durasi_hari,stok_diubah')
         .order('sort_kategori').order('sort_aplikasi').order('sort_tipe').order('sort_varian').order('code')),
-      q(supabase.from('apps').select('id,name').order('name')),
+      q(supabase.from('apps').select('id,name,slug').order('name')),
       q(supabase.from('stock_checks').select('checked_at').eq('id', 1).maybeSingle()),
       q(supabase.from('pricing_settings').select('min_margin_pct,min_margin_rp').eq('id', 1).maybeSingle()),
     ]);
@@ -37,6 +37,13 @@ export async function halamanStok(supabase, halaman) {
   }
   const segarkan = () => halamanStok(supabase, halaman);
   const editor = el('div');
+  // daftar tunggu "Kabari saya kalau tersedia" (kosong kalau migration-nya belum dijalankan)
+  let tunggu = [];
+  try {
+    tunggu = await q(supabase.from('stok_tunggu').select('id,variant_id,nama,wa,lang,created_at,variants(code)').eq('status', 'menunggu').order('created_at'));
+  } catch { /* belum ada */ }
+  const tungguPer = (kode) => tunggu.filter((t) => t.variants?.code === kode);
+  const kartuTunggu = el('div');
   const daftar = el('div');
   const tab = el('div', { class: 'row tab', role: 'group', 'aria-label': 'Saring stok' });
 
@@ -57,7 +64,11 @@ export async function halamanStok(supabase, halaman) {
 
   function isiBaris(r, kotak, gambarUlang) {
     const sibuk = (b, janji) => { b.disabled = true; return janji.finally(() => { b.disabled = false; }); };
-    const terapkan = (h) => { r.stok_jumlah = h.jumlah ?? null; r.stok = h.stok; r.stok_diubah = h.diubah || new Date().toISOString(); gambarUlang(); };
+    const terapkan = (h) => {
+      const tadiHabis = r.stok === 'habis';
+      r.stok_jumlah = h.jumlah ?? null; r.stok = h.stok; r.stok_diubah = h.diubah || new Date().toISOString(); gambarUlang();
+      if (tadiHabis && r.stok !== 'habis' && tungguPer(r.code).length) setTimeout(() => cekDikabari(r), 1200);
+    };
 
     // harga satuan: ketuk untuk mengubah
     const tombolHarga = el('button', { type: 'button', class: 'harga-ubah', 'aria-label': `Ubah harga ${r.tipe} ${r.varian}` }, rp(r.harga), el('span', { 'aria-hidden': 'true' }, ' ✎'));
@@ -134,7 +145,7 @@ export async function halamanStok(supabase, halaman) {
       saklar.addEventListener('click', () => {
         const baru = r.stok === 'habis' ? 'tersedia' : 'habis';
         sibuk(saklar, q(supabase.rpc('ubah_stok', { p_code: r.code, p_stok: baru })))
-          .then((h) => { const st = h?.stok ?? baru; terapkan({ jumlah: null, stok: st }); toast(`${r.aplikasi} ${r.varian}: ${st === 'habis' ? 'Habis' : 'Tersedia'}`); })
+          .then((h) => { const st = h?.stok ?? baru; toast(`${r.aplikasi} ${r.varian}: ${st === 'habis' ? 'Habis' : 'Tersedia'}`); terapkan({ jumlah: null, stok: st }); })
           .catch((err) => toast('Gagal: ' + err.message, true));
       });
       const hitung = el('button', { type: 'button', class: 'tautan kecil' }, 'Hitung jumlah');
@@ -152,7 +163,9 @@ export async function halamanStok(supabase, halaman) {
       el('div', { class: 'kolom-nama' },
         el('b', {}, `${r.tipe} · ${r.varian}`),
         el('div', { class: 'muted' }, `${r.code}${r.durasi_hari ? ` · ${r.durasi_hari} hari` : ''}${r.stok_diubah ? ` · stok diubah ${waktu(r.stok_diubah)}` : ''}`),
-        r.tampil ? null : el('span', { class: 'tag' }, 'disembunyikan')),
+        r.tampil ? null : el('span', { class: 'tag' }, 'disembunyikan'),
+        tungguPer(r.code).length ? el('a', { class: 'tag biru tag-tunggu', href: '#daftar-tunggu', onclick: (e) => { e.preventDefault(); document.getElementById('daftar-tunggu')?.scrollIntoView({ behavior: 'smooth' }); } },
+          `🔔 ${tungguPer(r.code).length} menunggu dikabari`) : null),
       el('div', { class: 'kolom-harga' }, tombolHarga, tombolHpp),
       stok,
       el('button', { type: 'button', class: 'sec kecil tombol-ubah', onclick: () => buka(r) }, 'Ubah'),
@@ -236,6 +249,58 @@ export async function halamanStok(supabase, halaman) {
     (baru ? (app.value ? tipe : app) : harga).focus({ preventScroll: true });
   }
 
+  // ---------------------------------------------------------------- daftar tunggu stok
+  async function cekDikabari(r) {
+    const sebelum = tungguPer(r.code).length;
+    try {
+      const sisa = await q(supabase.from('stok_tunggu').select('id,variant_id,nama,wa,lang,created_at,variants(code)').eq('status', 'menunggu').order('created_at'));
+      tunggu = sisa;
+      const n = sebelum - tungguPer(r.code).length;
+      if (n > 0) toast(`${n} orang yang menunggu ${r.aplikasi} ${r.varian} sudah dikabari lewat WhatsApp`);
+      else toast(`${sebelum} orang menunggu ${r.aplikasi} ${r.varian}. Kabari lewat daftar tunggu di atas (WhatsApp otomatis belum tersambung atau di luar jam kirim).`, true);
+      gambar(); gambarTunggu();
+    } catch { /* abaikan */ }
+  }
+  function gambarTunggu() {
+    if (!tunggu.length) { kartuTunggu.replaceChildren(); return; }
+    const perKode = new Map();
+    for (const t of tunggu) { const k = t.variants?.code; if (!k) continue; if (!perKode.has(k)) perKode.set(k, []); perKode.get(k).push(t); }
+    const blok = [...perKode].map(([kode, orang]) => {
+      const r = rows.find((x) => x.code === kode);
+      const ada = r && r.stok !== 'habis';
+      const kabari = ada ? el('button', { type: 'button', class: 'kecil wa-tombol' }, 'Kabari sekarang (otomatis)') : null;
+      kabari?.addEventListener('click', async () => {
+        kabari.disabled = true;
+        try { const h = await q(supabase.rpc('kabari_sekarang', { p_kode: kode })); toast(`${h.dikabari} orang dikabari${h.sisa ? `, ${h.sisa} belum` : ''}`); segarkan(); }
+        catch (err) { toast(err.message, true); kabari.disabled = false; }
+      });
+      const slug = apps.find((a) => a.id === r?.app_id)?.slug;
+      const teksWa = (t) => `Halo ${t.nama ? 'Kak ' + t.nama.split(' ')[0] : 'Kak'} 👋\nKabar baik! ${r?.aplikasi ?? ''} ${r?.tipe ?? ''} · ${r?.varian ?? ''} sudah tersedia lagi di IXVII.CO${r ? ` (${rp(r.harga)})` : ''}.\nPesan di sini: ${location.origin}/aplikasi/?app=${slug ?? ''}&pilih=${kode}`;
+      return el('details', { class: 'item-form tunggu-varian', open: ada || null },
+        el('summary', {}, el('b', {}, r ? `${r.aplikasi} · ${r.tipe} · ${r.varian}` : kode), ' ',
+          el('span', { class: 'tag ' + (ada ? 'hijau' : 'merah') }, ada ? 'Tersedia' : 'Habis'), ' ', el('span', { class: 'tag biru' }, `${orang.length} menunggu`)),
+        el('div', { class: 'row', style: 'margin:8px 0' }, kabari,
+          el('span', { class: 'muted' }, ada ? 'Stok sudah tersedia. Pesan otomatis terkirim saat stok diubah (di jam kirim) atau lewat tombol ini.' : 'Mereka otomatis dikabari begitu stok varian ini diubah jadi Tersedia.')),
+        el('div', { class: 'tablewrap' }, el('table', {}, el('tbody', {}, orang.map((t) => {
+          const hapus = el('button', { type: 'button', class: 'kecil sec' }, 'Hapus');
+          hapus.addEventListener('click', async () => {
+            if (!confirm(`Hapus ${t.nama || '+' + t.wa} dari daftar tunggu?`)) return;
+            try { await q(supabase.from('stok_tunggu').update({ status: 'batal' }).eq('id', t.id)); tunggu = tunggu.filter((x) => x.id !== t.id); gambarTunggu(); gambar(); }
+            catch (err) { toast('Gagal: ' + err.message, true); }
+          });
+          return el('tr', {}, el('td', {}, el('b', {}, t.nama || '–'), t.lang === 'en' ? el('span', { class: 'tag' }, 'EN') : null),
+            el('td', {}, el('a', { href: tautanWa(t.wa), target: '_blank', rel: 'noopener' }, '+' + t.wa)),
+            el('td', { class: 'muted' }, `sejak ${waktu(t.created_at)}`),
+            el('td', {}, el('div', { class: 'row' }, ada ? el('a', { class: 'btn kecil wa', href: tautanWa(t.wa, teksWa(t)), target: '_blank', rel: 'noopener' }, 'WA dari HP') : null, hapus)));
+        })))));
+    });
+    kartuTunggu.replaceChildren(el('section', { class: 'card', id: 'daftar-tunggu' },
+      el('h2', {}, `Daftar tunggu stok (${tunggu.length} orang)`),
+      el('p', { class: 'sub' }, 'Pembeli yang menekan "Kabari saya" di paket yang habis. Saat stok varian diubah jadi Tersedia, mereka otomatis dapat WhatsApp berisi link pesan (pukul 09.00–20.59 WIB; di luar jam itu dikirim di jam kirim berikutnya).'),
+      ...blok));
+  }
+  gambarTunggu();
+
   // ---------------------------------------------------------------- daftar
   const cari = el('input', { type: 'search', placeholder: 'Cari aplikasi atau varian…', 'aria-label': 'Cari', value: kataCari });
   function gambar() {
@@ -265,7 +330,7 @@ export async function halamanStok(supabase, halaman) {
   });
 
   gambar();
-  halaman.replaceChildren(el('section', { class: 'card' },
+  halaman.replaceChildren(kartuTunggu, el('section', { class: 'card' },
     el('h2', {}, 'Stok & harga'),
     el('p', { class: 'sub' }, 'Ubah harga, sisa stok, dan varian langsung dari sini (HP atau laptop). Perubahan langsung tampil di website dan tercatat di Riwayat. Stok yang dihitung otomatis berkurang 1 saat pesanan jadi Aktif dan kembali kalau pesanan dibatalkan.'),
     el('div', { class: 'row' }, infoCek, cekLagi),

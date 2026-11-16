@@ -43,6 +43,14 @@
     Referrer-Policy = "no-referrer"
     Cache-Control = "no-store"
 
+# Langganan saya: link pribadi pembeli
+[[headers]]
+  for = "/langganan/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    Cache-Control = "no-store"
+
 [[headers]]
   for = "/reseller/ebook/*"
   [headers.values]

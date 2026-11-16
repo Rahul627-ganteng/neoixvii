@@ -23,6 +23,16 @@ export async function halamanMember(supabase, halaman) {
     halaman.replaceChildren(el('div', { class: 'msg warn' }, 'Menu Member & kupon butuh migration 20261113000000_member_kupon_notif.sql. Jalankan dulu di SQL Editor Supabase.'));
     return;
   }
+  let ajak = null, hadiah = [];
+  try {
+    [ajak, hadiah] = await Promise.all([
+      q(supabase.from('ajak_program').select('*').eq('id', 1).maybeSingle()),
+      q(supabase.from('ajak_hadiah').select('id,member_id,order_id,teman,kupon_id,status,created_at').order('created_at', { ascending: false }).limit(500)),
+    ]);
+  } catch { ajak = null; }
+  const kolomBaru = !!ajak;   // migration ajak teman & headline sudah dijalankan
+  const kuponAdmin = kupon.filter((k) => (k.sumber ?? 'admin') === 'admin');
+  const kuponOtomatis = kupon.filter((k) => (k.sumber ?? 'admin') !== 'admin');
   const segarkan = () => halamanMember(supabase, halaman);
   const sah = orders.filter((o) => o.status !== 'batal');
   const pakaiKupon = new Map();
@@ -79,7 +89,8 @@ export async function halamanMember(supabase, halaman) {
         });
         return el('tr', {},
           td(el('div', {}, el('b', {}, m.name), ' ', m.is_active ? null : el('span', { class: 'tag merah' }, 'nonaktif'),
-            m.sumber === 'admin' ? el('span', { class: 'tag' }, 'dari admin') : null)),
+            m.sumber === 'admin' ? el('span', { class: 'tag' }, 'dari admin') : null,
+            m.kode_ajak ? el('div', { class: 'muted' }, 'kode ajak ', el('b', { class: 'kode-kupon' }, m.kode_ajak)) : null)),
           td(el('a', { href: tautanWa(m.wa), target: '_blank', rel: 'noopener' }, '+' + m.wa)),
           td(tglPendek(m.created_at)), td(x.n, true), td(rp(x.total), true), td(rp(x.hemat), true),
           td(el('div', { class: 'row' },
@@ -126,6 +137,8 @@ export async function halamanMember(supabase, halaman) {
     const [cMember, lMember] = cek('kuponMember', 'Khusus member', k.khusus_member);
     const [cGabung, lGabung] = cek('kuponGabung', 'Boleh digabung dengan diskon member', k.gabung_member);
     const [cAktif, lAktif] = cek('kuponAktif', 'Aktif', k.id ? k.is_active : true);
+    const [cPublik, lPublik] = cek('kuponPublik', 'Tampilkan di headline beranda', k.tampil_publik);
+    const teksPublik = el('input', { type: 'text', value: k.teks_publik || '', maxlength: 140, placeholder: 'mis. Diskon payday untuk semua aplikasi streaming' });
     const segarMaks = () => { maks.disabled = jenis.value !== 'persen'; };
     jenis.addEventListener('change', segarMaks); segarMaks();
     const simpan = el('button', { type: 'button' }, k.id ? 'Simpan kupon' : 'Buat kupon');
@@ -141,6 +154,7 @@ export async function halamanMember(supabase, halaman) {
         mulai: dariLokal(mulai.value), sampai: dariLokal(sampai.value),
         kuota: kuota.value ? Number(kuota.value) : null, per_nomor: perNomor.value ? Number(perNomor.value) : null,
         khusus_member: cMember.checked, gabung_member: cGabung.checked, is_active: cAktif.checked,
+        ...(kolomBaru ? { tampil_publik: cPublik.checked, teks_publik: teksPublik.value.trim() || null } : {}),
       };
       simpan.disabled = true;
       try {
@@ -167,19 +181,21 @@ export async function halamanMember(supabase, halaman) {
         isian('Maksimal potongan (Rp)', maks, 'Hanya untuk diskon persen.'), isian('Minimal belanja (Rp)', min),
         isian('Mulai berlaku', mulai, 'Kosongkan = langsung berlaku.'), isian('Berakhir', sampai, 'Kosongkan = tanpa batas waktu.'),
         isian('Kuota total', kuota, 'Berapa kali kupon bisa dipakai semua pembeli.'), isian('Batas per nomor WhatsApp', perNomor)),
-      el('div', { class: 'row', style: 'margin-top:8px;gap:16px' }, lMember, lGabung, lAktif),
+      el('div', { class: 'row', style: 'margin-top:8px;gap:16px' }, lMember, lGabung, lAktif, kolomBaru ? lPublik : null),
+      kolomBaru ? isian('Teks di headline beranda (opsional)', teksPublik, 'Kalau dicentang, kode ini tampil di headline beranda selama masih berlaku dan kuotanya belum habis.') : null,
       el('p', { class: 'muted' }, 'Kalau tidak boleh digabung, sistem memakai yang lebih besar: diskon member atau kupon. Diskon tidak pernah membuat harga di bawah HPP.'),
       el('div', { class: 'row', style: 'margin-top:8px' }, simpan, el('button', { type: 'button', class: 'sec', onclick: () => wadah.replaceChildren() }, 'Tutup'), hapus)));
     wadah.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function bagianKupon() {
     const editor = el('div');
-    const daftar = kupon.length ? tabel(['Kode', 'Diskon', 'Syarat', 'Periode', '>Dipakai', 'Status', ''], kupon.map((k) => {
+    const daftar = kuponAdmin.length ? tabel(['Kode', 'Diskon', 'Syarat', 'Periode', '>Dipakai', 'Status', ''], kuponAdmin.map((k) => {
       const [label, kelas] = statusKupon(k);
       const syarat = [k.min_belanja ? `min. ${rp(k.min_belanja)}` : null, k.khusus_member ? 'khusus member' : null,
         k.per_nomor ? `${k.per_nomor}x per nomor` : null, k.gabung_member ? 'bisa + diskon member' : null].filter(Boolean).join(' · ') || 'tanpa syarat';
       return el('tr', {},
-        td(el('div', {}, el('b', { class: 'kode-kupon' }, k.code), k.keterangan ? el('div', { class: 'muted' }, k.keterangan) : null)),
+        td(el('div', {}, el('b', { class: 'kode-kupon' }, k.code), k.tampil_publik ? el('span', { class: 'tag biru' }, 'di headline') : null,
+          k.keterangan ? el('div', { class: 'muted' }, k.keterangan) : null)),
         td(teksNilai(k)), td(syarat),
         td(`${k.mulai ? waktu(k.mulai) : 'sekarang'} → ${k.sampai ? waktu(k.sampai) : 'tanpa batas'}`),
         td(`${pakaiKupon.get(k.id) ?? 0}${k.kuota ? ` / ${k.kuota}` : ''}`, true),
@@ -188,11 +204,88 @@ export async function halamanMember(supabase, halaman) {
           el('button', { type: 'button', class: 'sec kecil', onclick: () => formKupon(k, editor) }, 'Ubah'),
           el('button', { type: 'button', class: 'sec kecil', onclick: () => salin(k.code, `Kode ${k.code} disalin`) }, 'Salin kode'))));
     })) : el('p', { class: 'muted' }, 'Belum ada kupon.');
+    const SUMBER = { ajak: 'Kode ajak teman', hadiah_ajak: 'Hadiah ajak teman', kembali: 'Ajakan kembali' };
+    const namaMember = new Map(members.map((m) => [m.id, m]));
+    const otomatis = kuponOtomatis.length ? el('details', { class: 'item-form', style: 'margin-top:14px' },
+      el('summary', {}, el('b', {}, `Kupon otomatis (${kuponOtomatis.length})`), ' ', el('span', { class: 'muted' }, 'kode ajak teman, hadiah pengajak, dan kupon ajakan kembali')),
+      tabel(['Kode', 'Jenis', 'Untuk', 'Diskon', 'Berlaku sampai', '>Dipakai', 'Status'], kuponOtomatis.slice(0, 300).map((k) => {
+        const [label, kelas] = statusKupon(k);
+        const m = k.pemilik_member ? namaMember.get(k.pemilik_member) : members.find((x) => x.wa === k.khusus_wa);
+        return el('tr', {}, td(el('b', { class: 'kode-kupon' }, k.code)), td(SUMBER[k.sumber] ?? k.sumber),
+          td(k.sumber === 'ajak' ? `teman ${m?.name ?? 'member'} (pembelian pertama)` : m ? m.name : k.khusus_wa ? '+' + k.khusus_wa : '–'),
+          td(teksNilai(k)), td(k.sampai ? waktu(k.sampai) : 'tanpa batas'), td(`${pakaiKupon.get(k.id) ?? 0}${k.kuota ? ` / ${k.kuota}` : ''}`, true),
+          td(el('span', { class: 'tag ' + kelas }, label)));
+      }))) : null;
     return [el('section', { class: 'card' },
       el('div', { class: 'row', style: 'justify-content:space-between' }, el('h2', {}, 'Kode kupon'),
         el('button', { type: 'button', class: 'kecil', onclick: () => formKupon({}, editor) }, '+ Kupon baru')),
       el('p', { class: 'sub' }, 'Kupon dipakai pembeli di langkah pemesanan ("Punya kode kupon?"). Atur masa berlaku, kuota, dan syaratnya di sini.'),
-      editor, daftar)];
+      editor, daftar, otomatis)];
+  }
+
+  // ---------------------------------------------------------------- ajak teman
+  function bagianAjak() {
+    if (!ajak) return [el('div', { class: 'msg warn' }, 'Ajak teman butuh migration 20261121000000_langganan_kabari_ajak_sorotan.sql. Jalankan dulu di SQL Editor Supabase.')];
+    const pr = ajak;
+    const aktif = el('input', { type: 'checkbox', id: 'ajakAktif' }); aktif.checked = !!pr.aktif;
+    const kirimWa = el('input', { type: 'checkbox', id: 'ajakWa' }); kirimWa.checked = !!pr.kirim_wa;
+    const pilihJenis = (v) => el('select', {}, el('option', { value: 'persen', selected: v === 'persen' }, 'Persen (%)'), el('option', { value: 'nominal', selected: v === 'nominal' }, 'Potongan (Rp)'));
+    const tJenis = pilihJenis(pr.teman_jenis), hJenis = pilihJenis(pr.hadiah_jenis);
+    const inp = (v, ph) => el('input', { type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: ph });
+    const tNilai = inp(Number(pr.teman_nilai)), tMaks = inp(pr.teman_maks, 'tanpa batas'), tMin = inp(pr.teman_min ?? 0);
+    const hNilai = inp(Number(pr.hadiah_nilai)), hMaks = inp(pr.hadiah_maks, 'tanpa batas'), hMin = inp(pr.hadiah_min ?? 0);
+    const hHari = el('input', { type: 'number', min: 1, max: 365, value: pr.hadiah_hari });
+    const batas = el('input', { type: 'number', min: 1, max: 100, value: pr.maks_hadiah_bulan });
+    const segarMaks = () => { tMaks.disabled = tJenis.value !== 'persen'; hMaks.disabled = hJenis.value !== 'persen'; };
+    tJenis.addEventListener('change', segarMaks); hJenis.addEventListener('change', segarMaks); segarMaks();
+    const simpan = el('button', { type: 'button' }, 'Simpan program ajak teman');
+    simpan.addEventListener('click', async () => {
+      const tv = Number(String(tNilai.value).replace(',', '.')), hv = Number(String(hNilai.value).replace(',', '.'));
+      if (!(tv > 0) || (tJenis.value === 'persen' && tv > 50)) return toast('Potongan untuk teman: persen 1–50 atau rupiah', true);
+      if (!(hv > 0) || (hJenis.value === 'persen' && hv > 50)) return toast('Hadiah pengajak: persen 1–50 atau rupiah', true);
+      simpan.disabled = true;
+      try {
+        await q(supabase.from('ajak_program').update({
+          aktif: aktif.checked, kirim_wa: kirimWa.checked,
+          teman_jenis: tJenis.value, teman_nilai: tv, teman_maks: tJenis.value === 'persen' ? angka(tMaks.value) : null, teman_min: angka(tMin.value) ?? 0,
+          hadiah_jenis: hJenis.value, hadiah_nilai: hv, hadiah_maks: hJenis.value === 'persen' ? angka(hMaks.value) : null, hadiah_min: angka(hMin.value) ?? 0,
+          hadiah_hari: Number(hHari.value) || 60, maks_hadiah_bulan: Number(batas.value) || 10, updated_at: new Date().toISOString(),
+        }).eq('id', 1));
+        toast('Program ajak teman tersimpan. Semua kode ajak member ikut diperbarui.'); segarkan();
+      } catch (err) { toast('Gagal: ' + err.message, true); simpan.disabled = false; }
+    });
+    const teksP = (jenis, nilai, maks) => (jenis === 'persen' ? `${Number(nilai)}%${maks ? ` (maks ${rp(maks)})` : ''}` : rp(nilai));
+    const perMemberAjak = new Map();
+    for (const h of hadiah) if (h.status !== 'dibatalkan') perMemberAjak.set(h.member_id, (perMemberAjak.get(h.member_id) ?? 0) + 1);
+    const top = [...perMemberAjak].sort((a, b) => b[1] - a[1]).slice(0, 10);
+    const byId = new Map(members.map((m) => [m.id, m]));
+    const kuponById = new Map(kupon.map((k) => [k.id, k]));
+    const ST = { diberikan: ['hadiah diberikan', 'hijau'], batas: ['batas bulanan tercapai', 'kuning'], dibatalkan: ['dibatalkan', 'merah'] };
+    return [el('section', { class: 'card' },
+      el('h2', {}, 'Program ajak teman'),
+      el('p', { class: 'sub' }, 'Setiap member otomatis punya kode ajak (mis. RAHUL27) dan link ajakan di halaman akunnya. Teman yang belum pernah belanja dapat potongan di pembelian pertama. Setelah pesanan teman itu jadi Aktif, pengajak otomatis dapat kupon hadiah pribadi lewat WhatsApp. Diskon tidak pernah membuat harga di bawah HPP.'),
+      el('div', { class: 'msg netral' }, `Sekarang: teman dapat potongan ${teksP(pr.teman_jenis, pr.teman_nilai, pr.teman_maks)}${pr.teman_min ? ` (min. belanja ${rp(pr.teman_min)})` : ''}, pengajak dapat kupon ${teksP(pr.hadiah_jenis, pr.hadiah_nilai, pr.hadiah_maks)} berlaku ${pr.hadiah_hari} hari, maksimal ${pr.maks_hadiah_bulan} hadiah per member per bulan.`),
+      el('label', { class: 'row', for: 'ajakAktif', style: 'margin:10px 0 4px' }, aktif, 'Program ajak teman aktif'),
+      el('h3', { style: 'margin:12px 0 0;font-size:15px' }, 'Untuk teman yang diajak'),
+      el('div', { class: 'grid2' }, isian('Jenis potongan', tJenis), isian('Besar potongan', tNilai, 'Persen (mis. 5) atau rupiah (mis. 5000).'),
+        isian('Maksimal potongan (Rp)', tMaks, 'Hanya untuk persen.'), isian('Minimal belanja (Rp)', tMin)),
+      el('h3', { style: 'margin:16px 0 0;font-size:15px' }, 'Hadiah untuk member yang mengajak'),
+      el('div', { class: 'grid2' }, isian('Jenis kupon hadiah', hJenis), isian('Besar kupon', hNilai),
+        isian('Maksimal potongan (Rp)', hMaks, 'Hanya untuk persen.'), isian('Minimal belanja (Rp)', hMin),
+        isian('Kupon berlaku (hari)', hHari), isian('Maksimal hadiah per member per bulan', batas)),
+      el('label', { class: 'row', for: 'ajakWa', style: 'margin-top:10px' }, kirimWa, 'Kirim kupon hadiah ke WhatsApp pengajak (Fonnte)'),
+      el('div', { class: 'row', style: 'margin-top:12px' }, simpan)),
+    el('section', { class: 'card' },
+      el('h2', {}, `Hasil ajak teman (${hadiah.filter((h) => h.status !== 'dibatalkan').length} teman belanja)`),
+      top.length ? el('div', {}, el('h3', { style: 'margin:0 0 6px;font-size:14px' }, 'Pengajak terbanyak'),
+        el('div', { class: 'row' }, top.map(([id, n]) => el('span', { class: 'tag biru' }, `${byId.get(id)?.name ?? 'member'} · ${n} teman`)))) : null,
+      hadiah.length ? el('div', { style: 'margin-top:12px' }, tabel(['Tanggal', 'Pengajak', 'Teman', 'Kupon hadiah', 'Status'], hadiah.slice(0, 200).map((h) => {
+        const k = kuponById.get(h.kupon_id);
+        const [label, kelas] = ST[h.status] ?? [h.status, ''];
+        return el('tr', {}, td(waktu(h.created_at)), td(byId.get(h.member_id)?.name ?? '–'), td(h.teman ?? '–'),
+          td(k ? el('span', {}, el('b', { class: 'kode-kupon' }, k.code), ` · ${teksNilai(k)}${pakaiKupon.get(k.id) ? ' · sudah dipakai' : ''}`) : '–'),
+          td(el('span', { class: 'tag ' + kelas }, label)));
+      }))) : el('p', { class: 'muted' }, 'Belum ada teman yang belanja pakai kode ajak.'))];
   }
 
   // ---------------------------------------------------------------- program diskon member
@@ -233,7 +326,8 @@ export async function halamanMember(supabase, halaman) {
       contoh, el('div', { class: 'row', style: 'margin-top:10px' }, simpan))];
   }
 
-  const BAGIAN = [['member', `Member (${members.length})`, bagianMember], ['kupon', `Kode kupon (${kupon.length})`, bagianKupon], ['program', 'Program diskon', bagianProgram]];
+  const BAGIAN = [['member', `Member (${members.length})`, bagianMember], ['kupon', `Kode kupon (${kuponAdmin.length})`, bagianKupon],
+    ['program', 'Program diskon', bagianProgram], ['ajak', 'Ajak teman', bagianAjak]];
   function gambar() {
     const tab = el('div', { class: 'row tab sub-tab', role: 'group', 'aria-label': 'Bagian member' }, BAGIAN.map(([k, l]) => el('button', {
       type: 'button', class: 'kecil ' + (k === bagian ? '' : 'sec'), 'aria-pressed': String(k === bagian), onclick: () => { bagian = k; gambar(); },

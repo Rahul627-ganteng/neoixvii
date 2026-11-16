@@ -21,6 +21,8 @@ import { halamanReseller } from './reseller.js';
 import { halamanEbook } from './ebook.js';
 import { halamanProduk } from './produk.js';
 import { halamanNotifikasi } from './notifikasi.js';
+import { halamanLangganan } from './langganan.js';
+import { halamanSorotan } from './sorotan.js';
 import { pasangMenu, tandaiMenu } from './menu.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -87,6 +89,8 @@ const RUTE = {
   ebook: () => halamanEbook(supabase, halaman),
   produk: () => halamanProduk(supabase, halaman),
   notifikasi: () => halamanNotifikasi(supabase, halaman),
+  langganan: () => halamanLangganan(supabase, halaman),
+  sorotan: () => halamanSorotan(supabase, halaman),
 };
 let ruteTerakhir = null;
 async function rute() {

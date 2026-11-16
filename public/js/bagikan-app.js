@@ -1,12 +1,23 @@
 // Bagikan halaman aplikasi: (1) link + ajakan beli di website & daftar member, (2) gambar pricelist siap kirim.
 // Gambar dibuat di browser (canvas), jadi tidak perlu screenshot manual.
-import { ambilProgramMember } from './api.js';
+import { ambilProgramAjak, ambilProgramMember } from './api.js';
+import { ambilMember } from './akun.js';
 import { harga, inggris, labelTipe, labelVarian, persen, rupiah, t, tanggal } from './i18n.js';
 import { el } from './ui.js';
 
 const ASAL = location.origin;
-const urlApp = (app) => `${ASAL}/aplikasi/?app=${encodeURIComponent(app.slug)}`;
+const urlApp = (app, kode) => `${ASAL}/aplikasi/?app=${encodeURIComponent(app.slug)}${kode ? `&ajak=${encodeURIComponent(kode)}` : ''}`;
 const URL_MEMBER = `${ASAL}/member/`;
+
+/** Kode ajak teman milik member di perangkat ini + besar potongan untuk temannya, atau null. */
+async function ajakSaya() {
+  const kode = ambilMember()?.kode;
+  if (!kode) return null;
+  const pr = await ambilProgramAjak();
+  if (!pr?.aktif) return null;
+  const potongan = pr.teman_jenis === 'persen' ? `${Number(pr.teman_nilai)}%` : rupiah(pr.teman_nilai);
+  return { kode, potongan };
+}
 const hariIni = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
 const pct = (n) => persen(Number(n) / 100);
 
@@ -27,15 +38,16 @@ function mulaiPerTipe(app) {
 }
 
 /** Teks ajakan untuk WhatsApp / media sosial. */
-export function teksAjakan(app, member) {
+export function teksAjakan(app, member, ajak = null) {
   const mulai = mulaiPerTipe(app);
   const bagian = [];
   if (mulai.length) {
     bagian.push(t('bagi.teksPembuka', { app: app.nama }) + '\n' + mulai.map((m) => `• ${t('bagi.teksMulai', { tipe: m.tipe, harga: harga(m.p) })}`).join('\n'));
-    bagian.push(`${t('bagi.teksPesan')}\n${urlApp(app)}`);
+    bagian.push(`${t('bagi.teksPesan')}\n${urlApp(app, ajak?.kode)}`);
   } else {
-    bagian.push(`${t('bagi.teksHabis', { app: app.nama })}\n${urlApp(app)}`);
+    bagian.push(`${t('bagi.teksHabis', { app: app.nama })}\n${urlApp(app, ajak?.kode)}`);
   }
+  if (ajak) bagian.push(t('bagi.teksAjak', { kode: ajak.kode, potongan: ajak.potongan }));
   if (member) {
     const besar = Number(member.diskon_besar_pct) > Number(member.diskon_pct) && member.min_besar
       ? t('bagi.teksMemberBesar', { pct: pct(member.diskon_besar_pct), min: rupiah(member.min_besar) }) : '';
@@ -307,7 +319,7 @@ const ikonBagikan = () => svgIkon('M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 
 const ikonGambar = () => svgIkon('M4 4h16v16H4zM4 16l5-5 4 4 3-3 4 4M15 8.5h.01');
 
 async function bukaDialog(app, konteks, tabAwal) {
-  const member = await programMember();
+  const [member, ajak] = await Promise.all([programMember(), ajakSaya().catch(() => null)]);
   const d = el('dialog', { class: 'dialog-bagikan', 'aria-labelledby': 'judul-bagikan' });
   const tutup = el('button', { type: 'button', class: 'tutup-dialog', 'aria-label': t('bagi.tutup'), onclick: () => d.close() }, '×');
   const tabLink = el('button', { type: 'button', role: 'tab' }, t('bagi.tabLink'));
@@ -318,7 +330,7 @@ async function bukaDialog(app, konteks, tabAwal) {
 
   // ---- link & ajakan
   const teks = el('textarea', { rows: 10, 'aria-label': t('bagi.tabLink') });
-  teks.value = teksAjakan(app, member);
+  teks.value = teksAjakan(app, member, ajak);
   const panelLink = el('div', {},
     el('p', { class: 'redup' }, t('bagi.bisaUbah')), teks,
     el('div', { class: 'baris-tombol' },

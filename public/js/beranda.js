@@ -1,7 +1,8 @@
-import { akunMember, ambilFaqUmum, ambilFilm, ambilKatalog, ambilProgramMember, ambilProgramReseller, ambilPromo, ambilTerlaris, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
-import { ambilBundle, ambilMember, ambilRiwayat, simpanBundle } from './akun.js';
+import { akunMember, ambilBerita, ambilFaqUmum, ambilFilm, ambilKatalog, ambilProgramMember, ambilProgramReseller, ambilPromo, ambilSorotan, ambilTerlaris, ambilToko, ambilUlasan, diskonTertinggi, infoAjak } from './api.js';
+import { ambilAjak, ambilBundle, ambilMember, ambilRiwayat, simpanAjak, simpanBundle } from './akun.js';
 import { kartuFilm } from './film-kartu.js';
 import { bandingGabung, kartuGabung } from './gabung.js';
+import { pasangSorotan, sambutanAjak, susunSorotan } from './sorotan.js';
 import { inggris, labelTipe, labelVarian, pasangKurs, persen, rupiah, t, tanggal } from './i18n.js';
 import { daftarFaq, el, ikonKategori, kartuApp, kartuUlasan, kerangkaMemuat, pasangKerangka, pasangTilt, pesanGagal, tautanWa, tulisCatatanKurs, urlKategori } from './ui.js';
 
@@ -27,6 +28,7 @@ async function muat() {
     $('hero-teks').textContent = t('hero.teks', { n: lain });
 
     gambarKategori(kategori, apps);
+    muatSorotan(apps);
     muatTerlaris(apps);
     muatTerakhir(apps);
     muatMember();
@@ -41,6 +43,29 @@ async function muat() {
     wadahUnggulan.replaceChildren(pesanGagal(t('gagal.katalog'), muat));
   }
 }
+
+// ---------------------------------------------------------------- headline (kabar terkini)
+async function muatSorotan(apps) {
+  const [sorotan, promo, terlaris, member, reseller, film, berita] = await Promise.all([
+    ambilSorotan(), ambilPromo(), ambilTerlaris(), ambilProgramMember(), ambilProgramReseller(), ambilFilm(), ambilBerita({ batas: 1 })]);
+  const slides = susunSorotan({ sorotan, promo, terlaris, member, reseller, film, berita, apps, bySlug: new Map(apps.map((a) => [a.slug, a])) });
+  const wadah = $('sorotan');
+  pasangSorotan(wadah, slides);
+  document.querySelector('.hero')?.classList.toggle('ada-sorotan', !wadah.hidden);
+}
+
+// sambutan untuk pengunjung dari link ajak teman (?ajak=KODE)
+async function muatAjak() {
+  const a = ambilAjak();
+  if (!a) return;
+  try { if (sessionStorage.getItem('ixvii-ajak-tutup') === a.kode) return; } catch { /* abaikan */ }
+  const info = await infoAjak(a.kode);
+  if (!info) { simpanAjak(null); return; }
+  const wadah = $('sambut-ajak');
+  wadah.replaceChildren(sambutanAjak(info, () => { wadah.hidden = true; try { sessionStorage.setItem('ixvii-ajak-tutup', a.kode); } catch { /* abaikan */ } }));
+  wadah.hidden = false;
+}
+muatAjak();
 
 // ---------------------------------------------------------------- "Kamu butuh aplikasi apa?"
 function gambarKategori(kategori, apps) {

@@ -199,7 +199,7 @@ function kartuDaftar(supabase, garansi) {
   gambar();
   return el('section', { class: 'card' },
     el('h2', {}, `Garansi tercatat (${garansi.length})`),
-    el('p', { class: 'sub' }, 'Dari form aktivasi dan dari balasan WhatsApp yang ditempel. Tab "Perlu diingatkan" berisi langganan yang berakhir dalam 3 hari; klik Kirim pengingat untuk membuka WhatsApp dengan pesan yang sudah terisi.'),
+    el('p', { class: 'sub' }, 'Dari form aktivasi dan dari balasan WhatsApp yang ditempel. Tab "Perlu diingatkan" berisi langganan yang berakhir dalam 3 hari; klik Kirim pengingat untuk membuka WhatsApp dengan pesan yang sudah terisi. Pengingat otomatis dan daftar langganan yang hampir habis / sudah lewat ada di ', el('a', { href: '#langganan' }, 'menu Masa langganan'), '.'),
     tab, el('div', { style: 'margin-top:10px' }, daftar));
 }
 

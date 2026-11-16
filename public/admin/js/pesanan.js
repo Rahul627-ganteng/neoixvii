@@ -225,7 +225,7 @@ export async function halamanPesanan(supabase, halaman) {
       stat(pesanan.filter((o) => o.status === 'menunggu_bayar').length, 'menunggu bayar', 'kuning'),
       stat(pesanan.filter((o) => o.status === 'dibayar').length, 'dibayar, belum dikirim'),
       stat(pesanan.filter((o) => o.status === 'aktif').length, 'langganan aktif'),
-      stat(segera, 'berakhir ≤ 3 hari (tawarkan perpanjang)', segera ? 'merah' : ''),
+      el('a', { href: '#langganan', class: 'stat-tautan' }, stat(segera, 'berakhir ≤ 3 hari (lihat Masa langganan →)', segera ? 'merah' : '')),
       stat(tanpaGaransi, 'aktif tapi garansi tidak aktif', tanpaGaransi ? 'kuning' : ''));
   };
 
