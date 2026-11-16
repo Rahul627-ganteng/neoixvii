@@ -927,3 +927,31 @@ body:has(.bar-bundle:not([hidden])) .kaki { padding-bottom: 96px; }
 .isi-artikel > h3 { margin-top: 22px; }
 .isi-artikel .e-galeri figure img { border-radius: 16px; }
 .isi-artikel .e-galeri figcaption { font-size: 13px; }
+
+/* ---------------------------------------------------------------- bagikan aplikasi (link + gambar pricelist) */
+.aksi-bagikan { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.aksi-bagikan .tombol { gap: 8px; }
+.ikon-bagi { width: 18px; height: 18px; flex: none; }
+.dialog-bagikan { border: 1px solid var(--garis-kuat); border-radius: 22px; padding: 18px 18px 14px; width: min(94vw, 560px); max-height: 92vh;
+  background: var(--permukaan-pekat); color: var(--teks); box-shadow: var(--bayang); overflow: auto; }
+.dialog-bagikan::backdrop { background: rgba(0, 0, 0, .62); }
+.kepala-dialog { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kepala-dialog h2 { margin: 0; font-size: 19px; }
+.tutup-dialog { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--garis); background: transparent; color: var(--teks);
+  font-size: 22px; line-height: 1; cursor: pointer; }
+.tab-bagikan { display: flex; gap: 6px; margin: 14px 0 12px; padding: 4px; border-radius: 999px; background: var(--sorot); }
+.tab-bagikan button { flex: 1; min-height: 38px; border: 0; border-radius: 999px; background: transparent; color: var(--teks-2, var(--teks));
+  font: 600 14px var(--font-isi); cursor: pointer; }
+.tab-bagikan button[aria-selected="true"] { background: var(--maroon); color: #fff; }
+.panel-bagikan textarea { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 14px; border: 1px solid var(--garis-kuat);
+  background: var(--latar); color: var(--teks); font: 14px/1.5 var(--font-isi); resize: vertical; }
+.panel-bagikan > div > .redup { margin: 0 0 8px; font-size: 13px; }
+.baris-tombol { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.baris-tombol .tombol { flex: 1 1 140px; }
+.atur-pricelist { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; font-size: 14px; }
+.pilih-tema { display: flex; gap: 6px; }
+.pilih-tema .chip { height: 34px; }
+.atur-pricelist .centang { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.pratinjau-pricelist { max-height: min(56vh, 620px); overflow: auto; border-radius: 14px; border: 1px solid var(--garis); background: var(--latar); }
+.pratinjau-pricelist img { display: block; width: 100%; height: auto; }
+.info-bagikan { min-height: 1.4em; margin: 8px 0 0; font-size: 13px; color: var(--hijau-teks); }

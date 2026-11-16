@@ -1,5 +1,6 @@
 import { ambilBerita, ambilDetail, ambilFilm, ambilInfoTipe, ambilKatalog, ambilPromo, ambilToko, ambilUlasan, diskonTertinggi } from './api.js';
 import { barisFilm } from './film-kartu.js';
+import { tombolBagikan } from './bagikan-app.js';
 import { kartuBerita } from './blog-kartu.js';
 import { angkaRating, harga, inggris, labelTipe, labelVarian, pasangKurs, persen, relatif, t, tanggal, teksDurasi } from './i18n.js';
 import { panelPesan } from './pesan.js';
@@ -224,6 +225,7 @@ function tampilkan(app, semua, detail, toko, infoTipe, promo, ulasan, film, beri
             ' ', t('app.ratingSingkat', { rata: angkaRating(app.rating.rata), n: app.rating.jumlah, s: app.rating.jumlah === 1 ? '' : 's' })) : null,
           infoStok(app)))),
     el('p', { class: 'desk-app redup' }, app.desc),
+    tombolBagikan(app, { toko }),
     el('div', { class: 'tata-detail' },
       el('div', { class: 'atas-detail' }, bagianGrup(app, infoTipe, pilih)),
       aside,
