@@ -64,7 +64,7 @@ declare
      "desc": "ChatGPT Plus 3 bulan, diperpanjang tiap bulan oleh admin.",
      "desc_en": "ChatGPT Plus for 3 months, renewed monthly by our admin.",
      "items": [["gpt_8u_1b", 3]]},
-    {"name": "Maraton Libur Natal", "name_en": "Holiday Binge Pack", "price": 209000, "stock": 8, "best": false,
+    {"name": "Maraton Nonton Libur Akhir Tahun", "name_en": "Year-End Holiday Binge Pack", "price": 209000, "stock": 8, "best": false,
      "desc": "Netflix 1P1U 3 bulan + Disney+ 3 bulan. Pas untuk libur akhir tahun.",
      "desc_en": "Netflix 1P1U 3 months + Disney+ 3 months. Perfect for the year-end holidays.",
      "items": [["nf_3b", 1], ["dis_6u_1b", 3]]},
