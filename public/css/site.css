@@ -1109,3 +1109,85 @@ body:has(.bar-bundle:not([hidden])) .kaki { padding-bottom: 96px; }
 .tautan-langganan { grid-column: 1 / -1; font-size: 13px; font-weight: 600; color: var(--hijau-teks); }
 .hemat-total { flex-wrap: wrap; gap: 4px 12px; }
 @media (max-width: 520px) { .ajak-teman-kepala { flex-direction: column; } .kupon-saya, .kode-ajak { flex-wrap: wrap; } }
+
+/* ==========================================================================
+   Nuansa 60-30-10 + latar dinamis
+   60% hitam obsidian · 30% maroon merek · 10% emas khusus ajakan utama.
+   Latar: cahaya maroon yang bergerak pelan (aurora), garis arsitektural halus,
+   dan butiran film. Semuanya di lapisan tetap di belakang konten.
+   ========================================================================== */
+body { position: relative; isolation: isolate; background: var(--latar); }
+body::before, body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+/* lapisan 1: aurora maroon + sedikit kilau emas, bergerak sangat pelan */
+body::before {
+  inset: -20vmax;
+  background:
+    radial-gradient(38vmax 30vmax at 18% 22%, var(--latar-orb1), transparent 70%),
+    radial-gradient(34vmax 28vmax at 82% 30%, var(--latar-orb2), transparent 72%),
+    radial-gradient(30vmax 22vmax at 70% 85%, var(--latar-orb1), transparent 70%),
+    radial-gradient(22vmax 18vmax at 30% 75%, var(--latar-orb3), transparent 70%);
+  animation: aurora-ixvii 38s ease-in-out infinite alternate;
+  will-change: transform;
+}
+/* lapisan 2: garis kisi tipis yang memudar ke tepi + butiran halus */
+body::after {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(var(--latar-garis) 1px, transparent 1px),
+    linear-gradient(90deg, var(--latar-garis) 1px, transparent 1px);
+  background-size: 160px 160px, 72px 72px, 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 20%, transparent 85%);
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 20%, transparent 85%);
+}
+@keyframes aurora-ixvii {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(4vmax, -3vmax, 0) rotate(8deg) scale(1.06); }
+  100% { transform: translate3d(-3vmax, 2vmax, 0) rotate(-6deg) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+/* ---------- 10%: aksen emas hanya untuk ajakan utama */
+.tombol { background: var(--aksen); color: var(--aksen-teks); font-weight: 700; position: relative; overflow: hidden;
+  box-shadow: 0 8px 24px -6px var(--aksen-cahaya), inset 0 1px 0 rgba(255, 255, 255, .45);
+  transition: transform .15s ease, background .15s ease, box-shadow .2s ease; }
+.tombol:hover { background: var(--aksen-hover); box-shadow: 0 12px 32px -6px var(--aksen-cahaya), inset 0 1px 0 rgba(255, 255, 255, .5); }
+.tombol::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .55) 48%, transparent 66%);
+  transform: translateX(-120%); }
+.tombol:hover::after { transform: translateX(120%); transition: transform .7s ease; }
+@media (prefers-reduced-motion: reduce) { .tombol:hover::after { transition: none; transform: translateX(-120%); } }
+/* tombol sekunder/khusus tetap tenang (bukan bagian 10%) */
+.tombol.garis { box-shadow: none; font-weight: 600; }
+.tombol.garis::after, .tombol.wa::after, .tombol.putih::after, .tombol:disabled::after { display: none; }
+.tombol.wa { color: #fff; box-shadow: none; }
+.tombol.putih { box-shadow: none; }
+.tombol:disabled { box-shadow: none; }
+
+/* menu Promo: titik emas berdenyut supaya mata langsung ke sana */
+.nav a.nav-promo { color: var(--aksen-tulisan); display: inline-flex; align-items: center; gap: 7px; }
+.nav a.nav-promo::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--aksen);
+  box-shadow: 0 0 0 0 var(--aksen-cahaya); animation: denyut-ixvii 1.8s ease-out infinite; }
+.nav a.nav-promo[aria-current="page"] { color: var(--aksen-teks); background: var(--aksen); }
+.nav a.nav-promo[aria-current="page"]::before { background: var(--aksen-teks); }
+@keyframes denyut-ixvii { 0% { box-shadow: 0 0 0 0 var(--aksen-cahaya); } 100% { box-shadow: 0 0 0 10px transparent; } }
+@media (prefers-reduced-motion: reduce) { .nav a.nav-promo::before { animation: none; } }
+
+/* BEST DEAL & hitung mundur = aksen */
+.pita-best { background: var(--aksen); color: var(--aksen-teks); box-shadow: 0 6px 18px var(--aksen-cahaya); }
+.bundle-kartu.best { border-color: color-mix(in srgb, var(--aksen) 60%, transparent);
+  box-shadow: var(--bayang), 0 0 0 1px color-mix(in srgb, var(--aksen) 35%, transparent), 0 18px 50px -20px var(--aksen-cahaya); }
+.hm-kotak b { color: var(--aksen-tulisan); }
+.peringkat { background: var(--aksen); color: var(--aksen-teks); }
+
+/* fokus keyboard ikut aksen supaya jelas di atas maroon maupun hitam */
+:focus-visible { outline-color: var(--aksen); }
+
+/* ---------- 30%: maroon sebagai struktur */
+.hero h1 em { background: linear-gradient(100deg, #ff4a52 0%, var(--maroon-terang) 45%, #ff6a5c 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+[data-tema="terang"] .hero h1 em { background: linear-gradient(100deg, #c0262d, #800203 60%, #c0262d); -webkit-background-clip: text; background-clip: text; }
+.seksi-kepala h2 { position: relative; padding-left: 14px; }
+.seksi-kepala h2::before { content: ""; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--maroon-terang), var(--maroon)); }
+.kaca { border-color: color-mix(in srgb, var(--garis) 70%, rgba(192, 38, 45, .25)); }
+.kartu-app:hover { transform: translateY(-2px); }

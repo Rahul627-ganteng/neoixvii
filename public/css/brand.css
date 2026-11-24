@@ -29,6 +29,21 @@
   --kilau1: rgba(128, 2, 3, .45);
   --kilau2: rgba(192, 38, 45, .18);
 
+  /* Sistem warna 60-30-10
+     60% dominan  : hitam obsidian (--latar, --permukaan)       → kanvas & kartu
+     30% sekunder : maroon/crimson merek (--maroon, --maroon-terang) → navigasi aktif, judul, garis, ikon
+     10% aksen    : emas menyala (--aksen)                      → HANYA ajakan utama: tombol pesan/daftar,
+                    BEST DEAL, menu Promo, hitung mundur. Jangan dipakai untuk hiasan. */
+  --aksen: #ffc53d;
+  --aksen-hover: #ffd76e;
+  --aksen-teks: #1a1204;          /* teks di atas aksen, kontras ±13:1 */
+  --aksen-tulisan: #ffc53d;       /* aksen sebagai warna tulisan di latar gelap */
+  --aksen-cahaya: rgba(255, 197, 61, .38);
+  --latar-orb1: rgba(150, 6, 12, .55);
+  --latar-orb2: rgba(208, 30, 40, .30);
+  --latar-orb3: rgba(255, 190, 70, .10);
+  --latar-garis: rgba(255, 255, 255, .045);
+
   --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-isi: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --radius: 20px;
@@ -58,6 +73,15 @@
   --kuning-teks: #8a5a00;
   --kilau1: rgba(128, 2, 3, .10);
   --kilau2: rgba(192, 38, 45, .07);
+  --aksen: #ffc53d;
+  --aksen-hover: #ffb703;
+  --aksen-teks: #1a1204;
+  --aksen-tulisan: #a15c00;       /* emas gelap supaya tetap terbaca di latar terang */
+  --aksen-cahaya: rgba(255, 183, 3, .35);
+  --latar-orb1: rgba(160, 20, 27, .13);
+  --latar-orb2: rgba(208, 30, 40, .08);
+  --latar-orb3: rgba(255, 183, 3, .10);
+  --latar-garis: rgba(22, 22, 26, .05);
   color-scheme: light;
 }
 
