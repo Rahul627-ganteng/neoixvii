@@ -91,7 +91,7 @@ export async function halamanBlog(supabase, halaman) {
         if (!/^image\/(png|jpeg|webp)$/.test(b.type)) throw new Error('Gambar harus JPG, PNG, atau WebP');
         if (b.size > MAKS_SAMPUL) throw new Error('Gambar maksimal 2 MB');
         const path = `berita-${Date.now()}.${b.type.split('/')[1].replace('jpeg', 'jpg')}`;
-        await q(supabase.storage.from('blog').upload(path, b, { upsert: true, contentType: b.type, cacheControl: '3600' }));
+        await q(supabase.storage.from('blog').upload(path, b, { upsert: false, contentType: b.type, cacheControl: '3600' }));
         sampul = supabase.storage.from('blog').getPublicUrl(path).data.publicUrl;
         gambarSampul(); toast('Gambar terunggah. Klik Simpan untuk memakainya.');
       } catch (err) { toast(err.message, true); }

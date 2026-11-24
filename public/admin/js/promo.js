@@ -56,7 +56,7 @@ function pilihBanner(supabase, awalan, saatBerubah, urlAwal) {
     try {
       const ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
       const path = `${awalan}-${Date.now()}.${ext}`;
-      await q(supabase.storage.from('banners').upload(path, f, { upsert: true, contentType: f.type, cacheControl: '3600' }));
+      await q(supabase.storage.from('banners').upload(path, f, { upsert: false, contentType: f.type, cacheControl: '3600' }));
       url = supabase.storage.from('banners').getPublicUrl(path).data.publicUrl;
       gambar(); saatBerubah(url); toast('Banner terunggah. Klik Simpan untuk memakainya.');
     } catch (err) { toast('Gagal mengunggah: ' + err.message, true); }

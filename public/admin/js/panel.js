@@ -178,6 +178,40 @@ async function aplikasi() {
   bukaEditor(apps.find((a) => a.id === pilihApp));
 }
 
+
+// ---------------------------------------------------------------- logo: rapikan sebelum diunggah
+const TIPE_GAMBAR = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
+const SISI_LOGO = 512;          // logo tampil paling besar ±64 px, 512 px sudah tajam di layar retina
+const MAKS_LOGO = 1024 * 1024;  // batas 1 MB setelah dikecilkan
+
+/** PNG/JPG/WebP besar dikecilkan ke 512 px (transparansi tetap); SVG diunggah apa adanya. */
+async function siapkanLogo(f) {
+  const ekstensi = (f.name.split('.').pop() || '').toLowerCase();
+  const tipe = f.type || TIPE_GAMBAR[ekstensi] || '';
+  if (tipe === 'image/svg+xml') {
+    if (f.size > MAKS_LOGO) throw new Error('SVG lebih dari 1 MB. Pakai versi yang lebih ringan atau PNG.');
+    return { berkas: f, ext: 'svg', tipe };
+  }
+  if (!/^image\/(png|jpeg|webp)$/.test(tipe)) throw new Error('Format logo harus PNG, JPG, WebP, atau SVG.');
+  let gambar;
+  try { gambar = await createImageBitmap(f); } catch { throw new Error('File gambar tidak bisa dibaca. Coba simpan ulang sebagai PNG.'); }
+  const skala = Math.min(1, SISI_LOGO / Math.max(gambar.width, gambar.height));
+  if (skala === 1 && f.size <= 300 * 1024) { gambar.close?.(); return { berkas: f, ext: tipe.split('/')[1].replace('jpeg', 'jpg'), tipe }; }
+  const kanvas = document.createElement('canvas');
+  kanvas.width = Math.max(1, Math.round(gambar.width * skala));
+  kanvas.height = Math.max(1, Math.round(gambar.height * skala));
+  const c = kanvas.getContext('2d');
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(gambar, 0, 0, kanvas.width, kanvas.height);
+  gambar.close?.();
+  const jadi = (jenis, mutu) => new Promise((ok) => kanvas.toBlob(ok, jenis, mutu));
+  let berkas = await jadi('image/png');
+  if (berkas && berkas.size <= MAKS_LOGO) return { berkas, ext: 'png', tipe: 'image/png' };
+  berkas = await jadi('image/webp', .9);
+  if (berkas && berkas.size <= MAKS_LOGO) return { berkas, ext: 'webp', tipe: 'image/webp' };
+  throw new Error('Logo masih lebih dari 1 MB setelah dikecilkan.');
+}
+
 async function editorApp(app, wadah, segarkanDaftar) {
   wadah.replaceChildren(memuat());
   const [faqs, resmi] = await Promise.all([
@@ -192,11 +226,12 @@ async function editorApp(app, wadah, segarkanDaftar) {
   fileLogo.addEventListener('change', async () => {
     const f = fileLogo.files[0];
     if (!f) return;
-    if (f.size > 1024 * 1024) { toast('Logo maksimal 1 MB', true); fileLogo.value = ''; return; }
     try {
-      const ext = (f.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
+      toast('Mengunggah logo…');
+      const { berkas, ext, tipe } = await siapkanLogo(f);
       const path = `${app.slug}-${Date.now()}.${ext}`;
-      await q(supabase.storage.from('logos').upload(path, f, { upsert: true, contentType: f.type, cacheControl: '3600' }));
+      // nama file selalu baru, jadi tidak perlu upsert (upsert butuh izin SELECT di Storage dan bikin unggahan ditolak)
+      await q(supabase.storage.from('logos').upload(path, berkas, { upsert: false, contentType: tipe, cacheControl: '31536000' }));
       const url = supabase.storage.from('logos').getPublicUrl(path).data.publicUrl;
       await q(supabase.from('apps').update({ logo_url: url }).eq('id', app.id));
       app.logo_url = url; gantiIkon(); toast('Logo tersimpan');
@@ -300,7 +335,7 @@ async function editorApp(app, wadah, segarkanDaftar) {
       el('div', { class: 'row', style: 'gap:14px' }, ikonBesar,
         el('div', {}, el('h2', {}, app.name), el('div', { class: 'muted' }, app.categories?.label ?? '',
           app.is_active ? ' · ' : ' · disembunyikan · ', el('a', { href: `/aplikasi/?app=${encodeURIComponent(app.slug)}`, target: '_blank', rel: 'noopener' }, 'lihat di web ↗')))),
-      el('label', { class: 'f' }, 'Logo (PNG, JPG, WebP, atau SVG, maks. 1 MB; sebaiknya kotak)'),
+      el('label', { class: 'f' }, 'Logo (PNG, JPG, WebP, atau SVG; sebaiknya kotak dengan latar transparan. Gambar besar otomatis dikecilkan ke 512 px)'),
       el('div', { class: 'row' }, fileLogo, app.logo_url ? hapusLogo : null),
       el('div', { class: 'row', style: 'margin-top:14px' }, unggul, el('label', { for: 'unggul' }, 'Tampilkan di "Pilihan untukmu" di beranda')),
       el('div', { class: 'grid2' },

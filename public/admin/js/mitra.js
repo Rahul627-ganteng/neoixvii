@@ -30,7 +30,7 @@ async function unggahFoto(supabase, file, awalan) {
   if (file.size > MAKS_FOTO) throw new Error('Foto maksimal 2 MB');
   const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
   const path = `${awalan}-${Date.now()}.${ext}`;
-  await q(supabase.storage.from('profiles').upload(path, file, { upsert: true, contentType: file.type, cacheControl: '3600' }));
+  await q(supabase.storage.from('profiles').upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' }));
   return supabase.storage.from('profiles').getPublicUrl(path).data.publicUrl;
 }
 
