@@ -1,0 +1,84 @@
+{
+  "id": "/",
+  "name": "IXVII.CO · Your App Solver",
+  "short_name": "IXVII.CO",
+  "description": "Langganan aplikasi premium lebih hemat: Netflix, ChatGPT, Canva, Spotify, CapCut, dan puluhan lainnya. Harga jelas, stok diperbarui langsung.",
+  "lang": "id",
+  "dir": "ltr",
+  "start_url": "/?sumber=aplikasi",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": [
+    "shopping",
+    "entertainment",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/brand/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Katalog",
+      "short_name": "Katalog",
+      "url": "/katalog/?sumber=aplikasi",
+      "icons": [
+        {
+          "src": "/assets/brand/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Promo Terkini",
+      "short_name": "Promo",
+      "url": "/promo/?sumber=aplikasi",
+      "icons": [
+        {
+          "src": "/assets/brand/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Bikin Bundlemu",
+      "short_name": "Bundle",
+      "url": "/rakit/?sumber=aplikasi",
+      "icons": [
+        {
+          "src": "/assets/brand/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Langganan Saya",
+      "short_name": "Langganan",
+      "url": "/langganan/?sumber=aplikasi",
+      "icons": [
+        {
+          "src": "/assets/brand/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

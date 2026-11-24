@@ -1120,8 +1120,9 @@ body:has(.bar-bundle:not([hidden])) .kaki { padding-bottom: 96px; }
      body::before  butiran halus
      body::after   kilau baja yang menyapu diagonal
    ========================================================================== */
-html { background: var(--latar); position: relative; }
-body { position: relative; isolation: isolate; background: transparent; }
+/* efek cahaya boleh lebih lebar dari layar, tapi halaman tidak boleh ikut melebar (geser samping di HP) */
+html { background: var(--latar); position: relative; overflow-x: clip; }
+body { position: relative; isolation: isolate; background: transparent; overflow-x: clip; }
 html::before, html::after, body::before, body::after { content: ""; pointer-events: none; z-index: -1; }
 
 html::before {
@@ -1129,18 +1130,19 @@ html::before {
   background:
     radial-gradient(ellipse 46% 38% at 50% -6%, var(--mekar-1), transparent 70%),
     radial-gradient(ellipse 22% 16% at 50% 0%, var(--mekar-2), transparent 70%);
-  animation: napas-ixvii 8s ease-in-out infinite alternate; transform-origin: 50% 0;
+  animation: napas-ixvii 8s ease-in-out infinite alternate;
 }
-@keyframes napas-ixvii { from { opacity: .75; transform: scale(1); } to { opacity: 1; transform: scale(1.06); } }
+@keyframes napas-ixvii { from { opacity: .7; } to { opacity: 1; } }
 
+@property --sudut-sinar { syntax: "<angle>"; inherits: false; initial-value: 180deg; }
 html::after {
-  position: absolute; left: 50%; top: -120px; width: 1800px; height: 1300px; margin-left: -900px;
-  background: repeating-conic-gradient(from 180deg at 50% 0%, transparent 0deg 3.2deg, var(--sinar) 3.6deg, transparent 4deg 7deg);
+  position: absolute; left: 0; right: 0; top: -120px; height: 1300px;
+  background: repeating-conic-gradient(from var(--sudut-sinar) at 50% 0%, transparent 0deg 3.2deg, var(--sinar) 3.6deg, transparent 4deg 7deg);
   -webkit-mask-image: radial-gradient(ellipse 45% 70% at 50% 0%, #000 10%, transparent 75%);
   mask-image: radial-gradient(ellipse 45% 70% at 50% 0%, #000 10%, transparent 75%);
-  animation: sinar-ixvii 22s ease-in-out infinite alternate; transform-origin: 50% 0;
+  animation: sinar-ixvii 22s ease-in-out infinite alternate;
 }
-@keyframes sinar-ixvii { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+@keyframes sinar-ixvii { from { --sudut-sinar: 177deg; } to { --sudut-sinar: 183deg; } }
 
 body::before {
   position: fixed; inset: 0;
@@ -1392,3 +1394,49 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .beranda .hero::before, .beranda .hero-logo, .titik-hidup { animation: none; }
 }
+
+/* ==========================================================================
+   Popup "Pasang aplikasi" (PWA)
+   ========================================================================== */
+.popup-pasang { position: fixed; z-index: 60; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); width: min(392px, calc(100vw - 24px));
+  padding: 20px 18px 16px; border-radius: 24px; display: grid; gap: 14px; overflow: hidden; isolation: isolate;
+  color: var(--teks); background: color-mix(in srgb, var(--permukaan-pekat) 88%, transparent);
+  border: 1px solid var(--garis-kuat); backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 30px 80px -24px var(--aksen-cahaya), 0 20px 50px -20px rgba(0, 0, 0, .6);
+  opacity: 0; transform: translateY(24px) scale(.98); transition: opacity .3s ease, transform .4s cubic-bezier(.2, .8, .2, 1); }
+.popup-pasang.tampil { opacity: 1; transform: none; }
+/* garis cahaya di atas + sorot diagonal, senada dengan beranda */
+.popup-pasang::before { content: ""; position: absolute; left: 14%; right: 14%; top: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 18px 2px var(--busur-cahaya); }
+.popup-pasang::after { content: ""; position: absolute; z-index: -1; top: -70%; right: -40%; width: 90%; height: 170%; pointer-events: none;
+  background: linear-gradient(112deg, transparent 42%, rgba(255, 255, 255, .07) 49%, color-mix(in srgb, var(--aksen) 26%, transparent) 53%, transparent 62%); }
+[data-tema="terang"] .popup-pasang { background: rgba(255, 255, 255, .92); box-shadow: 0 30px 70px -26px rgba(230, 30, 50, .45), 0 18px 40px -18px rgba(0, 0, 0, .22); }
+[data-tema="terang"] .popup-pasang::before { background: linear-gradient(90deg, transparent, var(--crimson), transparent); }
+
+.pasang-x { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--garis);
+  background: transparent; color: var(--teks-2); font-size: 20px; line-height: 1; cursor: pointer; }
+.pasang-x:hover { background: var(--sorot); color: var(--teks); }
+.pasang-kepala { display: flex; gap: 14px; align-items: center; padding-right: 30px; }
+.pasang-kepala img { flex: none; width: 56px; height: 56px; border-radius: 15px; box-shadow: 0 0 0 1px var(--garis-kuat), 0 10px 26px -8px var(--aksen-cahaya); }
+.pasang-kepala h2 { margin: 0; font-size: 16px; letter-spacing: .02em; }
+.pasang-kepala p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--teks-2); }
+.pasang-poin { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.pasang-poin li { display: flex; gap: 9px; align-items: center; }
+.pasang-poin li::before { content: "✓"; flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%;
+  font-size: 11px; font-weight: 800; background: var(--aktif-latar); color: var(--aktif-teks); }
+.pasang-langkah { margin: 0; padding: 12px 14px 12px 32px; display: grid; gap: 8px; font-size: 13.5px; line-height: 1.5;
+  border-radius: 14px; background: var(--sorot); border: 1px solid var(--garis); }
+.pasang-ikon { display: inline-grid; place-items: center; width: 24px; height: 24px; margin: 0 2px; vertical-align: -6px;
+  border-radius: 7px; background: rgba(10, 132, 255, .14); color: #0a84ff; }
+.pasang-ikon svg { width: 16px; height: 16px; }
+.pasang-catatan { margin: 0; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; border-radius: 14px; background: var(--sorot); border: 1px solid var(--garis); color: var(--teks-2); }
+.pasang-aksi { display: flex; gap: 8px; }
+.pasang-aksi .tombol { flex: 1; justify-content: center; min-height: 44px; }
+
+/* HP: menempel di bawah, lebar penuh; naik bila ada bilah bundle di bawah */
+@media (max-width: 560px) { .popup-pasang { left: 12px; right: 12px; width: auto; bottom: calc(12px + env(safe-area-inset-bottom)); } }
+body:has(.bar-rakit:not([hidden]), .bar-bundle:not([hidden])) .popup-pasang { bottom: calc(92px + env(safe-area-inset-bottom)); }
+@media (prefers-reduced-motion: reduce) { .popup-pasang { transition: opacity .2s ease; transform: none; } }
+
+/* dibuka sebagai aplikasi: beri ruang aman di poni/notch */
+@media (display-mode: standalone) { .kepala { padding-top: env(safe-area-inset-top); } }
