@@ -38,12 +38,13 @@
 <meta name="description" data-t-content="meta.beranda" content="Langganan aplikasi premium (streaming, AI, editing, dan lainnya) dengan harga lebih hemat. Lihat paket, harga, dan stok terbaru.">
 <script type="module" src="/js/beranda.js"></script>
 </head>
-<body>
+<body class="beranda">
 <header id="kepala" class="kepala"><div class="wadah"><a class="merek" href="/"><span>IXVII.CO</span></a></div></header>
 <main>
   <div class="wadah" id="sambut-ajak" hidden></div>
   <section class="wadah hero">
     <div class="hero-teks">
+      <span class="lencana-hero"><span class="titik-hidup" aria-hidden="true"></span><span data-t="hero.lencana">Your App Solver · Stok diperbarui langsung</span></span>
       <h1><span data-t="hero.judul1">Langganan aplikasi premium,</span> <em data-t="hero.judul2">lebih hemat.</em></h1>
       <p class="redup" id="hero-teks" data-t="hero.teks">Netflix, ChatGPT, Canva, Spotify, dan puluhan aplikasi lain. Pilih paket sharing atau private, lalu cek harga dan stoknya langsung.</p>
       <div class="aksi">
@@ -55,44 +56,48 @@
     <img class="hero-logo hanya-gelap" src="/assets/brand/logo-putih.png" width="274" height="282" alt="IXVII.CO — Your App Solver">
     <img class="hero-logo hanya-terang" src="/assets/brand/logo-hitam.png" width="273" height="282" alt="IXVII.CO — Your App Solver">
   </section>
+  <section class="wadah pita-app" id="pita-app" hidden>
+    <p class="pita-judul" data-t="pita.judul">Puluhan aplikasi premium, satu tempat</p>
+    <div class="pita-jendela"><div class="pita-jalan" id="pita-jalan"></div></div>
+  </section>
   <section class="wadah poin" aria-label="Keunggulan" data-t-aria="poin.label">
-    <div class="kaca"><h3 data-t="poin1.j">Harga jelas per paket</h3><p class="redup" data-t="poin1.t">Setiap durasi dan tipe paket tampil dengan harganya masing-masing.</p></div>
-    <div class="kaca"><h3 data-t="poin2.j">Stok selalu terbaru</h3><p class="redup" data-t="poin2.t">Label Tersedia dan Habis diambil langsung dari katalog kami.</p></div>
-    <div class="kaca"><h3 data-t="poin3.j">Sharing atau private</h3><p class="redup" data-t="poin3.t">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
+    <div class="kaca"><span class="ikon-bento" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><h3 data-t="poin1.j">Harga jelas per paket</h3><p class="redup" data-t="poin1.t">Setiap durasi dan tipe paket tampil dengan harganya masing-masing.</p></div>
+    <div class="kaca"><span class="ikon-bento" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M12 7v5l3 2"/></svg></span><h3 data-t="poin2.j">Stok selalu terbaru</h3><p class="redup" data-t="poin2.t">Label Tersedia dan Habis diambil langsung dari katalog kami.</p></div>
+    <div class="kaca"><span class="ikon-bento" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.9 2.6 2.6 3 5.2"/></svg></span><h3 data-t="poin3.j">Sharing atau private</h3><p class="redup" data-t="poin3.t">Pilih berbagi akun supaya lebih murah, atau akun pribadi untuk dipakai sendiri.</p></div>
   </section>
   <section class="wadah seksi" id="kategori">
-    <div class="seksi-kepala"><h2 class="judul-besar" data-t="beranda.butuh">Kamu butuh aplikasi apa?</h2><a href="/katalog/" data-t="seksi.semuaApp">Semua aplikasi →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.kategori">Kategori</span><h2 class="judul-besar" data-t="beranda.butuh">Kamu butuh aplikasi apa?</h2><a href="/katalog/" data-t="seksi.semuaApp">Semua aplikasi →</a></div>
     <div class="kategori-besar" id="daftar-kategori" aria-live="polite"></div>
   </section>
   <section class="wadah seksi" id="member-beranda" hidden></section>
   <section class="wadah seksi" id="terakhir-beranda" hidden>
-    <div class="seksi-kepala"><h2 data-t="beranda.terakhir">Terakhir kamu beli</h2><a href="/member/" id="terakhir-link" data-t="beranda.riwayat">Riwayat pembelian →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.riwayat">Riwayat</span><h2 data-t="beranda.terakhir">Terakhir kamu beli</h2><a href="/member/" id="terakhir-link" data-t="beranda.riwayat">Riwayat pembelian →</a></div>
     <div class="grid" id="terakhir-isi"></div>
   </section>
   <section class="wadah seksi" id="terlaris-beranda">
-    <div class="seksi-kepala"><h2 data-t="beranda.topPicked">Top picked bulan ini</h2><a href="/rakit/" data-t="beranda.keBundle">Bikin Bundlemu →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.terlaris">Terlaris</span><h2 data-t="beranda.topPicked">Top picked bulan ini</h2><a href="/rakit/" data-t="beranda.keBundle">Bikin Bundlemu →</a></div>
     <p class="redup sub-seksi" id="terlaris-sub" data-t="beranda.topSub">Paling banyak dibeli bulan ini. Tambahkan ke bundle untuk diskon ekstra.</p>
     <div class="grid" id="unggulan" aria-live="polite"></div>
   </section>
   <section class="wadah seksi" id="promo-beranda" hidden>
-    <div class="seksi-kepala"><h2 data-t="seksi.promo">Promo &amp; bundle</h2><a href="/promo/" data-t="promo.lihat">Lihat →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.promo">Promo</span><h2 data-t="seksi.promo">Promo &amp; bundle</h2><a href="/promo/" data-t="promo.lihat">Lihat →</a></div>
     <div class="promo-daftar" id="promo-isi"></div>
   </section>
   <section class="wadah seksi" id="film-beranda" hidden>
-    <div class="seksi-kepala"><h2 data-t="film.seksi">Baru tayang</h2><a href="/film/" data-t="film.lihat">Lihat semua →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.film">Film &amp; series</span><h2 data-t="film.seksi">Baru tayang</h2><a href="/film/" data-t="film.lihat">Lihat semua →</a></div>
     <div class="film-daftar" id="film-isi"></div>
   </section>
   <section class="wadah seksi" id="ulasan-beranda" hidden>
-    <div class="seksi-kepala"><h2 data-t="seksi.ulasan">Kata pembeli</h2><a href="/testimoni/" data-t="testi.lihat">Lihat semua ulasan →</a></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.ulasan">Ulasan</span><h2 data-t="seksi.ulasan">Kata pembeli</h2><a href="/testimoni/" data-t="testi.lihat">Lihat semua ulasan →</a></div>
     <div class="ulasan-daftar" id="ulasan-isi"></div>
   </section>
   <section class="wadah seksi" id="faq" hidden>
-    <div class="seksi-kepala"><h2 data-t="seksi.faq">Pertanyaan umum</h2></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.faq">FAQ</span><h2 data-t="seksi.faq">Pertanyaan umum</h2></div>
     <div class="kaca faq faq-beranda" id="faq-umum"></div>
     <p class="redup faq-wa" id="faq-wa" hidden></p>
   </section>
   <section class="wadah seksi" id="gabung" hidden>
-    <div class="seksi-kepala"><h2 class="judul-besar" data-t="gabung.judul">Mau cuan dari aplikasi premium?</h2></div>
+    <div class="seksi-kepala"><span class="kicker" data-t="kicker.mitra">Kemitraan</span><h2 class="judul-besar" data-t="gabung.judul">Mau cuan dari aplikasi premium?</h2></div>
     <div class="gabung-dua" id="gabung-isi"></div>
     <div id="banding-isi"></div>
   </section>
