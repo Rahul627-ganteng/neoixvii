@@ -371,7 +371,7 @@ function kartuPromoList(ctx, promos, bundles = []) {
     let banner = p.banner_url || null;
     const isiKampanye = bundles.filter((b) => b.promo_id && b.promo_id === p.id);
     const lencana = el('input', { type: 'text', value: p.lencana || '', maxlength: 40, placeholder: 'mis. Last Day Sale!' });
-    const warna = el('input', { type: 'color', value: p.warna || '#800203', 'aria-label': 'Warna tema' });
+    const warna = el('input', { type: 'color', value: p.warna || '#e61e32', 'aria-label': 'Warna tema' });
     const judul = el('input', { type: 'text', value: p.title || '', placeholder: 'Judul promo' });
     const judulEn = el('input', { type: 'text', value: p.title_en || '', placeholder: 'Title (opsional)' });
     const kelompokP = pilihKelompok(p.kelompok);

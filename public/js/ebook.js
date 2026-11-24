@@ -62,7 +62,7 @@ function tombolTema() {
 }
 const logo = () => el('picture', { class: 'eb-logo' },
   el('img', { class: 'hanya-gelap', src: '/assets/brand/logo-putih.png', alt: 'IXVII.CO', draggable: 'false' }),
-  el('img', { class: 'hanya-terang', src: '/assets/brand/logo-maroon.png', alt: 'IXVII.CO', draggable: 'false' }));
+  el('img', { class: 'hanya-terang', src: '/assets/brand/logo-hitam.png', alt: 'IXVII.CO', draggable: 'false' }));
 
 // ---------------------------------------------------------------- perlindungan isi
 let pasangSekali = false;

@@ -62,7 +62,7 @@ function pasangTema() {
     tombol.replaceChildren(ikon(gelap ? IKON.matahari : IKON.bulan), el('span', {}, gelap ? 'Terang' : 'Gelap'));
     tombol.setAttribute('aria-label', gelap ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
     tombol.title = tombol.getAttribute('aria-label');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', gelap ? '#0e0e10' : '#800203');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', gelap ? '#0e0e10' : '#e61e32');
   };
   tombol.addEventListener('click', () => {
     const baru = temaSekarang() === 'gelap' ? 'terang' : 'gelap';

@@ -58,12 +58,12 @@ export function teksAjakan(app, member, ajak = null) {
 
 // ---------------------------------------------------------------- gambar pricelist (canvas)
 const TEMA = {
-  gelap: { latar: ['#1a0405', '#3b0608', '#120203'], panel: 'rgba(255,255,255,.06)', panelGaris: 'rgba(255,255,255,.10)', teks: '#ffffff',
-    redup: 'rgba(255,255,255,.66)', aksen: '#ff6b72', garis: 'rgba(255,255,255,.16)', chip: 'rgba(255,255,255,.12)', habis: 'rgba(255,255,255,.38)',
-    ikon: '#800203', emblem: '/assets/brand/emblem-putih.png', hadiah: 'rgba(255,107,114,.16)' },
-  terang: { latar: ['#ffffff', '#f6eeee', '#efe3e4'], panel: '#ffffff', panelGaris: 'rgba(22,22,26,.08)', teks: '#16161a',
-    redup: '#5f5f66', aksen: '#800203', garis: 'rgba(22,22,26,.12)', chip: 'rgba(128,2,3,.08)', habis: 'rgba(22,22,26,.38)',
-    ikon: '#800203', emblem: '/assets/brand/emblem-maroon.png', hadiah: 'rgba(128,2,3,.07)' },
+  gelap: { latar: ['#141414', '#050505', '#000000'], panel: 'rgba(255,255,255,.06)', panelGaris: 'rgba(255,255,255,.10)', teks: '#ffffff',
+    redup: 'rgba(255,255,255,.66)', aksen: '#ff3a4c', garis: 'rgba(255,255,255,.16)', chip: 'rgba(255,255,255,.12)', habis: 'rgba(255,255,255,.38)',
+    ikon: '#e61e32', emblem: '/assets/brand/emblem-putih.png', hadiah: 'rgba(230,30,50,.16)' },
+  terang: { latar: ['#ffffff', '#f4f4f4', '#e9e9e9'], panel: '#ffffff', panelGaris: 'rgba(22,22,26,.08)', teks: '#16161a',
+    redup: '#5f5f5f', aksen: '#d0142a', garis: 'rgba(0,0,0,.12)', chip: 'rgba(230,30,50,.08)', habis: 'rgba(22,22,26,.38)',
+    ikon: '#e61e32', emblem: '/assets/brand/emblem-hitam.png', hadiah: 'rgba(230,30,50,.07)' },
 };
 const JUDUL = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 const ISI = 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
@@ -146,7 +146,7 @@ export function gambarPricelist(app, opsi = {}) {
         c.restore();
       } else {
         const g = c.createLinearGradient(PAD, y, PAD + IK, y + IK);
-        g.addColorStop(0, '#a3141b'); g.addColorStop(1, '#4a0305');
+        g.addColorStop(0, '#2b2b2b'); g.addColorStop(1, '#000000');
         c.fillStyle = g; c.fill();
         c.fillStyle = '#fff'; c.font = `700 58px ${JUDUL}`; c.textAlign = 'center'; c.textBaseline = 'middle';
         c.fillText(inisial(app.nama), PAD + IK / 2, y + IK / 2 + 2); c.textAlign = 'left';
@@ -274,7 +274,7 @@ export function gambarPricelist(app, opsi = {}) {
   T.latar.forEach((w, i) => g.addColorStop(i / (T.latar.length - 1), w));
   c.fillStyle = g; c.fillRect(0, 0, W, tinggi);
   const sinar = c.createRadialGradient(W * .9, 0, 0, W * .9, 0, W * .9);
-  sinar.addColorStop(0, opsi.tema === 'terang' ? 'rgba(128,2,3,.10)' : 'rgba(192,38,45,.35)'); sinar.addColorStop(1, 'rgba(0,0,0,0)');
+  sinar.addColorStop(0, opsi.tema === 'terang' ? 'rgba(230,30,50,.10)' : 'rgba(230,30,50,.32)'); sinar.addColorStop(1, 'rgba(0,0,0,0)');
   c.fillStyle = sinar; c.fillRect(0, 0, W, tinggi);
   susun(true);
   return kanvas;

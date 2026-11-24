@@ -21,7 +21,7 @@ const BLOK = [
   ['Contoh poster', ':::poster\nNAMA APLIKASI\nPremium Access\n1 Bulan • RpXX.XXX\nFitur premium\nGaransi sesuai ketentuan\nORDER NOW\nContact: @username\n:::'],
   ['Form', ':::form judul="Contoh formulir"\nNama\nNo. HP Aktif\nScreenshot bukti\n:::'],
   ['Banding', ':::banding kiri="Hindari" kanan="Lakukan"\nYang salah | Yang benar\n:::'],
-  ['Palet warna', ':::palet\n#800203 | Maroon | Warna utama\n#FFB84D | Kuning | Aksen\n:::'],
+  ['Palet warna', ':::palet\n#000000 | Black | Dominan\n#B3B3B3 | Steel Grey | Pendukung\n#E61E32 | Crimson Red | Aksen\n:::'],
   ['Chat WA', ':::chat\nPembeli: Halo kak, ini masih ada?\nKamu: Masih, Kak! Mau yang mana?\n:::'],
   ['Profil IG', ':::profil\n@namaakun\nKategori\nBaris bio pertama\nBaris bio kedua\ncontoh.com\n:::'],
   ['Kalender', ':::kalender id=kalender-baru\nSenin | Edukasi | Ide konten\nSelasa | Cerita | Ide konten\n:::'],
@@ -187,7 +187,7 @@ export async function halamanEbook(supabase, halaman) {
       let slug = slugDari(j);
       if (buku.some((k) => k.slug === slug)) slug += '-' + Date.now().toString(36).slice(-4);
       try {
-        const k = await q(supabase.from('ebook_buku').insert({ slug, judul: j.trim(), label: 'Ebook interaktif', warna: '#800203', tampil: true, urut: (buku.at(-1)?.urut ?? 0) + 1 }).select().single());
+        const k = await q(supabase.from('ebook_buku').insert({ slug, judul: j.trim(), label: 'Ebook interaktif', warna: '#e61e32', tampil: true, urut: (buku.at(-1)?.urut ?? 0) + 1 }).select().single());
         buku.push(k); bukuAktif = k; gambarIsi();
         toast('Ebook dibuat. Tambahkan bab, lalu jual lewat menu Produk digital (tipe kirim: ebook).');
       } catch (err) { toast(err.message, true); }
@@ -195,7 +195,7 @@ export async function halamanEbook(supabase, halaman) {
     const judul = el('input', { type: 'text', value: bukuAktif.judul || '' });
     const sub = el('input', { type: 'text', value: bukuAktif.subjudul || '' });
     const label = el('input', { type: 'text', value: bukuAktif.label || '' });
-    const warna = el('input', { type: 'color', value: bukuAktif.warna || '#800203' });
+    const warna = el('input', { type: 'color', value: bukuAktif.warna || '#e61e32' });
     const sampulUrl = el('input', { type: 'text', value: bukuAktif.sampul_url || '', placeholder: '/assets/produk/… atau https://…' });
     const tampilBuku = el('input', { type: 'checkbox', checked: bukuAktif.tampil });
     const sampulFile = el('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', class: 'hidden' });

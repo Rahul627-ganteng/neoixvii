@@ -98,11 +98,11 @@
 /* blok: contoh poster & form */
 .e-poster { margin: 0; display: grid; justify-items: center; gap: 8px; }
 .e-poster-isi { width: min(100%, 300px); aspect-ratio: 3 / 4; padding: 22px 20px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px; color: #fff;
-  background: linear-gradient(170deg, #1c0303 0%, #800203 60%, #2a0405 100%); box-shadow: var(--bayang); position: relative; overflow: hidden; }
+  background: linear-gradient(170deg, #1a1a1a 0%, #8c0b19 60%, #e61e32 100%); box-shadow: var(--bayang); position: relative; overflow: hidden; }
 .e-poster-label { align-self: flex-start; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, .14); }
 .e-poster-judul { font: 800 26px/1.05 var(--font-judul); text-transform: uppercase; margin-top: 6px; }
 .e-poster-sub { color: rgba(255, 255, 255, .8); font-size: 13px; }
-.e-poster-harga { align-self: flex-start; padding: 8px 12px; border-radius: 12px; background: #fff; color: #800203; font: 800 18px var(--font-judul); }
+.e-poster-harga { align-self: flex-start; padding: 8px 12px; border-radius: 12px; background: #fff; color: #c8102e; font: 800 18px var(--font-judul); }
 .e-poster-isi ul { list-style: none; padding: 0 !important; margin: 4px 0 0; display: grid; gap: 4px; font-size: 13px; }
 .e-poster-isi li { margin: 0 !important; }
 .e-poster-isi li::before { content: "✓ "; color: #7ee2a0; font-weight: 700; }

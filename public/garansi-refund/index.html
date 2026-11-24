@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0e0e10">
+<meta name="theme-color" content="#000000">
 <script>
 /* Pasang bahasa & tema sebelum halaman tampil supaya tidak berkedip. */
 (function () {
@@ -15,7 +15,7 @@
   } catch (e) {}
   if (q === 'en' || q === 'id') b = q;
   if (b === 'en') { d.lang = 'en'; d.classList.add('terjemah'); setTimeout(function () { d.classList.remove('terjemah'); }, 2000); }
-  if (t === 'terang') { d.setAttribute('data-tema', 'terang'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fbf6f1'); }
+  if (t === 'terang') { d.setAttribute('data-tema', 'terang'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); }
 })();
 </script>
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">

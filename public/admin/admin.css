@@ -1,12 +1,12 @@
 /* Panel admin IXVII.CO — dua mode: terang & gelap (tombol di kanan atas, tersimpan di perangkat) */
-:root { --maroon:#800203; --aksen:#800203; --maroon-soft:#f6e9eb; --ink:#1d1d1f; --quiet:#6b6b70; --line:#e3e3e6; --line-kuat:#c9c9ce; --bg:#f6f6f7;
+:root { --maroon:#e61e32; --aksen:#e61e32; --maroon-soft:#f6e9eb; --ink:#1d1d1f; --quiet:#6b6b70; --line:#e3e3e6; --line-kuat:#c9c9ce; --bg:#f6f6f7;
         --surface:#fff; --surface-2:#fafafa; --surface-3:#f0f0f2; --hover:#f2f2f4;
         --red:#b42318; --red-soft:#fdecea; --red-garis:#f0c3bf; --amber:#8a5a00; --amber-soft:#fff4dc; --green:#146c2e; --green-soft:#e6f4ea; --green-garis:#b7dfc3;
         --blue:#1a56b0; --blue-soft:#e8f0fe; --toast:#1d1d1f; --toast-teks:#fff; --bayang:0 8px 24px rgba(0,0,0,.12);
         --grafik-omzet:#3d6fb4; --grafik-profit:#a3262d; --grafik-rugi:#b42318; --grafik-garis:#ececef; --grafik-dasar:#c9c9ce; --grafik-teks:#6b6b70;
         color-scheme: light; }
 :root[data-tema="gelap"] {
-        --maroon:#9b1016; --aksen:#ff8087; --maroon-soft:rgba(220,60,68,.18); --ink:#f2f2f4; --quiet:#a3a3ab; --line:#2e2e35; --line-kuat:#4a4a52; --bg:#0e0e10;
+        --maroon:#c8102e; --aksen:#ff8087; --maroon-soft:rgba(220,60,68,.18); --ink:#f2f2f4; --quiet:#a3a3ab; --line:#2e2e35; --line-kuat:#4a4a52; --bg:#0e0e10;
         --surface:#18181c; --surface-2:#202025; --surface-3:#2a2a30; --hover:#26262c;
         --red:#ff8a80; --red-soft:rgba(239,68,68,.16); --red-garis:rgba(239,68,68,.45); --amber:#f5c451; --amber-soft:rgba(242,176,30,.15);
         --green:#7ee2a0; --green-soft:rgba(52,199,89,.15); --green-garis:rgba(52,199,89,.45);
@@ -327,7 +327,7 @@ code.sandi { font: 700 16px ui-monospace, Menlo, Consolas, monospace; padding: 2
 .eb-pratinjau { --permukaan: var(--surface); --permukaan-pekat: var(--surface); --garis: var(--line); --garis-kuat: var(--line-kuat); --teks: var(--ink);
   --teks-2: var(--ink); --teks-3: var(--quiet); --sorot: var(--surface-3); --lencana: var(--surface-3); --isian: var(--surface);
   --merah-latar: var(--red-soft); --merah-teks: var(--red); --hijau-latar: var(--green-soft); --hijau-teks: var(--green); --kuning-latar: var(--amber-soft);
-  --kuning-teks: var(--amber); --maroon: #800203; --maroon-terang: #c0262d; --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif; --bayang: 0 8px 24px rgba(0,0,0,.12);
+  --kuning-teks: var(--amber); --maroon: #e61e32; --maroon-terang: #ff3a4c; --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif; --bayang: 0 8px 24px rgba(0,0,0,.12);
   font-size: 15px !important; }
 .eb-pratinjau h2, .eb-pratinjau h3 { font-family: var(--font-judul); text-transform: uppercase; letter-spacing: .04em; }
 .eb-pratinjau .e-rp input { border: 0 !important; padding: 0 !important; background: transparent !important; width: auto; min-width: 0; flex: 1; }
