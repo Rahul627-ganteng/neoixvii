@@ -223,7 +223,7 @@ function kartuQris(supabase, s) {
       if (!/^image\/(png|jpeg|webp)$/.test(b.type)) throw new Error('Gambar harus JPG, PNG, atau WebP');
       if (b.size > 3 * 1024 * 1024) throw new Error('Gambar maksimal 3 MB');
       const path = `qris-${Date.now()}.${b.type.split('/')[1].replace('jpeg', 'jpg')}`;
-      await q(supabase.storage.from('banners').upload(path, b, { upsert: true, contentType: b.type, cacheControl: '3600' }));
+      await q(supabase.storage.from('banners').upload(path, b, { upsert: false, contentType: b.type, cacheControl: '3600' }));
       url = supabase.storage.from('banners').getPublicUrl(path).data.publicUrl;
       tampil(); toast('Gambar QRIS terunggah. Klik Simpan untuk memakainya.');
     } catch (err) { toast(err.message, true); }

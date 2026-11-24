@@ -88,7 +88,7 @@ export async function halamanFilm(supabase, halaman) {
         if (!/^image\/(png|jpeg|webp)$/.test(berkas.type)) throw new Error('Gambar harus JPG, PNG, atau WebP');
         if (berkas.size > MAKS_POSTER) throw new Error('Gambar maksimal 2 MB');
         const path = `film-${Date.now()}.${berkas.type.split('/')[1].replace('jpeg', 'jpg')}`;
-        await q(supabase.storage.from('posters').upload(path, berkas, { upsert: true, contentType: berkas.type, cacheControl: '3600' }));
+        await q(supabase.storage.from('posters').upload(path, berkas, { upsert: false, contentType: berkas.type, cacheControl: '3600' }));
         poster = supabase.storage.from('posters').getPublicUrl(path).data.publicUrl;
         gambarPoster(); toast('Gambar terunggah. Klik Simpan untuk memakainya.');
       } catch (err) { toast(err.message, true); }
