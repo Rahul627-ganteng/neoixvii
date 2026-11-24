@@ -5,29 +5,68 @@
    Tema           : gelap (bawaan) dan terang (data-tema="terang" di <html>)
    ========================================================================== */
 :root {
-  --maroon: #800203;          /* warna logo */
-  --maroon-terang: #c0262d;   /* aksen di latar gelap */
-  --latar: #0e0e10;
-  --permukaan: rgba(28, 28, 32, .55);
-  --permukaan-pekat: #1c1c20;
-  --teks: #f5f5f7;
-  --teks-2: rgba(245, 245, 247, .72);
-  --teks-3: #8e8e95;
-  --garis: rgba(255, 255, 255, .12);
-  --garis-kuat: rgba(255, 255, 255, .28);
-  --kepala: rgba(14, 14, 16, .72);
-  --isian: rgba(28, 28, 32, .7);
-  --bayang: 0 20px 60px rgba(0, 0, 0, .45);
-  --sorot: rgba(255, 255, 255, .06);
-  --lencana: rgba(255, 255, 255, .08);
+  /* ======================================================================
+     Palet dasar IXVII.CO
+       Black        #000000  → 60% (tema gelap)
+       Crimson Red  #E61E32  → 10% aksen: HANYA yang harus diklik + cahaya aksen
+       Pure White   #FFFFFF  → 60% (tema terang) / teks utama gelap
+       Steel Grey   #B3B3B3  → 30% struktur: teks kedua, garis, status aktif
+     ====================================================================== */
+  --hitam: #000000;
+  --crimson: #e61e32;
+  --putih: #ffffff;
+  --baja: #b3b3b3;
+
+  /* nama lama dipertahankan supaya semua halaman ikut berubah */
+  --maroon: #e61e32;          /* isian merah (dulu maroon logo) */
+  --maroon-terang: #ff3a4c;   /* merah sebagai tulisan/tautan di latar hitam (kontras ±5,3:1) */
+  --latar: #000000;
+  --permukaan: rgba(20, 20, 20, .62);
+  --permukaan-pekat: #111111;
+  --teks: #ffffff;
+  --teks-2: rgba(255, 255, 255, .74);
+  --teks-3: #b3b3b3;
+  --garis: rgba(179, 179, 179, .16);
+  --garis-kuat: rgba(179, 179, 179, .38);
+  --kepala: rgba(0, 0, 0, .72);
+  --isian: rgba(20, 20, 20, .8);
+  --bayang: 0 20px 60px rgba(0, 0, 0, .6);
+  --sorot: rgba(255, 255, 255, .05);
+  --lencana: rgba(179, 179, 179, .12);
   --hijau-latar: rgba(52, 199, 89, .16);
   --hijau-teks: #7ee2a0;
-  --merah-latar: rgba(192, 38, 45, .22);
-  --merah-teks: #ff9a9e;
+  --merah-latar: rgba(230, 30, 50, .18);
+  --merah-teks: #ff8a95;
   --kuning-latar: rgba(242, 176, 30, .16);
   --kuning-teks: #f5c451;
-  --kilau1: rgba(128, 2, 3, .45);
-  --kilau2: rgba(192, 38, 45, .18);
+  --kilau1: rgba(230, 30, 50, .32);
+  --kilau2: rgba(230, 30, 50, .12);
+
+  /* 60-30-10 */
+  --aksen: #e61e32;
+  --aksen-hover: #ff2f44;
+  --aksen-teks: #ffffff;
+  --aksen-tulisan: #ff3a4c;
+  --aksen-cahaya: rgba(230, 30, 50, .5);
+  --aktif-latar: linear-gradient(180deg, #ffffff 0%, #d9d9d9 55%, #b3b3b3 100%);  /* pil aktif = baja */
+  --aktif-teks: #000000;
+  --label: #b3b3b3;           /* label kecil/kicker: baja, bukan merah */
+  --baja-isian: repeating-linear-gradient(90deg, rgba(255, 255, 255, .10) 0 1px, rgba(0, 0, 0, .06) 1px 2px, transparent 2px 4px),
+                linear-gradient(180deg, #f0f0f0 0%, #c4c4c4 46%, #9a9a9a 54%, #d6d6d6 100%);
+  --panel-hitam: radial-gradient(520px 320px at 100% 0%, rgba(230, 30, 50, .42), transparent 62%),
+                 linear-gradient(160deg, #1a1a1a 0%, #070707 60%, #000 100%);
+  --panel-sutra: radial-gradient(560px 360px at 0% 100%, rgba(230, 30, 50, .75), transparent 65%),
+                 radial-gradient(420px 260px at 100% 0%, rgba(255, 255, 255, .12), transparent 60%),
+                 linear-gradient(160deg, #24080c 0%, #0b0b0b 60%, #000 100%);   /* panel cahaya crimson */
+
+  /* latar dinamis */
+  --mekar-1: rgba(230, 30, 50, .42);
+  --mekar-2: rgba(255, 120, 135, .35);
+  --sinar: rgba(255, 255, 255, .035);
+  --busur: #ffffff;
+  --busur-cahaya: rgba(230, 30, 50, .85);
+  --kilap: rgba(255, 255, 255, .05);
+  --latar-garis: rgba(179, 179, 179, .05);
 
   --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-isi: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -36,28 +75,40 @@
 }
 
 [data-tema="terang"] {
-  --maroon-terang: #a3141b;
-  --latar: #f6f4f4;
+  --maroon-terang: #d0142a;   /* kontras ±5:1 di putih */
+  --latar: #ffffff;
   --permukaan: rgba(255, 255, 255, .78);
   --permukaan-pekat: #ffffff;
-  --teks: #16161a;
-  --teks-2: rgba(22, 22, 26, .74);
-  --teks-3: #6b6b72;
-  --garis: rgba(22, 22, 26, .11);
-  --garis-kuat: rgba(22, 22, 26, .26);
-  --kepala: rgba(255, 255, 255, .82);
+  --teks: #0a0a0a;
+  --teks-2: rgba(10, 10, 10, .72);
+  --teks-3: #5f5f5f;
+  --garis: rgba(0, 0, 0, .10);
+  --garis-kuat: rgba(0, 0, 0, .28);
+  --kepala: rgba(255, 255, 255, .78);
   --isian: #ffffff;
-  --bayang: 0 16px 40px rgba(60, 10, 12, .10);
-  --sorot: rgba(22, 22, 26, .05);
-  --lencana: rgba(22, 22, 26, .06);
+  --bayang: 0 18px 44px -14px rgba(0, 0, 0, .16);
+  --sorot: rgba(0, 0, 0, .04);
+  --lencana: rgba(0, 0, 0, .06);
   --hijau-latar: #e6f4ea;
   --hijau-teks: #146c2e;
-  --merah-latar: #fdecea;
-  --merah-teks: #b42318;
+  --merah-latar: #fdeaec;
+  --merah-teks: #b3101f;
   --kuning-latar: #fff4dc;
   --kuning-teks: #8a5a00;
-  --kilau1: rgba(128, 2, 3, .10);
-  --kilau2: rgba(192, 38, 45, .07);
+  --kilau1: rgba(230, 30, 50, .14);
+  --kilau2: rgba(230, 30, 50, .06);
+  --aksen-tulisan: #d0142a;
+  --aksen-cahaya: rgba(230, 30, 50, .38);
+  --aktif-latar: #000000;     /* pil aktif = hitam pekat */
+  --aktif-teks: #ffffff;
+  --label: #5f5f5f;
+  --mekar-1: rgba(230, 30, 50, .16);
+  --mekar-2: rgba(255, 150, 160, .30);
+  --sinar: rgba(230, 30, 50, .035);
+  --busur: #e61e32;
+  --busur-cahaya: rgba(230, 30, 50, .45);
+  --kilap: rgba(255, 255, 255, .6);
+  --latar-garis: rgba(0, 0, 0, .04);
   color-scheme: light;
 }
 

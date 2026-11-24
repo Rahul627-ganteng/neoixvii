@@ -20,7 +20,7 @@ export function gantiTema() {
   const baru = temaTerang() ? 'gelap' : 'terang';
   document.documentElement.dataset.tema = baru;
   try { localStorage.setItem(SIMPAN_TEMA, baru); } catch { /* abaikan */ }
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', baru === 'terang' ? '#f6f4f4' : '#0e0e10');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', baru === 'terang' ? '#ffffff' : '#000000');
   return baru;
 }
 
@@ -97,6 +97,9 @@ const KAMUS = {
     'nav.beranda': 'Beranda', 'nav.katalog': 'Katalog',
     'alat.tema.terang': 'Pakai mode terang', 'alat.tema.gelap': 'Pakai mode gelap', 'alat.bahasa': 'Switch to English',
     'kaki.hak': '© {tahun} IXVII.CO · Your App Solver', 'kaki.info': 'Harga dan stok diperbarui langsung dari katalog kami.',
+    'hero.lencana': 'Your App Solver · Stok diperbarui langsung', 'pita.judul': 'Puluhan aplikasi premium, satu tempat',
+    'kicker.kategori': 'Kategori', 'kicker.riwayat': 'Riwayat', 'kicker.terlaris': 'Terlaris', 'kicker.promo': 'Promo',
+    'kicker.film': 'Film & series', 'kicker.ulasan': 'Ulasan', 'kicker.faq': 'FAQ', 'kicker.mitra': 'Kemitraan',
     'hero.judul1': 'Langganan aplikasi premium,', 'hero.judul2': 'lebih hemat.',
     'hero.teks': 'Netflix, ChatGPT, Canva, Spotify, dan {n} aplikasi lain. Pilih paket sharing atau private, lalu cek harga dan stoknya langsung.',
     'hero.katalog': 'Lihat katalog', 'hero.kategori': 'Pilih kategori',
@@ -500,6 +503,9 @@ const KAMUS = {
     'nav.beranda': 'Home', 'nav.katalog': 'Catalog',
     'alat.tema.terang': 'Use light mode', 'alat.tema.gelap': 'Use dark mode', 'alat.bahasa': 'Ganti ke Bahasa Indonesia',
     'kaki.hak': '© {tahun} IXVII.CO · Your App Solver', 'kaki.info': 'Prices and stock come straight from our catalog.',
+    'hero.lencana': 'Your App Solver · Live stock updates', 'pita.judul': 'Dozens of premium apps, one place',
+    'kicker.kategori': 'Categories', 'kicker.riwayat': 'History', 'kicker.terlaris': 'Best sellers', 'kicker.promo': 'Deals',
+    'kicker.film': 'Movies & series', 'kicker.ulasan': 'Reviews', 'kicker.faq': 'FAQ', 'kicker.mitra': 'Partnership',
     'hero.judul1': 'Premium app subscriptions,', 'hero.judul2': 'for less.',
     'hero.teks': 'Netflix, ChatGPT, Canva, Spotify, and {n} more apps. Pick a sharing or private plan and check prices and stock instantly.',
     'hero.katalog': 'Browse catalog', 'hero.kategori': 'Pick a category',

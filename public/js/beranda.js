@@ -28,6 +28,7 @@ async function muat() {
     $('hero-teks').textContent = t('hero.teks', { n: lain });
 
     gambarKategori(kategori, apps);
+    gambarPita(apps);
     muatSorotan(apps);
     muatTerlaris(apps);
     muatTerakhir(apps);
@@ -68,6 +69,17 @@ async function muatAjak() {
 muatAjak();
 
 // ---------------------------------------------------------------- "Kamu butuh aplikasi apa?"
+// pita nama aplikasi yang berjalan (teks saja, bukan logo merek)
+function gambarPita(apps) {
+  const nama = [...new Set(apps.filter((a) => !a.habisSemua).map((a) => a.nama.replace(/\s+(premium|pro|plus)$/i, '').trim()))].slice(0, 24);
+  if (nama.length < 4) return;
+  const isi = (sembunyi) => el('div', { class: 'pita-isi', 'aria-hidden': sembunyi ? 'true' : null },
+    nama.map((n) => el('span', { class: 'pita-item' }, n)));
+  $('pita-jalan').replaceChildren(isi(false), isi(true));
+  $('pita-jalan').style.setProperty('--durasi-pita', `${Math.max(28, nama.length * 3)}s`);
+  $('pita-app').hidden = false;
+}
+
 function gambarKategori(kategori, apps) {
   wadahKategori.replaceChildren(...kategori.map((k) => {
     const isi = apps.filter((a) => a.kunciKategori === k.kunci);

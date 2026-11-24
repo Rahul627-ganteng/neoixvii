@@ -112,7 +112,7 @@ export function pasangKerangka(aktif, vars) {
     kepala.replaceChildren(el('div', { class: 'wadah' },
       el('a', { class: 'merek', href: '/', 'aria-label': 'IXVII.CO' },
         el('img', { class: 'hanya-gelap', src: '/assets/brand/emblem-putih.png', alt: '', width: 274, height: 183 }),
-        el('img', { class: 'hanya-terang', src: '/assets/brand/emblem-maroon.png', alt: '', width: 273, height: 183 }),
+        el('img', { class: 'hanya-terang', src: '/assets/brand/emblem-hitam.png', alt: '', width: 273, height: 183 }),
         el('span', {}, 'IXVII.CO')),
       el('nav', { class: 'nav', 'aria-label': 'Menu' },
         HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),

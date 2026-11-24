@@ -230,7 +230,7 @@ export function kartuGenerator(ctx, statusAi) {
   const datalist = el('datalist', { id: 'varianPoster' }, tampil.map((v) => el('option', { value: `${v.code} · ${v.aplikasi} · ${v.tipe} · ${v.varian} · ${rp(v.harga)}` })));
 
   function bukaEditor(d, sumber) {
-    draf = { ...d, warna: poster?.warna || '#800203', aktif: true, sumber };
+    draf = { ...d, warna: poster?.warna || '#e61e32', aktif: true, sumber };
     const judul = el('input', { type: 'text', value: draf.judul, maxlength: 120 });
     const judulEn = el('input', { type: 'text', value: draf.judul_en, placeholder: 'opsional' });
     const sub = el('textarea', { value: draf.subjudul, rows: 2 });
