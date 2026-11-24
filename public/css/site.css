@@ -1111,40 +1111,91 @@ body:has(.bar-bundle:not([hidden])) .kaki { padding-bottom: 96px; }
 @media (max-width: 520px) { .ajak-teman-kepala { flex-direction: column; } .kupon-saya, .kode-ajak { flex-wrap: wrap; } }
 
 /* ==========================================================================
-   Nuansa 60-30-10 + latar dinamis
-   60% hitam obsidian · 30% maroon merek · 10% emas khusus ajakan utama.
-   Latar: cahaya maroon yang bergerak pelan (aurora), garis arsitektural halus,
-   dan butiran film. Semuanya di lapisan tetap di belakang konten.
+   Nuansa 60-30-10 + latar dinamis berlapis
+   60% dasar (obsidian / porselen) · 30% maroon merek · 10% emas khusus ajakan utama.
+   Latar tetap di belakang konten, 4 lapisan, semua digerakkan transform/posisi saja
+   (ringan, tanpa JS):
+     html::before  aurora warna-warni yang mengambang
+     html::after   cincin cahaya berputar (halo) di kanan atas
+     body::before  sinar diagonal ala garis miring logo XVII, menyapu pelan
+     body::after   kisi arsitektural + butiran film, bergeser perlahan
    ========================================================================== */
-body { position: relative; isolation: isolate; background: var(--latar); }
-body::before, body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
-/* lapisan 1: aurora maroon + sedikit kilau emas, bergerak sangat pelan */
-body::before {
-  inset: -20vmax;
+html { background: var(--latar); }
+body { position: relative; isolation: isolate; background: transparent; }
+html::before, html::after, body::before, body::after { content: ""; position: fixed; pointer-events: none; z-index: -1; }
+
+/* 1. aurora */
+html::before {
+  inset: -25vmax;
   background:
-    radial-gradient(38vmax 30vmax at 18% 22%, var(--latar-orb1), transparent 70%),
-    radial-gradient(34vmax 28vmax at 82% 30%, var(--latar-orb2), transparent 72%),
-    radial-gradient(30vmax 22vmax at 70% 85%, var(--latar-orb1), transparent 70%),
-    radial-gradient(22vmax 18vmax at 30% 75%, var(--latar-orb3), transparent 70%);
-  animation: aurora-ixvii 38s ease-in-out infinite alternate;
+    radial-gradient(34vmax 26vmax at 20% 22%, var(--orb-a), transparent 70%),
+    radial-gradient(30vmax 26vmax at 80% 18%, var(--orb-b), transparent 70%),
+    radial-gradient(28vmax 22vmax at 72% 78%, var(--orb-c), transparent 70%),
+    radial-gradient(26vmax 22vmax at 26% 80%, var(--orb-d), transparent 70%),
+    radial-gradient(20vmax 16vmax at 50% 50%, var(--orb-e), transparent 70%);
+  animation: aurora-ixvii 22s ease-in-out infinite alternate;
   will-change: transform;
-}
-/* lapisan 2: garis kisi tipis yang memudar ke tepi + butiran halus */
-body::after {
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(var(--latar-garis) 1px, transparent 1px),
-    linear-gradient(90deg, var(--latar-garis) 1px, transparent 1px);
-  background-size: 160px 160px, 72px 72px, 72px 72px;
-  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 20%, transparent 85%);
-  mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 20%, transparent 85%);
 }
 @keyframes aurora-ixvii {
   0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  50%  { transform: translate3d(4vmax, -3vmax, 0) rotate(8deg) scale(1.06); }
-  100% { transform: translate3d(-3vmax, 2vmax, 0) rotate(-6deg) scale(1.02); }
+  33%  { transform: translate3d(5vmax, -3vmax, 0) rotate(10deg) scale(1.08); }
+  66%  { transform: translate3d(-4vmax, 3vmax, 0) rotate(-8deg) scale(.98); }
+  100% { transform: translate3d(2vmax, 4vmax, 0) rotate(14deg) scale(1.05); }
 }
-@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+/* 2. halo berputar */
+html::after {
+  width: 80vmin; height: 80vmin; top: -18vmin; right: -14vmin; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, var(--halo-1) 70deg, transparent 140deg,
+    var(--halo-2) 210deg, transparent 280deg, var(--halo-1) 340deg, transparent 360deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 58%, #000 66%, #000 72%, transparent 100%);
+  mask: radial-gradient(closest-side, transparent 58%, #000 66%, #000 72%, transparent 100%);
+  animation: halo-ixvii 28s linear infinite;
+  will-change: transform; opacity: .9;
+}
+@keyframes halo-ixvii { to { transform: rotate(360deg); } }
+
+/* 3. sinar diagonal (motif garis miring logo) */
+body::before {
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 0 46%, var(--sinar) 49%, transparent 52%) no-repeat,
+    linear-gradient(115deg, transparent 0 47.5%, var(--sinar-2) 49.5%, transparent 51.5%) no-repeat,
+    repeating-linear-gradient(115deg, transparent 0 34px, var(--garis-miring) 34px 35px);
+  background-size: 260% 100%, 200% 100%, auto;
+  background-position: 120% 0, -100% 0, 0 0;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.55) 55%, transparent 95%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.55) 55%, transparent 95%);
+  animation: sinar-ixvii 9s ease-in-out infinite;
+}
+@keyframes sinar-ixvii {
+  0%   { background-position: 120% 0, -100% 0, 0 0; }
+  50%  { background-position: -20% 0, 200% 0, 70px 0; }
+  100% { background-position: 120% 0, -100% 0, 140px 0; }
+}
+
+/* 4. kisi + butiran */
+body::after {
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(var(--latar-garis) 1px, transparent 1px),
+    linear-gradient(90deg, var(--latar-garis) 1px, transparent 1px);
+  background-size: 160px 160px, 72px 72px, 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 25%, #000 25%, transparent 85%);
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 25%, #000 25%, transparent 85%);
+  animation: kisi-ixvii 24s linear infinite;
+}
+@keyframes kisi-ixvii { to { background-position: 0 0, 0 72px, 72px 0; } }
+
+/* logo hero mengambang pelan */
+.hero-logo { animation: apung-ixvii 6s ease-in-out infinite; }
+@keyframes apung-ixvii { 50% { transform: translateY(-10px); } }
+
+@media (max-width: 700px) { html::after { width: 110vmin; height: 110vmin; top: -40vmin; right: -45vmin; } }
+@media (prefers-reduced-motion: reduce) {
+  html::before, html::after, body::before, body::after, .hero-logo { animation: none; }
+}
 
 /* ---------- 10%: aksen emas hanya untuk ajakan utama */
 .tombol { background: var(--aksen); color: var(--aksen-teks); font-weight: 700; position: relative; overflow: hidden;
@@ -1191,3 +1242,15 @@ body::after {
   background: linear-gradient(180deg, var(--maroon-terang), var(--maroon)); }
 .kaca { border-color: color-mix(in srgb, var(--garis) 70%, rgba(192, 38, 45, .25)); }
 .kartu-app:hover { transform: translateY(-2px); }
+
+/* ---------- tema terang: porselen hangat, kaca putih, emas tetap jadi bintang */
+[data-tema="terang"] .kaca { background: rgba(255, 255, 255, .72); border-color: rgba(128, 2, 3, .10);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 18px 44px -18px rgba(128, 2, 3, .22); }
+[data-tema="terang"] .kepala { background: rgba(255, 250, 246, .72); }
+[data-tema="terang"] .tombol:not(.garis):not(.wa):not(.putih) { border: 1px solid #e5a400;
+  box-shadow: 0 10px 26px -8px rgba(229, 150, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .6); }
+[data-tema="terang"] .tombol.garis { background: rgba(255, 255, 255, .7); }
+[data-tema="terang"] .bundle-kartu.best { border-color: #f0b400;
+  box-shadow: 0 0 0 1px rgba(240, 180, 0, .35), 0 22px 50px -22px rgba(229, 150, 0, .55); }
+[data-tema="terang"] .hm-kotak { background: rgba(255, 255, 255, .8); border: 1px solid rgba(128, 2, 3, .10); }
+[data-tema="terang"] .hero-logo { filter: drop-shadow(0 22px 40px rgba(128, 2, 3, .22)); }

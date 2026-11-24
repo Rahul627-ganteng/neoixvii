@@ -39,9 +39,17 @@
   --aksen-teks: #1a1204;          /* teks di atas aksen, kontras ±13:1 */
   --aksen-tulisan: #ffc53d;       /* aksen sebagai warna tulisan di latar gelap */
   --aksen-cahaya: rgba(255, 197, 61, .38);
-  --latar-orb1: rgba(150, 6, 12, .55);
-  --latar-orb2: rgba(208, 30, 40, .30);
-  --latar-orb3: rgba(255, 190, 70, .10);
+  /* latar dinamis (gelap): maroon, crimson, magenta-mawar, emas, ungu anggur */
+  --orb-a: rgba(150, 6, 12, .60);
+  --orb-b: rgba(214, 28, 78, .30);
+  --orb-c: rgba(176, 10, 20, .45);
+  --orb-d: rgba(255, 176, 46, .16);
+  --orb-e: rgba(96, 18, 64, .35);
+  --halo-1: rgba(255, 197, 61, .55);
+  --halo-2: rgba(230, 40, 60, .55);
+  --sinar: rgba(255, 210, 120, .10);
+  --sinar-2: rgba(255, 70, 90, .08);
+  --garis-miring: rgba(255, 255, 255, .018);
   --latar-garis: rgba(255, 255, 255, .045);
 
   --font-judul: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -52,7 +60,7 @@
 
 [data-tema="terang"] {
   --maroon-terang: #a3141b;
-  --latar: #f6f4f4;
+  --latar: #fbf6f1;
   --permukaan: rgba(255, 255, 255, .78);
   --permukaan-pekat: #ffffff;
   --teks: #16161a;
@@ -78,10 +86,18 @@
   --aksen-teks: #1a1204;
   --aksen-tulisan: #a15c00;       /* emas gelap supaya tetap terbaca di latar terang */
   --aksen-cahaya: rgba(255, 183, 3, .35);
-  --latar-orb1: rgba(160, 20, 27, .13);
-  --latar-orb2: rgba(208, 30, 40, .08);
-  --latar-orb3: rgba(255, 183, 3, .10);
-  --latar-garis: rgba(22, 22, 26, .05);
+  /* latar dinamis (terang): blush, peach, champagne, mawar, lilac lembut */
+  --orb-a: rgba(255, 140, 165, .62);
+  --orb-b: rgba(255, 178, 102, .62);
+  --orb-c: rgba(240, 90, 120, .40);
+  --orb-d: rgba(255, 210, 80, .66);
+  --orb-e: rgba(196, 150, 255, .40);
+  --halo-1: rgba(255, 176, 0, .70);
+  --halo-2: rgba(214, 40, 70, .50);
+  --sinar: rgba(255, 255, 255, .65);
+  --sinar-2: rgba(255, 196, 80, .25);
+  --garis-miring: rgba(128, 2, 3, .025);
+  --latar-garis: rgba(128, 2, 3, .045);
   color-scheme: light;
 }
 

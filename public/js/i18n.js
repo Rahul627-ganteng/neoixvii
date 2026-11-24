@@ -20,7 +20,7 @@ export function gantiTema() {
   const baru = temaTerang() ? 'gelap' : 'terang';
   document.documentElement.dataset.tema = baru;
   try { localStorage.setItem(SIMPAN_TEMA, baru); } catch { /* abaikan */ }
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', baru === 'terang' ? '#f6f4f4' : '#0e0e10');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', baru === 'terang' ? '#fbf6f1' : '#0e0e10');
   return baru;
 }
 
