@@ -1,6 +1,7 @@
 // Komponen tampilan yang dipakai ulang semua halaman publik.
 import { ambilMember, simpanAjak } from './akun.js';
 import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
+import { mulaiPasang, tautanPasang } from './pasang.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
 export function el(tag, attrs = {}, ...anak) {
@@ -141,9 +142,11 @@ export function pasangKerangka(aktif, vars) {
         el('a', { href: '/affiliate/' }, t('kaki.affiliate')),
         el('a', { href: '/syarat/' }, t('kaki.syarat')),
         el('a', { href: '/privasi/' }, t('kaki.privasi')),
-        el('a', { href: '/garansi-refund/' }, t('kaki.garansi'))),
+        el('a', { href: '/garansi-refund/' }, t('kaki.garansi')),
+        tautanPasang()),
       el('span', { class: 'catatan-kurs', hidden: true })));
   }
+  mulaiPasang();
 }
 
 /** Tampilkan catatan kurs dolar di footer (hanya di mode Inggris). Panggil setelah pasangKurs(). */
