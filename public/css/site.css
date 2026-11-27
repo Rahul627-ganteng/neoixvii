@@ -1440,3 +1440,72 @@ body:has(.bar-rakit:not([hidden]), .bar-bundle:not([hidden])) .popup-pasang { bo
 
 /* dibuka sebagai aplikasi: beri ruang aman di poni/notch */
 @media (display-mode: standalone) { .kepala { padding-top: env(safe-area-inset-top); } }
+
+/* ==========================================================================
+   Pencarian cepat (header pojok kanan)
+   ========================================================================== */
+.cari-alat { width: auto; padding: 0 10px 0 11px; gap: 8px; display: inline-flex; align-items: center; color: var(--teks-2); }
+.cari-alat:hover { color: var(--teks); }
+.cari-petunjuk { font-size: 13px; }
+.cari-kbd, .cari-kaki kbd { font: 600 11px var(--font-isi); min-width: 18px; height: 18px; padding: 0 4px; display: inline-grid; place-items: center;
+  border-radius: 5px; border: 1px solid var(--garis-kuat); color: var(--teks-3); }
+/* header sudah padat: cukup ikon (pintasan "/" & Ctrl+K tetap jalan, tertulis di tooltip) */
+.cari-petunjuk, .cari-kbd { display: none; }
+.cari-alat { width: 36px; padding: 0; justify-content: center; }
+@media (min-width: 1301px) { .kepala .nav a { padding: 7px 12px; } }
+
+html.cari-buka { overflow: hidden; }
+.cari-lapis { position: fixed; inset: 0; z-index: 80; background: rgba(0, 0, 0, .45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity .18s ease; }
+.cari-lapis.buka { opacity: 1; }
+[data-tema="terang"] .cari-lapis { background: rgba(0, 0, 0, .18); }
+.cari-panel { position: absolute; top: 64px; right: max(16px, calc((100vw - 1240px) / 2)); width: min(520px, calc(100vw - 24px)); max-height: min(640px, calc(100dvh - 88px));
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; isolation: isolate;
+  background: color-mix(in srgb, var(--permukaan-pekat) 94%, transparent); border: 1px solid var(--garis-kuat);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 30px 80px -30px var(--aksen-cahaya), 0 24px 60px -24px rgba(0, 0, 0, .6);
+  transform: translateY(-8px) scale(.985); transform-origin: top right; transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
+.cari-lapis.buka .cari-panel { transform: none; }
+.cari-panel::before { content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 1px; z-index: 2;
+  background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 16px 2px var(--busur-cahaya); }
+[data-tema="terang"] .cari-panel { background: rgba(255, 255, 255, .97); box-shadow: 0 30px 70px -30px rgba(230, 30, 50, .4), 0 20px 50px -20px rgba(0, 0, 0, .25); }
+[data-tema="terang"] .cari-panel::before { background: linear-gradient(90deg, transparent, var(--crimson), transparent); }
+
+.cari-kepala { display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 16px; border-bottom: 1px solid var(--garis); }
+.cari-ikon-input svg { width: 18px; height: 18px; color: var(--teks-3); display: block; }
+.cari-input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--teks); font: 500 16px var(--font-isi); padding: 6px 0; }
+.cari-input::-webkit-search-cancel-button { display: none; }
+.cari-input::placeholder { color: var(--teks-3); }
+.cari-tutup { flex: none; height: 26px; padding: 0 8px; border-radius: 7px; border: 1px solid var(--garis-kuat); background: transparent; color: var(--teks-3); font: 600 11px var(--font-isi); cursor: pointer; }
+
+.cari-daftar { overflow-y: auto; overscroll-behavior: contain; padding: 6px 8px 8px; }
+.cari-grup + .cari-grup { margin-top: 4px; }
+.cari-label { margin: 10px 10px 6px; font: 600 11px var(--font-isi); letter-spacing: .14em; text-transform: uppercase; color: var(--teks-3); }
+.cari-hasil { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; color: var(--teks); text-decoration: none; scroll-margin: 8px; }
+.cari-hasil[aria-selected="true"], .cari-hasil:hover { background: var(--sorot); box-shadow: inset 0 0 0 1px var(--garis); }
+.cari-hasil[aria-selected="true"] .cari-kanan { color: var(--aksen-tulisan); }
+.cari-hasil .ikon-app { width: 34px; height: 34px; flex: none; border-radius: 10px; font-size: 12px; }
+.cari-ikon { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--sorot); border: 1px solid var(--garis); color: var(--teks-2); }
+.cari-ikon svg { width: 16px; height: 16px; }
+.cari-teks { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.cari-teks b { font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cari-teks small { font-size: 12.5px; color: var(--teks-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cari-teks mark { background: none; color: var(--aksen-tulisan); }
+.cari-kanan { flex: none; font-size: 12.5px; font-weight: 600; color: var(--teks-2); }
+.cari-semua { margin-top: 6px; border-top: 1px solid var(--garis); border-radius: 0 0 12px 12px; }
+.cari-semua .cari-ikon { background: transparent; }
+.cari-kosong { margin: 18px 10px; color: var(--teks-3); font-size: 14px; }
+.cari-chip { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 8px 6px; }
+.cari-chip button { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--garis-kuat); background: transparent; color: var(--teks); font: 500 13px var(--font-isi); }
+.cari-chip button:hover { border-color: var(--aksen); color: var(--aksen-tulisan); }
+.cari-chip svg { width: 13px; height: 13px; color: var(--teks-3); }
+.cari-kaki { display: flex; gap: 16px; justify-content: flex-end; padding: 8px 14px; border-top: 1px solid var(--garis); font-size: 11.5px; color: var(--teks-3); }
+.cari-kaki kbd { margin-right: 2px; }
+
+/* HP: panel penuh dari atas */
+@media (max-width: 640px) {
+  .cari-panel { top: 0; right: 0; left: 0; width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0 0 20px 20px; border-width: 0 0 1px; padding-top: env(safe-area-inset-top); }
+  .cari-kaki { display: none; }
+  .cari-input { font-size: 16px; }   /* 16px: iOS tidak zoom otomatis */
+}
+@media (prefers-reduced-motion: reduce) { .cari-lapis, .cari-panel { transition: none; } }
