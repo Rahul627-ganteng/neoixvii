@@ -2,6 +2,7 @@
 import { ambilMember, simpanAjak } from './akun.js';
 import { angkaRating, bulanTahun, catatanKurs, gantiBahasa, gantiTema, harga, inggris, labelTipe, t, tanggal, temaTerang } from './i18n.js';
 import { mulaiPasang, tautanPasang } from './pasang.js';
+import { tombolCari } from './cari.js';
 
 /** Membuat elemen dengan aman: teks selalu dimasukkan sebagai teks, bukan HTML. */
 export function el(tag, attrs = {}, ...anak) {
@@ -118,6 +119,7 @@ export function pasangKerangka(aktif, vars) {
       el('nav', { class: 'nav', 'aria-label': 'Menu' },
         HALAMAN.map((h) => el('a', { href: h.href, class: h.kelas, 'aria-current': h.href === aktif ? 'page' : null }, t(h.kunci)))),
       el('div', { class: 'kanan' },
+        tombolCari(),
         el('a', { class: 'alat member-alat', href: '/member/', 'aria-current': aktif === '/member/' ? 'page' : null,
           title: ambilMember() ? t('nav.akun') : t('nav.member') },
           svg(IKON.orang), el('span', {}, ambilMember() ? t('nav.akun') : t('nav.member'))),
